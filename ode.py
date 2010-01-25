@@ -124,7 +124,7 @@ class ODESolver (object):
 		self.us.extend(q[1] for q in qs)
 		
 		self.ats = array(self.ts)
-		self.aus = array(self.us)
+		self.aus = array(self.us).T
 
 
 	def plot(self, components=None):
@@ -132,7 +132,7 @@ class ODESolver (object):
 		Plot some components of the solution.
 		"""
 		if components is None:
-			components = range(len(self.us[0]))
+			components = range(len(self.us[:,0]))
 		for component in components:
 			plot(self.ats, self.aus[:,component], ',-', label=self.labels[component])
 		PL.xlabel('time')
@@ -233,25 +233,32 @@ class McLachlan(ODESolver):
 	def step(self, t, u):
 		h = self.h
 		vel = self.system.velocity(u)
-		qh = self.system.state(u) + .5*self.h*vel
+		qh = self.system.position(u) + .5*self.h*vel
 		force = self.system.force(qh)
 		codistribution = self.system.codistribution(qh)
 		lag = self.system.lag(u)
 		def residual(vl):
 			v,l = self.system.vel_lag_split(vl)
-			return np.hstack([v - vel + h * (force + dot(codistribution.T, l)), dot(codistribution, v)])
+			return np.hstack([v - vel - h * (force + dot(codistribution.T, l)), dot(self.system.codistribution(qh+.5*h*v), v)])
 		N = Newton(residual)
 		vl = N.run(self.system.vel_lag_stack(vel, lag))
 		vnew, lnew = self.system.vel_lag_split(vl)
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
-			
+	
+	def plot_qv(self, i=2, skip=1, *args, **kwargs):
+		qs = self.system.position(self.aus)
+		vs = self.system.velocity(self.aus)
+		plot(qs[i,::skip], vs[i,::skip], *args, **kwargs)
+	
+	def plot_H(self, *args, **kwargs):
+		plot(self.ats, self.system.energy(self.aus), *args, **kwargs)
 
 class ContactOscillator(object):
-	def __init__(self, epsilon=0):
+	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
 	
-	def state(self, u):
+	def position(self, u):
 		return u[:3]
 	
 	def velocity(self, u):
@@ -274,17 +281,48 @@ class ContactOscillator(object):
 	
 	def codistribution(self, q):
 		return array([[1., 0, q[1]]])
+	
+	def energy(self, u):
+		vel = self.velocity(u)
+		q = self.position(u)
+		return .5*(vel[0]**2 + vel[1]**2 + vel[2]**2 + q[0]**2 + q[1]**2 + q[2]**2 + self.epsilon*q[0]**2*q[2]**2)
+	
+	def initial(self, z0, e0=1.5, z0dot=0.):
+		q0 = array([np.sqrt( (2*e0 - 2*z0dot**2 - z0**2 - 1) / (1 + self.epsilon*z0**22) ), 1., z0])
+		p0 = array([-z0dot, 0, z0dot])
+		v0 = p0
+		l0 = ( q0[0] + q0[1]*q0[2] - p0[1]*p0[2] + self.epsilon*(q0[0]*q0[2]**2 + q0[0]**2*q0[1]*q0[2] ) ) / ( 1 + q0[1]**2 )
+		return np.hstack([q0, v0, l0])
+	
+	def time_step(self, N=40):
+		return 2*np.sin(np.pi/N)
+
 
 class Test_McOsc(object):
 	def setUp(self):
 		self.sys = ContactOscillator()
 		self.s = McLachlan(self.sys)
 		self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
+		self.s.time = 10.
 	
 	def test_run(self):
+		self.s.run()
+	
+	def test_H(self):
+		self.s.run()
+		self.s.plot_H()
+	
+	z0s = np.linspace(-.9,.9,10)
+	N = 40
+	
+	def test_z0(self, i=5):
+		z0 = self.z0s[i]
+		self.s.initialize(u0=self.sys.initial(z0), h=self.sys.time_step(self.N))
+		self.s.time = self.N*self.s.h
 		self.s.run()
 		
 if __name__ == '__main__':
 	t = Test_McOsc()
 	t.setUp()
-	t.test_run()
+	t.test_z0(1)
+	t.s.plot_qv(1)
