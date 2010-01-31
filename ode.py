@@ -60,7 +60,12 @@ class Newton(object):
 			if np.isscalar(y):
 				incr = y/d.item()
 			else:
-				incr = np.linalg.solve(d, y)
+				try:
+					incr = np.linalg.solve(d, y)
+				except np.linalg.LinAlgError, ex: # should use the "as" syntax!!
+					eigvals, eigs = np.linalg.eig(d)
+					zerovecs = eigs[:, np.abs(eigvals) < 1e-10]
+					raise np.linalg.LinAlgError("%s: %s" % (ex.message, repr(zerovecs)))
 			x += incr
 			if norm(incr) < self.tol:
 				break
@@ -136,7 +141,7 @@ class ODESolver (object):
 		"""
 		pass
 
-	max_iter = 1000000
+	max_iter = 100000
 	
 	# default values for h and time
 	h = .01
@@ -398,7 +403,7 @@ class LobattoIIID(RungeKutta):
 
 class Spark(ODESolver):
 	
-	RK_classes = [LobattoIIIA, LobattoIIIB, LobattoIIIC, LobattoIIICs, LobattoIIID]
+## 	RK_classes = [LobattoIIIA, LobattoIIIB, LobattoIIIC, LobattoIIICs, LobattoIIID]
 	
 	def __init__(self, system, nb_stages):
 		self.system = system
@@ -426,39 +431,41 @@ class Spark(ODESolver):
 	def step(self, t, u):
 		s = self.nb_stages
 		h = self.h
-		As = np.dstack([RK.tableaux[s] for RK in self.RK_classes])
-		T = As[:-1].sum(1)
-		ts = t + T
+## 		As = np.dstack([RK.tableaux[s] for RK in self.RK_classes])
+## 		T = As[:-1].sum(1)
+## 		ts = t + T
 		Q = self.simpleQ()
-		y = self.system.state(u)
+		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 		
 		def residual(YZ):
-			f = np.dstack(self.system.dynamics(t, YZ[:,:-1])) # should not be t!
+## 			f = np.dstack(self.system.dynamics(t, YZ[:,:-1])) # should not be t!
+			dyn_dict = self.system.dynamics(t, YZ[:,:-1])
 			Y = self.system.state(YZ)
-			r1 = Y - yc - h*np.tensordot(As, f, axes=[[2,1], [2,1]]).T
-			r2 = np.dot(Q,self.system.constraint(t, YZ).T)
+## 			r1 = Y - yc - h*np.tensordot(As, f, axes=[[2,1], [2,1]]).T
+			r1 = Y - yc - h*sum(dot(vec, RK_class.tableaux[s].T) for RK_class, vec in dyn_dict.items())
+			r2 = np.dot(self.system.constraint(t, YZ), Q.T)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
 			return [r1,r2,r3]
 		
 		N = Newton(residual)
 ## 		guess = np.random.rand(len(u),s+1)
-		guess = np.column_stack([u]*(s+1))
-		residual(guess)
-		res = N.run(guess)
-		return t, res[-1]
+		guess = np.column_stack([u.copy()]*(s+1))
+		result = N.run(guess)
+		return t+h, result[:,-1]
 			
 
 class JayExample(object):
 	def dynamics(self, t, u):
 		y1,y2,z = u
-		return [
-			array([y2 - 2*y1**2*y2, -y1**2]),
-			array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
-			array([-y2**2*z, -3*y2**2*z]),
-			array([2*y1*y2**2 - 2*np.exp(2*t)*y1*y2]),
-			array([2*y2**2*z**2, y1**2*y2**2])]
+		return {
+			LobattoIIIA: array([y2 - 2*y1**2*y2, -y1**2]),
+			LobattoIIIB: array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
+			LobattoIIIC: array([-y2**2*z, -3*y2**2*z]),
+			LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(2*t)*y1*y2]),
+			LobattoIIID: array([2*y2**2*z**2, y1**2*y2**2])
+			}
 	
 	def constraint(self, t, u):
 		return array([u[0]**2*u[1] -  1])
@@ -487,7 +494,10 @@ class GraphSystem(object):
 	
 	def dynamics(self, t, u):
 		x,y = self.state(u)
-		return [np.zeros_like(self.state(u)), array([np.ones_like(x), self.lag(u)[0]])]
+		return {
+			LobattoIIIA: np.zeros_like(self.state(u)), 
+			LobattoIIIB: array([np.ones_like(x), self.lag(u)[0]]),
+			}
 	
 	def constraint(self, t, u):
 		x,y = self.state(u)
@@ -496,6 +506,24 @@ class GraphSystem(object):
 	def hidden_error(self, t, u):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
 
+class ODESystem(object):
+	def __init__(self, f, RK_class=LobattoIIIA):
+		self.f = f
+		self.RK_class = RK_class
+	
+	def state(self, u):
+		return u[:1]
+	
+	def lag(self,u):
+		return u[1:] # should be empty
+	
+	def dynamics(self, t, u):
+		return {self.RK_class: array([self.f(u)])}
+	
+	def constraint(self, t, u):
+		return np.zeros([0,np.shape(u)[1]])
+	
+	
 
 class ContactOscillator(object):
 	def __init__(self, epsilon=0.):
@@ -564,6 +592,21 @@ class Test_McOsc(object):
 		self.s.time = self.N*self.s.h
 		self.s.run()
 		
+class Test_SparkODE(object):
+	def setUp(self):
+		def f(x):
+			return -x
+		self.sys = ODESystem(f)
+		self.s = Spark(self.sys, 2)
+		self.s.initialize(array([1.]))
+	
+	def test_run(self):
+		self.s.run()
+		exact = np.exp(-self.s.ats).reshape(1,-1)
+		print exact[:,-1]
+		print self.s.us[-1]
+		npt.assert_array_almost_equal(self.s.aus, exact, 5)
+## 		plot(self.s.ats, np.vstack([self.s.aus, exact]).T)
 
 class Test_Jay(object):
 	def setUp(self):
@@ -572,6 +615,7 @@ class Test_Jay(object):
 		self.sys = GraphSystem(sq)
 		self.s = Spark(self.sys, 2)
 		self.s.initialize(array([1.,1.,0]))
+## 		self.s.initialize(array([1.]))
 	
 	def test_run(self):
 		self.s.run()
