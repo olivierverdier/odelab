@@ -421,12 +421,12 @@ class Spark(ODESolver):
 		Q = dot(L,Q)
 		return Q
 	
-	def simpleQ(self):
-		s = self.nb_stages
-		Q = np.zeros([s,s+1])
-		Q[:s,:s] = np.identity(s)
-		return Q
-		
+## 	def simpleQ(self):
+## 		s = self.nb_stages
+## 		Q = np.zeros([s,s+1])
+## 		Q[:s,:s] = np.identity(s)
+## 		return Q
+## 		
 	
 	def step(self, t, u):
 		s = self.nb_stages
@@ -434,7 +434,7 @@ class Spark(ODESolver):
 ## 		As = np.dstack([RK.tableaux[s] for RK in self.RK_classes])
 ## 		T = As[:-1].sum(1)
 ## 		ts = t + T
-		Q = self.simpleQ()
+		Q = self.Q()
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 		
@@ -612,7 +612,8 @@ class Test_Jay(object):
 	def setUp(self):
 		def sq(x):
 			return x*x
-		self.sys = GraphSystem(sq)
+## 		self.sys = GraphSystem(sq)
+		self.sys = JayExample()
 		self.s = Spark(self.sys, 2)
 		self.s.initialize(array([1.,1.,0]))
 ## 		self.s.initialize(array([1.]))
