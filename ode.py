@@ -43,7 +43,7 @@ class Newton(object):
 		return res_vec
 	
 	maxiter = 300
-	tol = 1e-8
+	tol = 1e-14
 	def run(self, x0):
 		"""
 		Run the Newton iteration.
@@ -181,25 +181,51 @@ class ODESolver (object):
 		# start from the last time we stopped
 		t = t0 = self.ts[-1]
 		u = self.us[-1]
-		qs = list(self.generate(t, u, t0 + time))
-		
-		self.ts.extend(q[0] for q in qs)
-		self.us.extend(q[1] for q in qs)
-		
-		self.ats = array(self.ts)
-		self.aus = array(self.us).T
+		qs = []
+		generator = self.generate(t, u, t0 + time)
+		try:
+			for i in xrange(self.max_iter):
+				try:
+					qs.append(generator.next())
+				except StopIteration:
+					break
+		except Exception, e:
+			raise
+		finally: # wrap up
+			self.ts.extend(q[0] for q in qs)
+			self.us.extend(q[1] for q in qs)
+	
+			self.ats = array(self.ts)
+			self.aus = array(self.us).T
 
-
+	
+	
 	def plot(self, components=None):
 		"""
 		Plot some components of the solution.
 		"""
 		if components is None:
-			components = range(len(self.us[:,0]))
+			components = range(len(self.us[0]))
+		if not np.iterable(components):
+			components = [components]
+		has_exact = hasattr(self.system, 'exact')
+		if has_exact:
+			exact = self.system.exact(self.ats)
 		for component in components:
-			plot(self.ats, self.aus[:,component], ',-', label=self.labels[component])
+			label = self.system.label(component)
+			plot(self.ats, self.aus[component], ',-', label=label)
+			if has_exact:
+				PL.gca()._get_lines.count -= 1
+				plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
 		PL.xlabel('time')
 		PL.legend()
+	
+	def plot_function(self, function):
+		"""
+		Plot a given function of the state. May be useful to plot constraints or energy.
+		"""
+		values = self.system.__getattribute__(function)(np.vstack([self.ats, self.aus]))
+		plot(self.ats, values.T)
 
 	def plot2D(self):
 		"""
@@ -322,83 +348,83 @@ class LobattoIIIA(RungeKutta):
 	
 	sf = np.sqrt(5)
 	tableaux = {
-	2: array([	[0.,0.],
-				[.5,.5],
-				[.5,.5]]),
-	3: array([	[0.,0.,0.],
-				[5/24,1/3,-1/24],
-				[1/6,2/3,1/6],
-				[1/6,2/3,1/6]]),
-	4: array([	[0., 0.,0.,0.],
-				[(11+sf)/120, (25-sf)/120,    (25-13*sf)/120, (-1+sf)/120],
-				[(11-sf)/120, (25+13*sf)/120, (25+sf)/120, (-1-sf)/120],
-				[1/12,             5/12,                5/12,                1/12],
-				[1/12, 5/12, 5/12, 1/12]])
+	2: array([	[0., 0.,0.],
+				[1., .5,.5],
+				[1, .5,.5]]),
+	3: array([	[0  ,0.,0.,0.],
+				[1/2,5/24,1/3,-1/24],
+				[1  ,1/6,2/3,1/6],
+				[1 ,1/6,2/3,1/6]]),
+	4: array([	[0        ,0., 0.,0.,0.],
+				[(5-sf)/10,(11+sf)/120, (25-sf)/120,    (25-13*sf)/120, (-1+sf)/120],
+				[(5+sf)/10,(11-sf)/120, (25+13*sf)/120, (25+sf)/120, (-1-sf)/120],
+				[1        ,1/12,             5/12,                5/12,                1/12],
+				[1       ,1/12, 5/12, 5/12, 1/12]])
 	}
 
 class LobattoIIIB(RungeKutta):
 	sf = np.sqrt(5)
 	tableaux = {	
-	2: array([	[1/2, 0],
-				[1/2, 0],
-				[1/2, 1/2]]),
+	2: array([	[0.,1/2, 0],
+				[1.,1/2, 0],
+				[1,1/2, 1/2]]),
 				
-	3: array([	[1/6, -1/6, 0],
-				[1/6,  1/3, 0],
-				[1/6,  5/6, 0],
-				[1/6, 2/3, 1/6]]),
+	3: array([	[0  ,1/6, -1/6, 0],
+				[1/2,1/6,  1/3, 0],
+				[1  ,1/6,  5/6, 0],
+				[1 ,1/6, 2/3, 1/6]]),
 				
-	4: array([	[1/12, (-1-sf)/24,     (-1+sf)/24,     0],
-				[1/12, (25+sf)/120,    (25-13*sf)/120, 0],
-				[1/12, (25+13*sf)/120, (25-sf)/120,    0],
-				[1/12, (11-sf)/24,    (11+sf)/24,    0],
-				[1/12, 5/12, 5/12, 1/12]])
+	4: array([	[0        ,1/12, (-1-sf)/24,     (-1+sf)/24,     0],
+				[(5-sf)/10,1/12, (25+sf)/120,    (25-13*sf)/120, 0],
+				[(5+sf)/10,1/12, (25+13*sf)/120, (25-sf)/120,    0],
+				[1        ,1/12, (11-sf)/24,    (11+sf)/24,    0],
+				[1       ,1/12, 5/12, 5/12, 1/12]])
 	}
 
 class LobattoIIIC(RungeKutta):
 	sf = np.sqrt(5)
 	tableaux = {
 2: array([
-[1/2, -1/2],
-[1/2,  1/2],
-[1/2, 1/2]]),
+[0.,1/2, -1/2],
+[1.,1/2,  1/2],
+[1,1/2, 1/2]]),
 3: array([
-[1/6, -1/3,   1/6],
-[1/6,  5/12, -1/12],
-[1/6,  2/3,   1/6],
-[1/6, 2/3, 1/6]]),
+[0  ,1/6, -1/3,   1/6],
+[1/2,1/6,  5/12, -1/12],
+[1  ,1/6,  2/3,   1/6],
+[1 ,1/6, 2/3, 1/6]]),
 4: array([
-[1/12, -sf/12,       sf/12,        -1/12],
-[1/12, 1/4,               (10-7*sf)/60, sf/60],
-[1/12, (10+7*sf)/60, 1/4,               -sf/60],
-[1/12, 5/12,              5/12,              1/12],
-[1/12, 5/12, 5/12, 1/12]])
+[0        ,1/12, -sf/12,       sf/12,        -1/12],
+[(5-sf)/10,1/12, 1/4,               (10-7*sf)/60, sf/60],
+[(5+sf)/10,1/12, (10+7*sf)/60, 1/4,               -sf/60],
+[1        ,1/12, 5/12,              5/12,              1/12],
+[1       ,1/12, 5/12, 5/12, 1/12]])
 }
 
 class LobattoIIICs(RungeKutta):
 	tableaux = {
 2: array([
-[0., 0],
-[1, 0],
-[1/2, 1/2]]),
+[0.,0., 0],
+[1.,1, 0],
+[1,1/2, 1/2]]),
 3: array([
-[0,   0,   0],
-[1/4, 1/4, 0],
-[0,   1,   0],
-[1/6, 2/3, 1/6]])
+[0  ,0,   0,   0],
+[1/2,1/4, 1/4, 0],
+[1  ,0,   1,   0],
+[1 ,1/6, 2/3, 1/6]])
 	}
 
 class LobattoIIID(RungeKutta):
 	tableaux = {
 2: array([
-[1/4, -1/4],
-[3/4, 1/4],
-[1/2, 1/2]]),
+[0.,1/4, -1/4],
+[1.,3/4, 1/4],
+[1,1/2, 1/2]]),
 3: array([
-[1/12, -1/6,  1/12],
-[5/24,  1/3, -1/24],
-[1/12,  5/6,  1/12],
-[1/6, 2/3, 1/6]])
+[0  ,1/12, -1/6,  1/12],
+[1/2,5/24,  1/3, -1/24],
+[1  ,1/12,  5/6,  1/12],
+[1 ,1/6, 2/3, 1/6]])
 	}
 
 class Spark(ODESolver):
@@ -411,7 +437,7 @@ class Spark(ODESolver):
 	
 	def Q(self):
 		s = self.nb_stages
-		A1t = LobattoIIIA.tableaux[s][1:-1]
+		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
 		es = np.zeros(s)
 		es[-1] = 1.
 		Q = np.zeros([s,s+1])
@@ -432,19 +458,22 @@ class Spark(ODESolver):
 		s = self.nb_stages
 		h = self.h
 ## 		As = np.dstack([RK.tableaux[s] for RK in self.RK_classes])
-## 		T = As[:-1].sum(1)
-## 		ts = t + T
+		c = LobattoIIIA.tableaux[s][:,0]
+		T = t + c*h
 		Q = self.Q()
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 		
 		def residual(YZ):
 ## 			f = np.dstack(self.system.dynamics(t, YZ[:,:-1])) # should not be t!
-			dyn_dict = self.system.dynamics(t, YZ[:,:-1])
+			TYZ = np.vstack([T,YZ])
+## 			TYZ = np.vstack([T[:-1],YZ[:,:-1]])
+			dyn_dict = self.system.dynamics(TYZ[:,:-1])
 			Y = self.system.state(YZ)
 ## 			r1 = Y - yc - h*np.tensordot(As, f, axes=[[2,1], [2,1]]).T
-			r1 = Y - yc - h*sum(dot(vec, RK_class.tableaux[s].T) for RK_class, vec in dyn_dict.items())
-			r2 = np.dot(self.system.constraint(t, YZ), Q.T)
+			dyn = [dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
+			r1 = Y - yc - h*sum(dyn)
+			r2 = np.dot(self.system.constraint(TYZ), Q.T)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
 			return [r1,r2,r3]
@@ -452,31 +481,50 @@ class Spark(ODESolver):
 		N = Newton(residual)
 ## 		guess = np.random.rand(len(u),s+1)
 		guess = np.column_stack([u.copy()]*(s+1))
-		result = N.run(guess)
-		return t+h, result[:,-1]
+		residual(guess)
+		full_result = N.run(guess) # all the values of Y,Z at all stages
+		# we keep the last Z value
+		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
+		return t+h, result
 			
 
-class JayExample(object):
-	def dynamics(self, t, u):
-		y1,y2,z = u
+class System(object):
+	def label(self, component):
+		return '%d' % component
+
+
+class JayExample(System):
+	def dynamics(self, tu):
+		t,y1,y2,z = tu
 		return {
 			LobattoIIIA: array([y2 - 2*y1**2*y2, -y1**2]),
 			LobattoIIIB: array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
 			LobattoIIIC: array([-y2**2*z, -3*y2**2*z]),
-			LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(2*t)*y1*y2]),
+			LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(-2*t)*y1*y2, z]),
 			LobattoIIID: array([2*y2**2*z**2, y1**2*y2**2])
 			}
 	
-	def constraint(self, t, u):
-		return array([u[0]**2*u[1] -  1])
+	def constraint(self, tu):
+		return array([tu[1]**2*tu[2] -  1])
 	
 	def state(self, u):
-		return u[:2]
+		return u[0:2]
 	
 	def lag(self, u):
 		return u[2:3]
+	
+	def exact(self, t):
+		return array([np.exp(t), np.exp(-2*t), np.exp(2*t)])
+	
+	def label(self, component):
+		return ['y1','y2','z'][component]
+	
+	def test_exact(self, t):
+		dyn = self.dynamics(np.hstack([t, self.exact(t)]))
+		res = sum(v for v in dyn.values()) - array([np.exp(t), -2*np.exp(-2*t)])
+		return res
 
-class GraphSystem(object):
+class GraphSystem(System):
 	"""
 	Trivial semi-explicit index 2 DAE of the form::
 		x' = 1
@@ -506,7 +554,7 @@ class GraphSystem(object):
 	def hidden_error(self, t, u):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
 
-class ODESystem(object):
+class ODESystem(System):
 	def __init__(self, f, RK_class=LobattoIIIA):
 		self.f = f
 		self.RK_class = RK_class
@@ -517,15 +565,19 @@ class ODESystem(object):
 	def lag(self,u):
 		return u[1:] # should be empty
 	
-	def dynamics(self, t, u):
-		return {self.RK_class: array([self.f(u)])}
+	def dynamics(self, tu):
+		return {self.RK_class: array([self.f(tu)])}
 	
-	def constraint(self, t, u):
-		return np.zeros([0,np.shape(u)[1]])
+	def constraint(self, tu):
+		return np.zeros([0,np.shape(tu)[1]])
 	
 	
+def tensordiag(T):
+	if len(np.shape(T)) > 1: # vector case
+		T = np.column_stack([T[:,s,s] for s in range(np.shape(T)[1])])
+	return T
 
-class ContactOscillator(object):
+class ContactOscillator(System):
 	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
 	
@@ -534,6 +586,9 @@ class ContactOscillator(object):
 	
 	def velocity(self, u):
 		return u[3:6]
+	
+	def state(self,u):
+		return u[:6]
 	
 	def lag(self, u):
 		return u[6:7]
@@ -547,11 +602,13 @@ class ContactOscillator(object):
 	def vel_lag_stack(self, v,l):
 		return np.hstack([v,l])
 	
-	def force(self, q):
-		return -q - self.epsilon*q[2]*q[0]*array([q[2],0,q[0]])
+	def force(self, u):
+		q = self.position(u) # copy?
+		return -q - self.epsilon*q[2]*q[0]*array([q[2],np.zeros_like(q[0]),q[0]])
 	
-	def codistribution(self, q):
-		return array([[1., 0, q[1]]])
+	def codistribution(self, u):
+		q = self.position(u)
+		return np.array([[np.ones_like(q[1]), np.zeros_like(q[1]), q[1]]])
 	
 	def energy(self, u):
 		vel = self.velocity(u)
@@ -567,12 +624,25 @@ class ContactOscillator(object):
 	
 	def time_step(self, N=40):
 		return 2*np.sin(np.pi/N)
+	
+	def dynamics(self, u):
+		v = self.velocity(u)
+		reaction_force = np.tensordot(self.codistribution(u), self.lag(u), [0,0]) # a 3xsxs tensor
+		reaction_force = tensordiag(reaction_force)
+		return {
+		LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
+		LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + reaction_force])
+		}
+	
+	def constraint(self, u):
+		constraint = np.tensordot(self.codistribution(u), self.velocity(u), [1,0])
+		constraint = tensordiag(constraint)
+		return constraint
 
-
-class Test_McOsc(object):
+class Harness_Osc(object):
 	def setUp(self):
 		self.sys = ContactOscillator()
-		self.s = McLachlan(self.sys)
+		self.set_solver()
 		self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
 		self.s.time = 10.
 	
@@ -592,10 +662,18 @@ class Test_McOsc(object):
 		self.s.time = self.N*self.s.h
 		self.s.run()
 		
+class Test_McOsc(Harness_Osc):
+	def set_solver(self):
+		self.s = McLachlan(self.sys)
+
+class Test_JayOsc(Harness_Osc):
+	def set_solver(self):
+		self.s = Spark(self.sys, 2)
+	
 class Test_SparkODE(object):
 	def setUp(self):
-		def f(x):
-			return -x
+		def f(tx):
+			return -tx[1]
 		self.sys = ODESystem(f)
 		self.s = Spark(self.sys, 2)
 		self.s.initialize(array([1.]))
@@ -615,11 +693,15 @@ class Test_Jay(object):
 ## 		self.sys = GraphSystem(sq)
 		self.sys = JayExample()
 		self.s = Spark(self.sys, 2)
-		self.s.initialize(array([1.,1.,0]))
+		self.s.initialize(u0=array([1.,1.,1.]), time=1)
 ## 		self.s.initialize(array([1.]))
 	
 	def test_run(self):
 		self.s.run()
+		print self.s.ts[-1]
+		print self.s.us[-1]
+		print self.sys.exact(self.s.ts[-1])
+	
 
 if __name__ == '__main__':
 	t = Test_Jay()
