@@ -707,10 +707,10 @@ class Harness_Osc(object):
 	z0s = np.linspace(-.9,.9,10)
 	N = 40
 	
-	def test_z0(self, i=5):
+	def test_z0(self, i=5, nb_Poincare_iterations=1):
 		z0 = self.z0s[i]
 		self.s.initialize(u0=self.sys.initial(z0), h=self.sys.time_step(self.N))
-		self.s.time = self.N*self.s.h
+		self.s.time = nb_Poincare_iterations*self.N*self.s.h
 		self.s.run()
 
 	def plot_qv(self, i=2, skip=None, *args, **kwargs):
@@ -768,6 +768,6 @@ class Test_Jay(object):
 if __name__ == '__main__':
 	t = Test_JayOsc()
 	t.setUp()
-	t.test_z0()
+	t.test_z0(nb_Poincare_iterations=10)
 ## 	t.test_z0(1)
 ## 	t.s.plot_qv(1)
