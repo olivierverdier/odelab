@@ -333,10 +333,6 @@ class McLachlan(ODESolver):
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
 	
-	def plot_qv(self, i=2, skip=1, *args, **kwargs):
-		qs = self.system.position(self.aus)
-		vs = self.system.velocity(self.aus)
-		plot(qs[i,::skip], vs[i,::skip], *args, **kwargs)
 	
 	def plot_H(self, *args, **kwargs):
 		plot(self.ats, self.system.energy(self.aus), *args, **kwargs)
@@ -713,6 +709,17 @@ class Harness_Osc(object):
 		self.s.initialize(u0=self.sys.initial(z0), h=self.sys.time_step(self.N))
 		self.s.time = self.N*self.s.h
 		self.s.run()
+
+	def plot_qv(self, i=2, skip=None, *args, **kwargs):
+		if skip is None:
+			skip = self.N
+		qs = self.sys.position(self.s.aus)
+		vs = self.sys.velocity(self.s.aus)
+		if not kwargs.get('marker') and not kwargs.get('ls'):
+			kwargs['ls'] = ''
+			kwargs['marker'] = 'o'
+		plot(qs[i,::skip], vs[i,::skip], *args, **kwargs)
+	
 		
 class Test_McOsc(Harness_Osc):
 	def set_solver(self):
@@ -758,6 +765,6 @@ class Test_Jay(object):
 if __name__ == '__main__':
 	t = Test_JayOsc()
 	t.setUp()
-	t.test_run()
+	t.test_z0()
 ## 	t.test_z0(1)
 ## 	t.s.plot_qv(1)
