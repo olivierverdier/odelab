@@ -453,8 +453,7 @@ class Spark(ODESolver):
 ## 		Q[:s,:s] = np.identity(s)
 ## 		return Q
 ## 		
-	
-	def step(self, t, u):
+	def get_residual_function(self, t, u):
 		s = self.nb_stages
 		h = self.h
 ## 		As = np.dstack([RK.tableaux[s] for RK in self.RK_classes])
@@ -466,26 +465,32 @@ class Spark(ODESolver):
 		
 		def residual(YZ):
 ## 			f = np.dstack(self.system.dynamics(t, YZ[:,:-1])) # should not be t!
-			TYZ = np.vstack([T,YZ])
-## 			TYZ = np.vstack([T[:-1],YZ[:,:-1]])
-			dyn_dict = self.system.dynamics(TYZ[:,:-1])
+			YZT = np.vstack([YZ,T])
+## 			YZT = np.vstack([T[:-1],YZ[:,:-1]])
+			dyn_dict = self.system.dynamics(YZT[:,:-1])
 			Y = self.system.state(YZ)
 ## 			r1 = Y - yc - h*np.tensordot(As, f, axes=[[2,1], [2,1]]).T
 			dyn = [dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
 			r1 = Y - yc - h*sum(dyn)
-			r2 = np.dot(self.system.constraint(TYZ), Q.T)
+			r2 = np.dot(self.system.constraint(YZT), Q.T)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
 			return [r1,r2,r3]
 		
+		return residual
+
+	def step(self, t, u):
+		s = self.nb_stages
+		residual = self.get_residual_function(t, u)
 		N = Newton(residual)
 ## 		guess = np.random.rand(len(u),s+1)
 		guess = np.column_stack([u.copy()]*(s+1))
 		residual(guess)
+		#1/0
 		full_result = N.run(guess) # all the values of Y,Z at all stages
 		# we keep the last Z value
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+h, result
+		return t+self.h, result
 			
 
 class System(object):
@@ -495,7 +500,7 @@ class System(object):
 
 class JayExample(System):
 	def dynamics(self, tu):
-		t,y1,y2,z = tu
+		y1,y2,z,t = tu
 		return {
 			LobattoIIIA: array([y2 - 2*y1**2*y2, -y1**2]),
 			LobattoIIIB: array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
@@ -505,7 +510,7 @@ class JayExample(System):
 			}
 	
 	def constraint(self, tu):
-		return array([tu[1]**2*tu[2] -  1])
+		return array([tu[0]**2*tu[1] -  1])
 	
 	def state(self, u):
 		return u[0:2]
@@ -520,7 +525,7 @@ class JayExample(System):
 		return ['y1','y2','z'][component]
 	
 	def test_exact(self, t):
-		dyn = self.dynamics(np.hstack([t, self.exact(t)]))
+		dyn = self.dynamics(np.hstack([self.exact(t),t]))
 		res = sum(v for v in dyn.values()) - array([np.exp(t), -2*np.exp(-2*t)])
 		return res
 
@@ -573,7 +578,8 @@ class ODESystem(System):
 	
 	
 def tensordiag(T):
-	if len(np.shape(T)) > 1: # vector case
+	if len(np.shape(T)) == 3: # vector case
+		assert T.shape[1] == T.shape[2]
 		T = np.column_stack([T[:,s,s] for s in range(np.shape(T)[1])])
 	return T
 
@@ -625,19 +631,65 @@ class ContactOscillator(System):
 	def time_step(self, N=40):
 		return 2*np.sin(np.pi/N)
 	
-	def dynamics(self, u):
-		v = self.velocity(u)
+	def reaction_force(self, u):
 		reaction_force = np.tensordot(self.codistribution(u), self.lag(u), [0,0]) # a 3xsxs tensor
 		reaction_force = tensordiag(reaction_force)
+		return reaction_force
+	
+	def dynamics(self, u):
+		v = self.velocity(u)
 		return {
 		LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
-		LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + reaction_force])
+		LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + self.reaction_force(u)])
 		}
 	
 	def constraint(self, u):
 		constraint = np.tensordot(self.codistribution(u), self.velocity(u), [1,0])
 		constraint = tensordiag(constraint)
 		return constraint
+
+class Test_ContactOscillator(object):
+	def __init__(self, s=3):
+		self.s = 3
+	def setUp(self):
+		self.co = ContactOscillator()
+	
+	def prepare(self):
+		u = np.random.rand(7)
+		us = np.column_stack([u]*self.s)
+		return u, us
+	
+	def test_constraint(self):
+		u, us = self.prepare()
+		c = self.co.constraint(u)
+		cs = self.co.constraint(us)
+		npt.assert_array_almost_equal(cs - c.reshape(-1,1), 0)
+
+	def test_reaction_force(self):
+		u, us = self.prepare()
+		r = self.co.reaction_force(u)
+		rs = self.co.reaction_force(us)
+		npt.assert_array_almost_equal(rs - r.reshape(-1,1), 0)
+	
+	def test_prop_lag(self):
+		"""
+		reaction force is proportional to lambda
+		"""
+		n = 5
+		u = np.random.rand(7)
+		us = np.column_stack([u]*n)
+		us[-1] = np.linspace(0,1,5)
+		f = self.co.reaction_force(us)
+		dfs = np.diff(f)
+		npt.assert_array_almost_equal(dfs - dfs[:,0:1], 0)
+			
+	
+	def test_dynamics(self):
+		u, us = self.prepare()
+		d = self.co.dynamics(u)
+		ds = self.co.dynamics(us)
+		for k in d:
+			npt.assert_array_almost_equal(ds[k] - d[k].reshape(-1,1),0)
 
 class Harness_Osc(object):
 	def setUp(self):
@@ -704,7 +756,7 @@ class Test_Jay(object):
 	
 
 if __name__ == '__main__':
-	t = Test_Jay()
+	t = Test_JayOsc()
 	t.setUp()
 	t.test_run()
 ## 	t.test_z0(1)
