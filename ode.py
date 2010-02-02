@@ -224,7 +224,7 @@ class ODESolver (object):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
 		"""
-		values = self.system.__getattribute__(function)(np.vstack([self.ats, self.aus]))
+		values = self.system.__getattribute__(function)(np.vstack([self.aus, self.ats]))
 		plot(self.ats, values.T)
 
 	def plot2D(self):
@@ -335,6 +335,9 @@ class McLachlan(ODESolver):
 	
 	
 	def plot_H(self, *args, **kwargs):
+		"""
+		Obsolete; use plot_function instead
+		"""
 		plot(self.ats, self.system.energy(self.aus), *args, **kwargs)
 
 class RungeKutta(ODESolver):
@@ -734,7 +737,7 @@ class Test_SparkODE(object):
 		def f(tx):
 			return -tx[1]
 		self.sys = ODESystem(f)
-		self.s = Spark(self.sys, 2)
+		self.s = Spark(self.sys, 4)
 		self.s.initialize(array([1.]))
 	
 	def test_run(self):
