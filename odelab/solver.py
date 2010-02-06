@@ -7,7 +7,7 @@ from numpy.linalg import norm, inv
 import pylab as PL
 from pylab import plot, legend
 
-from odelab.newton import Newton
+from odelab.newton import Newton, FSolve
 
 
 
@@ -203,6 +203,8 @@ class ode15s(ODESolver):
 
 class McLachlan(ODESolver):
 	
+	root_solver = Newton
+	
 	def step(self, t, u):
 		h = self.h
 		vel = self.system.velocity(u)
@@ -213,7 +215,7 @@ class McLachlan(ODESolver):
 		def residual(vl):
 			v,l = self.system.vel_lag_split(vl)
 			return np.hstack([v - vel - h * (force + dot(codistribution.T, l)), dot(self.system.codistribution(qh+.5*h*v), v)])
-		N = Newton(residual)
+		N = self.root_solver(residual)
 		vl = N.run(self.system.vel_lag_stack(vel, lag))
 		vnew, lnew = self.system.vel_lag_split(vl)
 		qnew = qh + .5*h*vnew
@@ -309,7 +311,7 @@ class LobattoIIID(RungeKutta):
 
 class Spark(ODESolver):
 	
-## 	RK_classes = [LobattoIIIA, LobattoIIIB, LobattoIIIC, LobattoIIICs, LobattoIIID]
+	root_solver = FSolve
 	
 	def __init__(self, system, nb_stages):
 		self.system = system
@@ -352,8 +354,8 @@ class Spark(ODESolver):
 	def step(self, t, u):
 		s = self.nb_stages
 		residual = self.get_residual_function(t, u)
-		N = Newton(residual)
 		guess = np.column_stack([u.copy()]*(s+1))
+		N = self.root_solver(residual)
 		residual(guess)
 		full_result = N.run(guess) # all the values of Y,Z at all stages
 		# we keep the last Z value:

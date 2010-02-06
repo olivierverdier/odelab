@@ -18,7 +18,7 @@ class Harness_Osc(object):
 	z0s = np.linspace(-.9,.9,10)
 	N = 40
 	
-	def test_z0(self, i=5, nb_Poincare_iterations=1):
+	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
 		self.s.initialize(u0=self.sys.initial(z0), h=self.sys.time_step(self.N))
 		self.s.time = nb_Poincare_iterations*self.N*self.s.h

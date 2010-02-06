@@ -20,18 +20,11 @@ def jacobian(F,x,h=1e-6):
 	grad = (Fs - F(x))/h
 	return array(grad).T
 
-class Newton(object):
-	"""
-	Simple Newton solver to solve F(x) = level.
-	"""
+class RootSolver(object):
 	def __init__(self, F=None, level=0.):
 		self.F = F
 		self.level = level
-	
-	h = 1e-6
-	def der(self, x):
-		return jacobian(self.residual, x, self.h)
-	
+
 	def residual(self, x):
 		a = x.reshape(self.shape)
 		res = self.F(a)
@@ -40,6 +33,28 @@ class Newton(object):
 		except AttributeError: # a list of arrays
 			res_vec = np.hstack([comp.ravel() for comp in res])
 		return res_vec
+
+	def get_initial(self, x0):
+		if np.isscalar(x0):
+			x = array([x0])
+		else:
+			x = array(x0)
+		self.shape = x.shape
+		x = x.ravel()
+		return x
+	
+	def get_result(self, x):
+		return x.reshape(self.shape)
+
+class Newton(RootSolver):
+	"""
+	Simple Newton solver to solve F(x) = level.
+	"""
+	
+	h = 1e-6
+	def der(self, x):
+		return jacobian(self.residual, x, self.h)
+	
 	
 	maxiter = 600
 	tol = 1e-11
@@ -47,12 +62,7 @@ class Newton(object):
 		"""
 		Run the Newton iteration.
 		"""
-		if np.isscalar(x0):
-			x = array([x0])
-		else:
-			x = array(x0)
-		self.shape = x.shape
-		x = x.ravel()
+		x = self.get_initial(x0)
 		for i in xrange(self.maxiter):
 			d = self.der(x)
 			y = self.level - self.residual(x)
@@ -73,8 +83,18 @@ class Newton(object):
 		else:
 			raise Exception("Newton algorithm did not converge. ∆x=%.2e" % norm(incr))
 		self.required_iter = i
-		return x.reshape(self.shape)
+		return self.get_result(x)
 	
-	def is_zero(self, x):
+	def is_zero(self, x): # use np.allclose?
 		res = norm(self.F(x) - self.level)
 		return res < self.tol
+
+class FSolve(RootSolver):
+	"""
+	Wrapper around scipy.optimize.fsolve
+	"""
+	def run(self, x0):
+		guess = self.get_initial(x0)
+		import scipy.optimize
+		full_result = scipy.optimize.fsolve(self.residual, guess, warning=False)
+		return self.get_result(full_result)
