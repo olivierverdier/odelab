@@ -12,6 +12,9 @@ from odelab.newton import Newton, FSolve
 
 
 class ODESolver (object):
+	"""
+	General Solver class, that takes care of calling the step function and storing the intermediate results.
+	"""
 
 	def __init__(self, system=None):
 		self.system = system
@@ -35,7 +38,18 @@ class ODESolver (object):
 
 	def initialize(self, u0=None, t0=0, h=None, time=None):
 		"""
-		Initialize the solver to the initial condition u(t0) = u0.
+		Initialize the solver to the initial condition :math:`u(t0) = u0`.
+		
+		Parameters
+		----------
+			u0 : array
+				initial condition; if it is not provided, it is set to the previous initial condition.
+			t0 : scalar
+				initial time
+			h : scalar
+				time step
+			time : scalar
+				time span of the simulation
 		"""
 		if u0 is None:
 			u0 = self.us[0]
@@ -62,6 +76,14 @@ class ODESolver (object):
 		
 	
 	def run(self, time=None):
+		"""
+		Run the simulation for a given time.
+		
+		Parameters
+		----------
+		time : scalar
+			the time span for which to run; if none is given, the default ``self.time`` is used
+		"""
 		if time is None:
 			time = self.time
 		# start from the last time we stopped
@@ -89,6 +111,11 @@ class ODESolver (object):
 	def plot(self, components=None):
 		"""
 		Plot some components of the solution.
+		
+		Parameters
+		----------
+			components : scalar|array_like
+				either a given component of the solution, or a list of components to plot.
 		"""
 		if components is None:
 			components = range(len(self.us[0]))
@@ -109,6 +136,19 @@ class ODESolver (object):
 	def plot_function(self, function):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
+		
+		Parameters
+		----------
+			function : string
+				name of the method to call on the current system object.
+		
+		Example
+		-------
+			the code::
+			
+				solver.plot_function('energy')
+			
+			will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
 		values = self.system.__getattribute__(function)(np.vstack([self.aus, self.ats]))
 		plot(self.ats, values.T)
@@ -179,7 +219,7 @@ class RungeKutta34 (ODESolver):
 
 class ode15s(ODESolver):
 	"""
-	Simulation of matlab's ode15s solver.
+	Simulation of matlab's ``ode15s`` solver.
 	It is a BDF method of max order 5
 	"""
 	def __init__(self, *args, **kwargs):
@@ -202,6 +242,24 @@ class ode15s(ODESolver):
 		return self.integ.t, self.integ.y
 
 class McLachlan(ODESolver):
+	"""
+	Solver for the Lagrange-d'Alembert (LDA) equations using the
+	algorithm given by equation (4.18) in [mclachlan06]_.
+	 
+	 The Lagrangian is assumed to be of the form:
+	 
+	.. math::
+	
+	    L(q,v) = 0.5 \|v^2\| - V(q)
+	 
+	 where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
+	 where :math:`A` is the mxn constraint matrix.
+	 
+	 
+	 References:
+.. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) (`url <http://dx.doi.org/10.1007/s00332-005-0698-1>`_)
+	"""
+
 	
 	root_solver = Newton
 	
@@ -223,8 +281,105 @@ class McLachlan(ODESolver):
 	
 	
 
+
+
+class Spark(ODESolver):
+	"""
+	Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
+	 as presented in [jay03]_.
+	 
+	 We consider the following system of DAEs
+	 
+	    y' = f(t,y,z)
+	     0 = g(t,y)
+	 
+	 where t is the independent variable, y is a vector of length n containing
+	 the differential variables and z is a vector of length m containing the 
+	 algebraic variables. Also,
+	 
+	    f: R x R^n x R^m -> R^n
+	    g: R x R^n -> R^m
+	 
+	 It is assumed that $g_y f_z$ exists and is invertible.
+	 
+	 The above system is integrated from t0 to tfinal, where 
+	 tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
+	 given by (y,z) = (y0,z0) and the number of stages in the Lobatto III RK 
+	 methods used is given by s.
+	 
+	 
+	 
+	 The set of nonlinear SPARK equations are solved using the solver in ``root_solver``.
+	 
+	 
+	 References:
+.. [jay03] \L. Jay - Solution of index 2 implicit differential-algebraic equations
+	    by Lobatto Runge-Kutta methods (2003).
+	"""
+	
+	root_solver = FSolve
+
+	def __init__(self, system, nb_stages):
+		self.system = system
+		self.nb_stages = nb_stages
+	
+	def Q(self):
+		s = self.nb_stages
+		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
+		es = np.zeros(s)
+		es[-1] = 1.
+		Q = np.zeros([s,s+1])
+		Q[:-1,:-1] = A1t
+		Q[-1,-1] = 1.
+		L = np.linalg.inv(np.vstack([A1t, es]))
+		Q = dot(L,Q)
+		return Q
+	
+	def get_residual_function(self, t, u):
+		s = self.nb_stages
+		h = self.h
+		c = LobattoIIIA.tableaux[s][:,0]
+		T = t + c*h
+		Q = self.Q()
+		y = self.system.state(u).copy()
+		yc = y.reshape(-1,1) # "column" vector
+		
+		def residual(YZ):
+			YZT = np.vstack([YZ,T])
+			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
+			Y = self.system.state(YZ)
+			dyn = [dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
+			r1 = Y - yc - h*sum(dyn)
+			r2 = np.dot(self.system.constraint(YZT), Q.T)
+			# unused final versions of z
+			r3 = self.system.lag(YZ[:,-1])
+			return [r1,r2,r3]
+		
+		return residual
+
+	def step(self, t, u):
+		s = self.nb_stages
+		residual = self.get_residual_function(t, u)
+		guess = np.column_stack([u.copy()]*(s+1))
+		N = self.root_solver(residual)
+		residual(guess)
+		full_result = N.run(guess) # all the values of Y,Z at all stages
+		# we keep the last Z value:
+		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
+		return t+self.h, result
+	
+
+# Coefficients for the Lobatto methods		
+
 class RungeKutta(ODESolver):
-	pass
+	"""
+	Collection of classes containing the coefficients of various Runge-Kutta methods.
+	
+	Attributes
+	----------
+	tableaux : dictionary
+		dictionary containing a Butcher tableau for every available number of stages.
+	"""
 
 class LobattoIIIA(RungeKutta):
 	
@@ -308,59 +463,4 @@ class LobattoIIID(RungeKutta):
 [1  ,1/12,  5/6,  1/12],
 [1 ,1/6, 2/3, 1/6]])
 	}
-
-class Spark(ODESolver):
-	
-	root_solver = FSolve
-	
-	def __init__(self, system, nb_stages):
-		self.system = system
-		self.nb_stages = nb_stages
-	
-	def Q(self):
-		s = self.nb_stages
-		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
-		es = np.zeros(s)
-		es[-1] = 1.
-		Q = np.zeros([s,s+1])
-		Q[:-1,:-1] = A1t
-		Q[-1,-1] = 1.
-		L = np.linalg.inv(np.vstack([A1t, es]))
-		Q = dot(L,Q)
-		return Q
-	
-	def get_residual_function(self, t, u):
-		s = self.nb_stages
-		h = self.h
-		c = LobattoIIIA.tableaux[s][:,0]
-		T = t + c*h
-		Q = self.Q()
-		y = self.system.state(u).copy()
-		yc = y.reshape(-1,1) # "column" vector
-		
-		def residual(YZ):
-			YZT = np.vstack([YZ,T])
-			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
-			Y = self.system.state(YZ)
-			dyn = [dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
-			r1 = Y - yc - h*sum(dyn)
-			r2 = np.dot(self.system.constraint(YZT), Q.T)
-			# unused final versions of z
-			r3 = self.system.lag(YZ[:,-1])
-			return [r1,r2,r3]
-		
-		return residual
-
-	def step(self, t, u):
-		s = self.nb_stages
-		residual = self.get_residual_function(t, u)
-		guess = np.column_stack([u.copy()]*(s+1))
-		N = self.root_solver(residual)
-		residual(guess)
-		full_result = N.run(guess) # all the values of Y,Z at all stages
-		# we keep the last Z value:
-		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+self.h, result
-			
-
 

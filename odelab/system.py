@@ -15,6 +15,27 @@ class System(object):
 
 
 class JayExample(System):
+	"""
+	 The example in [jay06]_ §5. This is a test to check implementation of the
+	 SRK-DAE2 methods given in [jay06]_. We want to compare our results to 
+	 [jay06]_ Fig. 1.
+	 
+	 The exact solution to this problem is known as is
+	
+.. math::
+	 
+	    y1(t) = e^t;  y2(t) = e^(-2t);  z1(t) = e^(2t);
+	 
+	 We will compute the global error at :math:`t=1` at plot this relative to the
+	 stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
+	 
+	 
+	 References:
+	 
+.. [jay06] Jay - Specialized Runge-Kutta Methods for index 2 DAEs (2006)
+	"""
+
+ 
 	def multi_dynamics(self, tu):
 		y1,y2,z,t = tu
 		return {
@@ -47,10 +68,13 @@ class JayExample(System):
 
 class GraphSystem(System):
 	"""
-	Trivial semi-explicit index 2 DAE of the form::
+	Trivial semi-explicit index 2 DAE of the form:
+	
+.. math::
+
 		x' = 1
 		y' = lambda
-		y = f(x)
+		y  = f(x)
 	"""
 	def __init__(self, f):
 		self.f = f
@@ -76,6 +100,9 @@ class GraphSystem(System):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
 
 class ODESystem(System):
+	"""
+	Simple wrapper to transform an ODE into a semi-explicit DAE.
+	"""
 	def __init__(self, f, RK_class=solver.LobattoIIIA):
 		self.f = f
 		self.RK_class = RK_class
@@ -100,6 +127,17 @@ def tensordiag(T):
 	return T
 
 class ContactOscillator(System):
+	"""
+Example 5.2 in [MP]_.
+
+This is the example presented in [MP]_ § 5.2. It is a nonlinear
+perturbation of the contact oscillator.
+
+
+.. [MP] R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16**, 283-328., (2006)
+	"""
+	 
+
 	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
 	
