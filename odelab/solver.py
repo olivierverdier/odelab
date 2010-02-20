@@ -1,4 +1,14 @@
 # -*- coding: UTF-8 -*-
+"""
+:mod:`Solver` -- ODE Solvers
+============================
+
+A collection of solvers for ODEs of various types.
+
+.. module :: solver
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
+"""
 from __future__ import division
 
 import numpy as np
@@ -14,6 +24,10 @@ from odelab.newton import Newton, FSolve
 class ODESolver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
+	
+	:Parameters:
+		system : :class:`System`
+			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses.
 	"""
 
 	def __init__(self, system=None):
@@ -40,8 +54,7 @@ class ODESolver (object):
 		"""
 		Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		
-		Parameters
-		----------
+		:Parameters:
 			u0 : array
 				initial condition; if it is not provided, it is set to the previous initial condition.
 			t0 : scalar
@@ -79,10 +92,9 @@ class ODESolver (object):
 		"""
 		Run the simulation for a given time.
 		
-		Parameters
-		----------
-		time : scalar
-			the time span for which to run; if none is given, the default ``self.time`` is used
+		:Parameters:
+			time : scalar
+				the time span for which to run; if none is given, the default ``self.time`` is used
 		"""
 		if time is None:
 			time = self.time
@@ -112,8 +124,7 @@ class ODESolver (object):
 		"""
 		Plot some components of the solution.
 		
-		Parameters
-		----------
+		:Parameters:
 			components : scalar|array_like
 				either a given component of the solution, or a list of components to plot.
 		"""
@@ -137,13 +148,11 @@ class ODESolver (object):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
 		
-		Parameters
-		----------
+		:Parameters:
 			function : string
 				name of the method to call on the current system object.
 		
-		Example
-		-------
+		:Example:
 			the code::
 			
 				solver.plot_function('energy')
@@ -375,10 +384,9 @@ class RungeKutta(ODESolver):
 	"""
 	Collection of classes containing the coefficients of various Runge-Kutta methods.
 	
-	Attributes
-	----------
-	tableaux : dictionary
-		dictionary containing a Butcher tableau for every available number of stages.
+	:Attributes:
+		tableaux : dictionary
+			dictionary containing a Butcher tableau for every available number of stages.
 	"""
 
 class LobattoIIIA(RungeKutta):

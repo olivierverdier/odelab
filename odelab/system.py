@@ -1,4 +1,15 @@
 # -*- coding: UTF-8 -*-
+"""
+:mod:`System` -- Systems
+============================
+
+Examples of ODE systems.
+
+.. module :: system
+	:synopsis: Examples of ODE systems.
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
+"""
 from __future__ import division
 
 import numpy as np

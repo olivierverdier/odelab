@@ -18,8 +18,9 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. automodule:: odelab.solver
+	:members:
+	
 .. automodule:: odelab.system
 	:members:
 
-.. automodule:: odelab.solver
-	:members:
