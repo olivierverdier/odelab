@@ -21,6 +21,13 @@ from odelab.newton import Newton, FSolve
 
 import itertools
 
+class SimulationInfo(object):
+	pass
+
+class Simulator(object):
+	def __init__(self, solver, time=None):
+		self.solver = solver
+	
 
 
 class ODESolver (object):
@@ -88,6 +95,27 @@ class ODESolver (object):
 	class FinalTimeNotReached(Exception):
 		pass
 	
+	def simulating(self):
+		return self
+	
+	def __enter__(self):
+		sim_info = SimulationInfo()
+		# start from the last time we stopped
+		t = t0 = self.ts[-1]
+		sim_info.tf = t0 + self.time # final time
+		u = self.us[-1]
+		sim_info.qs = []
+		sim_info.generator = self.generate(t, u)
+		self.sim_info = sim_info
+		return sim_info
+		
+	def __exit__(self, ex_type, ex_value, traceback):
+		self.ts.extend(q[0] for q in self.sim_info.qs)
+		self.us.extend(q[1] for q in self.sim_info.qs)
+
+		self.ats = array(self.ts)
+		self.aus = array(self.us).T
+
 	def run(self, time=None):
 		"""
 		Run the simulation for a given time.
@@ -96,30 +124,18 @@ class ODESolver (object):
 			time : scalar
 				the time span for which to run; if none is given, the default ``self.time`` is used
 		"""
-		if time is None:
+		if time is not None:
+			time = time
+		else:
 			time = self.time
-		# start from the last time we stopped
-		t = t0 = self.ts[-1]
-		tf = t0 + time # final time
-		u = self.us[-1]
-		qs = []
-		generator = self.generate(t, u)
-		try:
+		with self as sim_info:
 			for i in xrange(self.max_iter):
-				t,u = generator.next()
-				qs.append((t,u))
-				if t > tf:
+				t,u = sim_info.generator.next()
+				self.sim_info.qs.append((t,u))
+				if t > sim_info.tf:
 					break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
-		except Exception as ex:
-			raise
-		finally: # wrap up
-			self.ts.extend(q[0] for q in qs)
-			self.us.extend(q[1] for q in qs)
-	
-			self.ats = array(self.ts)
-			self.aus = array(self.us).T
 
 	
 	
