@@ -2,16 +2,46 @@
 from __future__ import division
 
 import numpy as np
+import math
 
+class Polynomial(object):
+	def __init__(self, coeffs):
+		self.coeffs = coeffs
 
-def poly_mult(p,x):
-	"""
-	Numerical value of the polynomial at x
-		x may be a scalar or an array
-	"""
-	def simpleMult(a, b):
-		return a*x + b
-	return reduce(simpleMult, reversed(p), 0)
+		
+	check_partition = True
+	def eval_matrix(self, Z, s=1, r=None):
+		"""
+	Evaluate the polynomial on a matrix, using matrix multiplications (`dot`).
+
+	This is done using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
+	The polynomial is split into chunks of size `s`.
+
+	:Parameters:
+		Z : list[s+1]
+			list of exponents of z up to s, so `len(Z) == s+1`.
+		s : int
+			size of the chunks; the only limitation is that s ≥ 1; s=1 is the Horner method
+			while s ≥ d is the naive polynomial evaluation.
+		r : int
+			Automatically computed. If given, it should satisfy: :math:`s*r ≥ d+1`
+
+	The number of multiplications is minimised if :math:`s ≈ sqrt(d)`, but
+	the choice of s is up to the caller. We explicitly assume :math:`d ≥ s*r`,
+
+	Reference:
+.. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed..
+		"""
+		p = self.coeffs
+		P = 0
+		if r is None:
+			r = int(math.ceil(len(p)/s))
+		elif self.check_partition: # r is given, we check that it has an acceptable value
+			assert len(p) <= r*s
+		for k in reversed(range(r)):
+			B = sum(b*Z[j] for j,b in enumerate(p[s*k:s*(k+1)]))
+			P = np.dot(Z[s],P) + B
+		return P
 
 class Pade(object):
 			
@@ -32,8 +62,31 @@ class Pade(object):
 		C[0] = 1.
 		C[1:] = 1./np.cumprod(np.arange(d+k+1)+1)
 		N = np.array([np.convolve(Dr, C[m:m+d+1])[:d+1] for m,Dr in enumerate(D)])
-		return N,D
+		return [Polynomial(Nl) for Nl in N], [Polynomial(Dl) for Dl in D]
 
+
+# ==============================================
+# Tests
+# ==============================================
+
+def Horner(p, x):
+	"""
+	Numerical value of the polynomial at x
+		x may be a scalar or an array
+	"""
+	def simpleMult(a, b):
+		return a*x + b
+	return reduce(simpleMult, reversed(p), 0)
+
+def test_mat_pol():
+	d = np.random.randint(0,20)
+	p = Polynomial(np.random.rand(d+1))
+	z = np.random.rand()
+	expected = Horner(p.coeffs, z)
+	for s in range(1,d):
+		Z = [z**j for j in range(s+1)]
+		computed = p.eval_matrix(Z, s)
+		nt.assert_almost_equal(computed, expected)
 
 import numpy.testing as nt
 
@@ -84,9 +137,11 @@ def test_phi_pade(k=9,d=10):
 	N,D = Pade.coefficients(k,d)
 	for l in range(k):
 		expected = phi_l(z,l)
-		Nz = poly_mult(N[l],z)
-		Dz = poly_mult(D[l],z)
+		Nz = Horner(N[l].coeffs, z)
+		Dz = Horner(D[l].coeffs, z)
 		computed = Nz/Dz
 		nt.assert_almost_equal(computed, expected)
 
 		
+if __name__ == '__main__':
+	test_mat_pol()
