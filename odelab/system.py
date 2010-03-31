@@ -21,6 +21,10 @@ from pylab import plot, legend
 import odelab.solver as solver
 
 class System(object):
+	def __init__(self, f=None):
+		if f is not None:
+			self.f = f
+
 	def label(self, component):
 		return '%d' % component
 
@@ -87,8 +91,6 @@ class GraphSystem(System):
 		y' = lambda
 		y  = f(x)
 	"""
-	def __init__(self, f):
-		self.f = f
 	
 	def state(self, u):
 		return u[:2]
