@@ -79,3 +79,40 @@ class Test_Jay(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.us[-1][:2], exact[:2], decimal=2)
 
+class Test_Simple(object):
+	limit = 20
+	class LimitedSys(object):
+		class LimitReached(Exception):
+			pass
+		def __init__(self, limit):
+			self.limit = limit
+			self.i = 0
+		def f(self, t, x):
+			if self.i < self.limit:
+				self.i += 1
+			 	return 0
+			else:
+				raise self.LimitReached()
+	def setUp(self):
+		self.sys = self.LimitedSys(self.limit)
+		self.s = ExplicitEuler(self.sys)
+		self.s.initialize(u0=0)
+	
+	def test_max_iter(self):
+		self.max_iter = 1
+		self.s.max_iter = self.max_iter
+		try:
+			self.s.run()
+		except ODESolver.FinalTimeNotReached:
+			npt.assert_equal(len(self.s.ts), self.max_iter + 1)
+		else:
+			raise Exception("FinalTimeNotReached not raised!")
+	
+	def test_sys_exception(self):
+		try:
+			self.s.run()
+		except self.LimitedSys.LimitReached:
+			npt.assert_equal(len(self.s.ts), self.limit + 1)
+		else:
+			raise Exception("Exception not raised")
+		

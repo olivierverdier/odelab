@@ -19,6 +19,8 @@ from pylab import plot, legend
 
 from odelab.newton import Newton, FSolve
 
+import itertools
+
 
 
 class ODESolver (object):
@@ -44,7 +46,6 @@ class ODESolver (object):
 		"""
 		pass
 
-	max_iter = 100000
 	
 	# default values for h and time
 	h = .01
@@ -74,19 +75,18 @@ class ODESolver (object):
 		if time is not None:
 			self.time = time
 
-	def generate(self, t, u, tf):
+	def generate(self, t, u):
 		"""
-		Generates the (t,u) values until t > tf
+		Generates the (t,u) values.
 		"""
-		for i in xrange(self.max_iter):
+		for i in itertools.count(): # infinite loop
 			t, u = self.step(t, u)
-			if t > tf:
-				break
 			yield t, u
-			self.increment_stepsize()
-		else:
-			raise Exception("Final time not reached")
-		
+			self.increment_stepsize()		
+
+	max_iter = 100000
+	class FinalTimeNotReached(Exception):
+		pass
 	
 	def run(self, time=None):
 		"""
@@ -100,16 +100,19 @@ class ODESolver (object):
 			time = self.time
 		# start from the last time we stopped
 		t = t0 = self.ts[-1]
+		tf = t0 + time # final time
 		u = self.us[-1]
 		qs = []
-		generator = self.generate(t, u, t0 + time)
+		generator = self.generate(t, u)
 		try:
 			for i in xrange(self.max_iter):
-				try:
-					qs.append(generator.next())
-				except StopIteration:
+				t,u = generator.next()
+				qs.append((t,u))
+				if t > tf:
 					break
-		except Exception, e:
+			else:
+				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
+		except Exception as ex:
 			raise
 		finally: # wrap up
 			self.ts.extend(q[0] for q in qs)
