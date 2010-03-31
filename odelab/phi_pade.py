@@ -44,12 +44,15 @@ class Polynomial(object):
 		return P
 
 class Pade(object):
-			
-	@classmethod
-	def coefficients(self, k, d=6):
+	
+	def __init__(self, d=6):
+		self.d = d
+	
+	def coefficients(self, k):
 		"""
 		Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for 0 ≤ l ≤ k.
 		"""
+		d = self.d
 		J = np.arange(d+1)
 		j = J[:-1]
 		a = -(d-j)/(2*d-j)/(j+1)
@@ -134,7 +137,8 @@ def test_phi_pade(k=9,d=10):
 	Test of the Padé approximation of :math:`φ_l`.
 	"""
 	z = .1
-	N,D = Pade.coefficients(k,d)
+	pade = Pade(d)
+	N,D = pade.coefficients(k)
 	for l in range(k):
 		expected = phi_l(z,l)
 		Nz = Horner(N[l].coeffs, z)
