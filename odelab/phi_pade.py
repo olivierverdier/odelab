@@ -64,8 +64,8 @@ class Pade(object):
 		C = np.empty(d+k+2)
 		C[0] = 1.
 		C[1:] = 1./np.cumprod(np.arange(d+k+1)+1)
-		N = np.array([np.convolve(Dr, C[m:m+d+1])[:d+1] for m,Dr in enumerate(D)])
-		return [Polynomial(Nl) for Nl in N], [Polynomial(Dl) for Dl in D]
+		N = [Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]) for m,Dr in enumerate(D)]
+		return N, [Polynomial(Dl) for Dl in D]
 
 
 # ==============================================
