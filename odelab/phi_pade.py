@@ -62,6 +62,11 @@ class Polynomial(object):
 			P = np.dot(Z[s],P) + B
 		return P
 
+def ninf(M):
+	if np.isscalar(M):
+		return abs(M)
+	return lin.norm(M,np.inf)
+
 class Phi(object):
 	
 	def __init__(self, k, d=6):
@@ -86,9 +91,51 @@ class Phi(object):
 		C = np.empty(d+k+2)
 		C[0] = 1.
 		C[1:] = 1./np.cumprod(np.arange(d+k+1)+1)
+		self.C = C # save for future use; C[j] == 1/j!
 		N = [Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]) for m,Dr in enumerate(D)]
 		return N, [Polynomial(Dl) for Dl in D]
-
+	
+	def scaling(self, z):
+		norm = ninf(z)
+		return int(math.ceil(math.log(norm,2)))
+	
+	def eval_pade(self, z, s=None):
+		"""
+		Evaluate phi_l(z) using the Padé approximation.
+		"""
+		if s is None:
+			s = int(math.floor(math.sqrt(self.d)))
+		N,D = self.pade
+		Z = Polynomial.exponents(z,s)
+		self.phi = [solve(PD.eval_matrix(Z), PN.eval_matrix(Z)) for PN,PD in zip(N,D)]
+	
+	
+	def eval(self, z):
+		scaling = self.scaling(z)
+		print 'scaling', scaling
+		scaled_eval = self.eval_pade(z/2**scaling)
+		for s in range(scaling):
+			self.square()
+		return self.phi[-1]
+	
+	def square(self):
+		ifac = self.C
+		phi = self.phi
+		newphi = []
+		for l in range(self.k+1):
+			odd = l % 2
+			half = l//2
+			next = half
+			if odd:
+				next += 1
+			res = np.dot(phi[half], phi[next])
+			res += sum(2*ifac[j]*phi[l-j] for j in xrange(half))
+			if odd:
+				res += ifac[half]*phi[half+1]
+			res /= 2**l
+			newphi.append(res)
+		self.phi = newphi
+		
 
 # ==============================================
 # Tests
@@ -207,6 +254,28 @@ def test_phi_pade(k=8,d=10):
 		computed = lin.solve(Dz,Nz)
 		nt.assert_almost_equal(computed, expected)
 
+def test_phi_eval_pade(k=8,d=6):
+	z = .1*np.array([[1.,2.],[3.,1.]])
+	phi = Phi(k,d)
+	phi.eval_pade(z)
+	computed = phi.phi[-1]
+	expected = phi_l(z,k)
+
+def test_phi_scaled(l=5,d=10):
+	z = 100.1
+	phi = Phi(l,d)
+	expected = phi_l(z,l)
+	computed = phi.eval(z)
+	nt.assert_approx_equal(computed, expected)
+
+
+def test_phi_scaled_mat(l=2,d=6):
+	z = np.array([[1.,2.],[3.,1.]])
+## 	z = np.random.rand(2,2)
+	phi = Phi(l,d)
+	expected = phi_l(z,l)
+	computed = phi.eval(z)
+	nt.assert_almost_equal(computed, expected)
 		
 if __name__ == '__main__':
 	test_mat_pol()
