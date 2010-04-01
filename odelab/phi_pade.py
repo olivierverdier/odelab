@@ -16,7 +16,20 @@ def solve(A,b):
 class Polynomial(object):
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
-
+	
+	@classmethod
+	def exponents(self, z, s):
+		"""
+		Compute the first s+1 exponents of z		
+		"""
+		if np.isscalar(z):
+			ident = 1
+		else:
+			ident = np.identity(len(z))
+		Z = [ident]
+		for i in range(s):
+			Z.append(np.dot(Z[-1],z))
+		return Z
 		
 	check_partition = True
 	def eval_matrix(self, Z, s=1, r=None):
@@ -82,6 +95,15 @@ class Pade(object):
 # ==============================================
 
 import scipy.linalg as slin
+import numpy.testing as nt
+
+def test_poly_exps():
+	x = np.array([[1.,2.],[3.,1.]])
+	x2 = np.dot(x,x)
+	X = Polynomial.exponents(x,2)
+	nt.assert_array_almost_equal(X[-1],x2)
+	nt.assert_array_almost_equal(X[1],x)
+	nt.assert_array_almost_equal(X[0], np.identity(2))
 
 def Horner(p, x):
 	"""
