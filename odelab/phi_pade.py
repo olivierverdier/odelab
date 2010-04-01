@@ -31,8 +31,7 @@ class Polynomial(object):
 			Z.append(np.dot(Z[-1],z))
 		return Z
 		
-	check_partition = True
-	def eval_matrix(self, Z, s=1, r=None):
+	def eval_matrix(self, Z):
 		"""
 	Evaluate the polynomial on a matrix, using matrix multiplications (`dot`).
 
@@ -41,25 +40,23 @@ class Polynomial(object):
 
 	:Parameters:
 		Z : list[s+1]
-			list of exponents of z up to s, so `len(Z) == s+1`.
-		s : int
-			size of the chunks; the only limitation is that s ≥ 1; s=1 is the Horner method
-			while s ≥ d is the naive polynomial evaluation.
-		r : int
-			Automatically computed. If given, it should satisfy: :math:`s*r ≥ d+1`
-
-	The number of multiplications is minimised if :math:`s ≈ sqrt(d)`, but
-	the choice of s is up to the caller. We explicitly assume :math:`d ≥ s*r`,
+			list of exponents of z up to s, so `len(Z) == s+1`, where `s` is the size of the chunks;
+			s=1, it is the Horner method
+			s ≥ d is the naive polynomial evaluation.
+			s ≈ sqrt(d) is the optimal choice
 
 	Reference:
 .. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed..
 		"""
 		p = self.coeffs
 		P = 0
-		if r is None:
-			r = int(math.ceil(len(p)/s))
-		elif self.check_partition: # r is given, we check that it has an acceptable value
-			assert len(p) <= r*s
+		s = len(Z) - 1
+		if s == 0: # ok only if the polynomial is constant
+			if len(p) > 1:
+				raise Exception("s may only be zero for constant polynomials")
+			return p[0]*Z[0]
+		r = int(math.ceil(len(p)/s))
+		# assert len(p) <= r*s # this should pass
 		for k in reversed(range(r)):
 			B = sum(b*Z[j] for j,b in enumerate(p[s*k:s*(k+1)]))
 			P = np.dot(Z[s],P) + B
@@ -105,26 +102,35 @@ def test_poly_exps():
 	nt.assert_array_almost_equal(X[1],x)
 	nt.assert_array_almost_equal(X[0], np.identity(2))
 
-def Horner(p, x):
+
+def simple_mul(p, x):
 	"""
 	Numerical value of the polynomial at x
 		x may be a scalar or an array
 	"""
-	def simpleMult(a, b):
-		return a*x + b
-	return reduce(simpleMult, reversed(p), 0)
+	X = Polynomial.exponents(x,len(p)-1)
+	return sum(pk*xk for pk,xk in zip(p,X))
 
-def test_mat_pol():
-	d = np.random.randint(0,20)
-	p = Polynomial(np.random.rand(d+1))
-	z = np.random.rand()
-	expected = Horner(p.coeffs, z)
-	for s in range(1,d):
-		Z = [z**j for j in range(s+1)]
-		computed = p.eval_matrix(Z, s)
-		nt.assert_almost_equal(computed, expected)
+def test_simple_mul_mat():
+	X = np.array([[1.,2.],[3.,1.]])
+	expected = 9.*np.identity(2) + 3.*X + 2.*np.dot(X,X)
+	computed = simple_mul([9.,3.,2.], X)
+	nt.assert_almost_equal(computed, expected)
 
-import numpy.testing as nt
+
+def test_mat_pol(n=2):
+	for d in range(1,20):
+		p = Polynomial(np.random.rand(d+1))
+		z = np.random.rand(n,n)
+		expected = simple_mul(p.coeffs, z)
+## 		expected = p.eval_matrix(Polynomial.exponents(z,1))
+		for s in range(1, d+1):
+			Z = Polynomial.exponents(z,s)
+			computed = p.eval_matrix(Z)
+			print p.coeffs, s
+			nt.assert_almost_equal(computed, expected)
+
+
 
 def expm(M):
 	"""
@@ -177,9 +183,9 @@ def test_phi_pade(k=9,d=10):
 	N,D = pade.coefficients(k)
 	for l in range(k):
 		expected = phi_l(z,l)
-		Nz = Horner(N[l].coeffs, z)
-		Dz = Horner(D[l].coeffs, z)
-		computed = Nz/Dz
+		Nz = simple_mul(N[l].coeffs, z)
+		Dz = simple_mul(D[l].coeffs, z)
+		computed = lin.solve(Dz,Nz)
 		nt.assert_almost_equal(computed, expected)
 
 		
