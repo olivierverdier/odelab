@@ -152,9 +152,13 @@ def phi_l(z, l=0):
 		φ_{l+1}(z) = \frac{φ_l(z) - \frac{1}{l!}}{z}
 	"""
 	phi = expm(z)
-	fac = 1.
+	fac = Polynomial.exponents(z,0)[0] # identity
+	if np.isscalar(z):
+		iz = 1./z
+	else:
+		iz = lin.inv(z)
 	for i in range(l):
-		phi =  solve(z, phi - fac)
+		phi =  np.dot(phi - fac, iz)
 		fac /= i+1
 	return phi
 
@@ -176,8 +180,20 @@ def test_phi_l():
 		computed = phi_l(z, l)
 		nt.assert_almost_equal(computed, expected)
 
+def test_phi_0_mat():
+	z = np.random.rand(2,2)
+	expected = expm(z)
+	computed = phi_l(z,0)
+	nt.assert_almost_equal(computed, expected)
 
-def test_phi_pade(k=9,d=10):
+def test_phi_1_mat():
+	z = np.random.rand(2,2)
+	expected = expm(z) - np.identity(2)
+	expected = lin.solve(z, expected)
+	computed = phi_l(z,1)
+	nt.assert_almost_equal(computed, expected)
+
+def test_phi_pade(k=8,d=10):
 	"""
 	Test of the Padé approximation of :math:`φ_l` on matrices.
 	"""
