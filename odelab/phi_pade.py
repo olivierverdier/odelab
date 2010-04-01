@@ -2,7 +2,16 @@
 from __future__ import division
 
 import numpy as np
+import numpy.linalg as lin
 import math
+
+def solve(A,b):
+	"""
+	Silly method to take care of the scalar case.
+	"""
+	if np.isscalar(A):
+		return b/A
+	return lin.solve(A,b)
 
 class Polynomial(object):
 	def __init__(self, coeffs):
@@ -72,6 +81,8 @@ class Pade(object):
 # Tests
 # ==============================================
 
+import scipy.linalg as slin
+
 def Horner(p, x):
 	"""
 	Numerical value of the polynomial at x
@@ -93,25 +104,28 @@ def test_mat_pol():
 
 import numpy.testing as nt
 
-def rec_phi_l(z,l=0):
+def expm(M):
 	"""
-	Returns phi_l, 1/l!
-	Computes recursively using the recursion formula:
-		φ_0 = exp
-		φ_{l+1}(z) = \frac{φ_l(z) - \frac{1}{l!}}{z}
+	Matrix exponential from scipy; adapt it to work on scalars.
 	"""
-	if l==0:
-		return np.exp(z), 1.
+	if np.isscalar(M):
+		return math.exp(M)
 	else:
-		phi, fac = rec_phi_l(z,l-1)
-		newfac = fac/l
-		return  (phi - fac)/z, newfac
+		return slin.expm(M)
+
 
 def phi_l(z, l=0):
 	"""
-	Compute phi_l using the recursion function `rec_phi_l`
+	Returns phi_l using the recursion formula:
+		φ_0 = exp
+		φ_{l+1}(z) = \frac{φ_l(z) - \frac{1}{l!}}{z}
 	"""
-	return rec_phi_l(z,l)[0]
+	phi = expm(z)
+	fac = 1.
+	for i in range(l):
+		phi =  solve(z, phi - fac)
+		fac /= i+1
+	return phi
 
 phi_formulae = { 
 	0: lambda z: np.exp(z),
@@ -123,7 +137,7 @@ phi_formulae = {
 
 def test_phi_l():
 	"""
-	Check that `phi_l` computes :math:`φ_l` correctly (compare to phi_formulae).
+	Check that `phi_l` computes :math:`φ_l` correctly for scalars (compare to phi_formulae).
 	"""
 	z = .1
 	for l in range(4):
