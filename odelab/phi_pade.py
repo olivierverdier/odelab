@@ -62,16 +62,19 @@ class Polynomial(object):
 			P = np.dot(Z[s],P) + B
 		return P
 
-class Pade(object):
+class Phi(object):
 	
-	def __init__(self, d=6):
+	def __init__(self, k, d=6):
+		self.k = k
 		self.d = d
+		self.pade = self.compute_Pade()
 	
-	def coefficients(self, k):
+	def compute_Pade(self):
 		"""
 		Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for 0 ≤ l ≤ k.
 		"""
 		d = self.d
+		k = self.k
 		J = np.arange(d+1)
 		j = J[:-1]
 		a = -(d-j)/(2*d-j)/(j+1)
@@ -176,11 +179,11 @@ def test_phi_l():
 
 def test_phi_pade(k=9,d=10):
 	"""
-	Test of the Padé approximation of :math:`φ_l`.
+	Test of the Padé approximation of :math:`φ_l` on matrices.
 	"""
-	z = .1
-	pade = Pade(d)
-	N,D = pade.coefficients(k)
+	z = .1*np.array([[1.,2.],[3.,1.]])
+	phi = Phi(k,d)
+	N,D = phi.pade
 	for l in range(k):
 		expected = phi_l(z,l)
 		Nz = simple_mul(N[l].coeffs, z)
