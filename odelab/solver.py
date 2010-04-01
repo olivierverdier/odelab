@@ -252,20 +252,21 @@ class ode15s(ODESolver):
 
 class McLachlan(ODESolver):
 	"""
-	Solver for the Lagrange-d'Alembert (LDA) equations using the
-	algorithm given by equation (4.18) in [mclachlan06]_.
-	 
-	 The Lagrangian is assumed to be of the form:
-	 
-	.. math::
+Solver for the Lagrange-d'Alembert (LDA) equations using the
+algorithm given by equation (4.18) in [mclachlan06]_.
+ 
+ The Lagrangian is assumed to be of the form:
+ 
+.. math::
+
+    L(q,v) = 0.5 \|v^2\| - V(q)
+ 
+ where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
+ where :math:`A` is the mxn constraint matrix.
+ 
+ 
+:References:
 	
-	    L(q,v) = 0.5 \|v^2\| - V(q)
-	 
-	 where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
-	 where :math:`A` is the mxn constraint matrix.
-	 
-	 
-	 References:
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) (`url <http://dx.doi.org/10.1007/s00332-005-0698-1>`_)
 	"""
 
@@ -294,34 +295,35 @@ class McLachlan(ODESolver):
 
 class Spark(ODESolver):
 	"""
-	Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
-	 as presented in [jay03]_.
-	 
-	 We consider the following system of DAEs
-	 
-	    y' = f(t,y,z)
-	     0 = g(t,y)
-	 
-	 where t is the independent variable, y is a vector of length n containing
-	 the differential variables and z is a vector of length m containing the 
-	 algebraic variables. Also,
-	 
-	    f: R x R^n x R^m -> R^n
-	    g: R x R^n -> R^m
-	 
-	 It is assumed that $g_y f_z$ exists and is invertible.
-	 
-	 The above system is integrated from t0 to tfinal, where 
-	 tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
-	 given by (y,z) = (y0,z0) and the number of stages in the Lobatto III RK 
-	 methods used is given by s.
-	 
-	 
-	 
-	 The set of nonlinear SPARK equations are solved using the solver in ``root_solver``.
-	 
-	 
-	 References:
+Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
+ as presented in [jay03]_.
+ 
+ We consider the following system of DAEs
+ 
+    y' = f(t,y,z)
+     0 = g(t,y)
+ 
+ where t is the independent variable, y is a vector of length n containing
+ the differential variables and z is a vector of length m containing the 
+ algebraic variables. Also,
+ 
+    f: R x R^n x R^m -> R^n
+    g: R x R^n -> R^m
+ 
+ It is assumed that $g_y f_z$ exists and is invertible.
+ 
+ The above system is integrated from t0 to tfinal, where 
+ tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
+ given by (y,z) = (y0,z0) and the number of stages in the Lobatto III RK 
+ methods used is given by s.
+ 
+ 
+ 
+ The set of nonlinear SPARK equations are solved using the solver in ``root_solver``.
+ 
+ 
+ References:
+	
 .. [jay03] \L. Jay - Solution of index 2 implicit differential-algebraic equations
 	    by Lobatto Runge-Kutta methods (2003).
 	"""
