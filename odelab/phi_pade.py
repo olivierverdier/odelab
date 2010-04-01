@@ -1,4 +1,15 @@
 # -*- coding: UTF-8 -*-
+"""
+:mod:`phi_pade` -- Phi Padé
+============================
+
+Computation of φ functions using Padé approximations and Scaling and Squaring.
+
+.. module :: phi_pade
+	:synopsis: Computation of φ functions.
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
+"""
 from __future__ import division
 
 import numpy as np
@@ -14,6 +25,9 @@ def solve(A,b):
 	return lin.solve(A,b)
 
 class Polynomial(object):
+	"""
+	Polynomial class used in the Padé approximation.
+	"""
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
 	
@@ -33,19 +47,20 @@ class Polynomial(object):
 		
 	def eval_matrix(self, Z):
 		"""
-	Evaluate the polynomial on a matrix, using matrix multiplications (`dot`).
+Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
 
-	This is done using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
-	The polynomial is split into chunks of size `s`.
+This is done using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
+The polynomial is split into chunks of size :data:`s`.
 
-	:Parameters:
-		Z : list[s+1]
-			list of exponents of z up to s, so `len(Z) == s+1`, where `s` is the size of the chunks;
-			s=1, it is the Horner method
-			s ≥ d is the naive polynomial evaluation.
-			s ≈ sqrt(d) is the optimal choice
+:Parameters:
+	Z : list[s+1]
+		list of exponents of z up to s, so ``len(Z) == s+1``, where :data:`s` is the size of the chunks;
+		s=1, it is the Horner method
+		s ≥ d is the naive polynomial evaluation.
+		s ≈ sqrt(d) is the optimal choice
 
-	Reference:
+:Reference:
+
 .. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed..
 		"""
 		p = self.coeffs
@@ -68,6 +83,19 @@ def ninf(M):
 	return lin.norm(M,np.inf)
 
 class Phi(object):
+	"""
+Main class to compute the :math:`φ_l` functions. The simplest way to define those functions is:
+
+.. math::
+	φ_l = ∑_{k=0}^{∞} \frac{x^k}{(l+k)!}
+
+Usage is as follows::
+
+	phi = Phi(k,d)
+	phi.eval_matrix(M)
+
+where :data:`M` is a square array.
+	"""
 	
 	def __init__(self, k, d=6):
 		self.k = k
@@ -76,7 +104,7 @@ class Phi(object):
 	
 	def compute_Pade(self):
 		"""
-		Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for 0 ≤ l ≤ k.
+		Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for :math:`0 ≤ l ≤ k`.
 		"""
 		d = self.d
 		k = self.k
@@ -101,7 +129,7 @@ class Phi(object):
 	
 	def eval_pade(self, z, s=None):
 		"""
-		Evaluate phi_l(z) using the Padé approximation.
+		Evaluate :math:`φ_l(z)` using the Padé approximation.
 		"""
 		if s is None:
 			s = int(math.floor(math.sqrt(self.d)))
@@ -184,7 +212,7 @@ def test_mat_pol(n=2):
 
 def expm(M):
 	"""
-	Matrix exponential from scipy; adapt it to work on scalars.
+	Matrix exponential from :mod:`scipy`; adapt it to work on scalars.
 	"""
 	if np.isscalar(M):
 		return math.exp(M)
@@ -219,7 +247,7 @@ phi_formulae = {
 
 def test_phi_l():
 	"""
-	Check that `phi_l` computes :math:`φ_l` correctly for scalars (compare to phi_formulae).
+	Check that :func:`phi_l` computes :math:`φ_l` correctly for scalars (by comparing to :data:`phi_formulae`).
 	"""
 	z = .1
 	for l in range(4):
