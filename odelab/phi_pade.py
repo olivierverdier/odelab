@@ -140,7 +140,6 @@ where :data:`M` is a square array.
 	
 	def eval(self, z):
 		scaling = self.scaling(z)
-		print 'scaling', scaling
 		scaled_eval = self.eval_pade(z/2**scaling)
 		for s in range(scaling):
 			self.square()
