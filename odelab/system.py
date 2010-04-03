@@ -222,8 +222,8 @@ class Linear(Exponential):
 	def __init__(self, L):
 		self.L = L
 	
-	def stiff(self):
+	def linear(self):
 		return self.L
 	
-	def non_stiff(self, t, u):
+	def non_linear(self, t, u):
 		return np.zeros_like(u)

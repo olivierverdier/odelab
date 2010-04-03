@@ -284,6 +284,9 @@ class Exponential(ODESolver):
 	"""
 	Explicit Exponential Integrator Class.
 	"""
+	def __init__(self, *args, **kwargs):
+		super(Exponential, self).__init__(*args, **kwargs)
+		self.phi = Phi(self.phi_order)
 	
 	def initialize(self, *args, **kwargs):
 		super(Exponential, self).initialize(*args, **kwargs)
@@ -302,7 +305,7 @@ class Exponential(ODESolver):
 			for j, coeff in enumerate(uas[1:]):
 				if coeff is not None:
 					Y[:,s] += np.dot(coeff, Y[:,j])
-			Y[:,s] = self.system.non_stiff(t+uas[0]*h, Y[:,s])
+			Y[:,s] = self.system.non_linear(t+uas[0]*h, Y[:,s])
 		for r in range(nb_steps):
 			vbr = vb[r]
 			for j, coeff in enumerate(vbr):
@@ -313,13 +316,20 @@ class Exponential(ODESolver):
 		
 
 	def general_linear(self):
-		z = self.h * self.system.stiff()
-		return self.general_linear_z(z)
+		"""
+		Currently returns a cached version of the coefficients of the method.
+		"""
+		if self._h_dirty: # recompute the coefficients if h had changed
+			z = self.h * self.system.linear()
+			self._general_linear = self.general_linear_z(z)
+			self._h_dirty = False
+		return self._general_linear
 
 class LawsonEuler(Exponential):
+	phi_order = 0
+	
 	def general_linear_z(self, z):
-		phi = Phi(0)
-		ez = phi(z)[0]
+		ez = self.phi(z)[0]
 		one = Polynomial.exponents(z,0)[0]
 		return np.array([[0., None, one]], dtype=object), np.array([[ez, ez]], dtype=object)
 
