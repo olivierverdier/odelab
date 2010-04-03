@@ -102,7 +102,6 @@ class ODESolver (object):
 		sim_info = SimulationInfo()
 		# start from the last time we stopped
 		t = t0 = self.ts[-1]
-		sim_info.tf = t0 + self.time # final time
 		u = self.us[-1]
 		sim_info.qs = []
 		sim_info.generator = self.generate(t, u)
@@ -124,15 +123,15 @@ class ODESolver (object):
 			time : scalar
 				the time span for which to run; if none is given, the default ``self.time`` is used
 		"""
-		if time is not None:
-			time = time
-		else:
+		if time is None:
 			time = self.time
+		t0 = self.ts[0]
+		tf = t0 + time # final time
 		with self as sim_info:
 			for i in xrange(self.max_iter):
-				t,u = sim_info.generator.next()
+				t,u = next(sim_info.generator)
 				self.sim_info.qs.append((t,u))
-				if t > sim_info.tf:
+				if t > tf:
 					break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))

@@ -115,4 +115,13 @@ class Test_Simple(object):
 			npt.assert_equal(len(self.s.ts), self.limit + 1)
 		else:
 			raise Exception("Exception not raised")
+	
+def test_time():
+	sys = System(lambda t,x: -x)
+	sol = ExplicitEuler(sys)
+	sol.h = ExplicitEuler.time/10
+	sol.initialize(u0=0.)
+	sol.run(sol.h)
+	npt.assert_(sol.ts[-1] < ExplicitEuler.time)
+	
 		
