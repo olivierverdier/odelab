@@ -41,6 +41,7 @@ class ODESolver (object):
 
 	def __init__(self, system=None):
 		self.system = system
+		self.h = self._h
 	
 	@property
 	def f(self):
@@ -55,7 +56,7 @@ class ODESolver (object):
 
 	
 	# default values for h and time
-	h = .01
+	_h = .01
 	time = 1.
 
 	def initialize(self, u0=None, t0=0, h=None, time=None):
@@ -89,7 +90,14 @@ class ODESolver (object):
 		for i in itertools.count(): # infinite loop
 			t, u = self.step(t, u)
 			yield t, u
-			self.increment_stepsize()		
+			self.increment_stepsize()
+	
+	def get_h(self):
+		return self._h
+	def set_h(self, h):
+		self._h = h
+		self._h_dirty = True
+	h = property(get_h, set_h)
 
 	max_iter = 100000
 	class FinalTimeNotReached(Exception):
