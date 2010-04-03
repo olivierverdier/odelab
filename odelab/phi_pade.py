@@ -16,6 +16,9 @@ import numpy as np
 import numpy.linalg as lin
 import math
 
+import sys
+sys.py3kwarning = True
+
 def solve(A,b):
 	"""
 	Silly method to take care of the scalar case.
@@ -45,7 +48,7 @@ class Polynomial(object):
 			Z.append(np.dot(Z[-1],z))
 		return Z
 		
-	def eval_matrix(self, Z):
+	def __call__(self, Z):
 		"""
 Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
 
@@ -92,7 +95,7 @@ Main class to compute the :math:`φ_l` functions. The simplest way to define tho
 Usage is as follows::
 
 	phi = Phi(k,d)
-	phi.eval_matrix(M)
+	phi(M)
 
 where :data:`M` is a square array.
 	"""
@@ -135,15 +138,15 @@ where :data:`M` is a square array.
 			s = int(math.floor(math.sqrt(self.d)))
 		N,D = self.pade
 		Z = Polynomial.exponents(z,s)
-		self.phi = [solve(PD.eval_matrix(Z), PN.eval_matrix(Z)) for PN,PD in zip(N,D)]
+		self.phi = [solve(PD(Z), PN(Z)) for PN,PD in zip(N,D)]
 	
 	
-	def eval(self, z):
+	def __call__(self, z):
 		scaling = self.scaling(z)
 		scaled_eval = self.eval_pade(z/2**scaling)
 		for s in range(scaling):
 			self.square()
-		return self.phi[-1]
+		return self.phi
 	
 	def square(self):
 		ifac = self.C
@@ -200,10 +203,10 @@ def test_mat_pol(n=2):
 		p = Polynomial(np.random.rand(d+1))
 		z = np.random.rand(n,n)
 		expected = simple_mul(p.coeffs, z)
-## 		expected = p.eval_matrix(Polynomial.exponents(z,1))
+## 		expected = p(Polynomial.exponents(z,1))
 		for s in range(1, d+1):
 			Z = Polynomial.exponents(z,s)
-			computed = p.eval_matrix(Z)
+			computed = p(Z)
 			print p.coeffs, s
 			nt.assert_almost_equal(computed, expected)
 
@@ -292,7 +295,7 @@ def test_phi_scaled(l=5,d=10):
 	z = 100.1
 	phi = Phi(l,d)
 	expected = phi_l(z,l)
-	computed = phi.eval(z)
+	computed = phi(z)[-1]
 	nt.assert_approx_equal(computed, expected)
 
 
@@ -301,7 +304,7 @@ def test_phi_scaled_mat(l=2,d=6):
 ## 	z = np.random.rand(2,2)
 	phi = Phi(l,d)
 	expected = phi_l(z,l)
-	computed = phi.eval(z)
+	computed = phi(z)[-1]
 	nt.assert_almost_equal(computed, expected)
 		
 if __name__ == '__main__':
