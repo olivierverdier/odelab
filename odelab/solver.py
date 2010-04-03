@@ -268,6 +268,55 @@ class ode15s(ODESolver):
 			print("vode error")
 		return self.integ.t, self.integ.y
 
+# exponential integrators
+
+from phi_pade import Phi, Polynomial
+
+class Exponential(ODESolver):
+	"""
+	Explicit Exponential Integrator Class.
+	"""
+	
+	def initialize(self, *args, **kwargs):
+		super(Exponential, self).initialize(*args, **kwargs)
+		self.tail = self.us[-1].reshape(-1,1)
+	
+	def step(self, t, u):
+		h = self.h
+		ua, vb = self.general_linear()
+		nb_stages = ua.shape[0]
+		nb_steps = vb.shape[0]
+		Y = np.zeros([len(u), nb_stages+nb_steps])
+		Y[:,-nb_steps:] = self.tail
+		newtail = np.zeros_like(self.tail) # alternative: work directly on self.tail
+		for s in range(nb_stages):
+			uas = ua[s]
+			for j, coeff in enumerate(uas[1:]):
+				if coeff is not None:
+					Y[:,s] += np.dot(coeff, Y[:,j])
+			Y[:,s] = self.system.non_stiff(t+uas[0]*h, Y[:,s])
+		for r in range(nb_steps):
+			vbr = vb[r]
+			for j, coeff in enumerate(vbr):
+				if coeff is not None:
+					newtail[:,r] += np.dot(coeff, Y[:,j])
+		self.tail = newtail
+		return t + h, self.tail[:,0]
+		
+
+	def general_linear(self):
+		z = self.h * self.system.stiff()
+		return self.general_linear_z(z)
+
+class LawsonEuler(Exponential):
+	def general_linear_z(self, z):
+		phi = Phi(0)
+		ez = phi(z)[0]
+		one = Polynomial.exponents(z,0)[0]
+		return np.array([[0., None, one]], dtype=object), np.array([[ez, ez]], dtype=object)
+
+
+
 class McLachlan(ODESolver):
 	"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the

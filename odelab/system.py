@@ -214,3 +214,16 @@ perturbation of the contact oscillator.
 		constraint = np.tensordot(self.codistribution(u), self.velocity(u), [1,0])
 		constraint = tensordiag(constraint)
 		return constraint
+
+class Exponential(System):
+	pass
+
+class Linear(Exponential):
+	def __init__(self, L):
+		self.L = L
+	
+	def stiff(self):
+		return self.L
+	
+	def non_stiff(self, t, u):
+		return np.zeros_like(u)
