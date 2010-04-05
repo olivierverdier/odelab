@@ -79,7 +79,7 @@ class Test_Jay(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.us[-1][:2], exact[:2], decimal=2)
 
-class Test_Simple(object):
+class Test_Exceptions(object):
 	limit = 20
 	class LimitedSys(object):
 		class LimitReached(Exception):
@@ -130,20 +130,21 @@ import scipy.linalg as slin
 class Test_LinearExponential(object):
 	def test_run(self):
 		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-			self.L = L
-			print L
-			self.sys = Linear(self.L)
-			self.s = LawsonEuler(self.sys)
-			self.u0 = np.array([1.,0.])
-			self.s.initialize(u0 = self.u0)
+			for SolverClass in [LawsonEuler, RKMK4T]:
+				self.L = L
+				print L
+				self.sys = Linear(self.L)
+				self.s = RKMK4T(self.sys)
+				self.u0 = np.array([1.,0.])
+				self.s.initialize(u0 = self.u0)
 	
-			h = self.s.h
-			self.s.run(time=h)
-			computed = self.s.us[-1]
-			phi = Phi(0)
-			tf = self.s.ts[-1]
-			print tf
-			phi_0 = np.dot(phi(tf*self.L)[0], self.u0)
-			expected = np.dot(slin.expm(tf*self.L), self.u0)
-			npt.assert_array_almost_equal(computed, expected)
-			npt.assert_array_almost_equal(computed, phi_0)
+				h = self.s.h
+				self.s.run(time=h)
+				computed = self.s.us[-1]
+				phi = Phi(0)
+				tf = self.s.ts[-1]
+				print tf
+				phi_0 = np.dot(phi(tf*self.L)[0], self.u0)
+				expected = np.dot(slin.expm(tf*self.L), self.u0)
+				npt.assert_array_almost_equal(computed, expected)
+				npt.assert_array_almost_equal(computed, phi_0)

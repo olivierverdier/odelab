@@ -333,6 +333,21 @@ class LawsonEuler(Exponential):
 		one = Polynomial.exponents(z,0)[0]
 		return np.array([[0., None, one]], dtype=object), np.array([[ez, ez]], dtype=object)
 
+class RKMK4T(Exponential):
+	phi_order = 1
+	
+	def general_linear_z(self, z):
+		one = Polynomial.exponents(z,0)[0]
+		ez, phi_1 = self.phi(z)
+		ez2, phi_12 = self.phi(z/2)
+		return (np.array([[0, None, None, None, None, one],
+						[1/2, 1/2*phi_12, None, None, None, ez2],
+						[1/2, 1/8*np.dot(z, phi_12), 1/2*np.dot(phi_12,one-1/4*z), None, None, ez2],
+						[1, None, None, phi_1, None, ez]], dtype=object),
+				np.array([[1/6*np.dot(phi_1,one+1/2*z), 1/3*phi_1, 1/3*phi_1, 1/6*np.dot(phi_1,one-1/2*z), ez]], dtype=object)
+				)
+		
+
 
 
 class McLachlan(ODESolver):
