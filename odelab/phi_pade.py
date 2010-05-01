@@ -271,7 +271,7 @@ def test_phi_1_mat():
 	computed = phi_l(z,1)
 	nt.assert_almost_equal(computed, expected)
 
-def test_phi_pade(k=4,d=6):
+def test_phi_pade(k=4,d=10):
 	"""
 	Test of the Padé approximation of :math:`φ_l` on matrices.
 	"""
@@ -286,7 +286,7 @@ def test_phi_pade(k=4,d=6):
 			Nz = simple_mul(N[l].coeffs, z)
 			Dz = simple_mul(D[l].coeffs, z)
 			computed = lin.solve(Dz,Nz)
-			nt.assert_almost_equal(computed, expected)
+			nt.assert_almost_equal(computed/expected, np.ones_like(expected))
 			nt.assert_almost_equal(expected, phis[l])
 
 def test_phi_eval_pade_mat(k=8,d=6):
@@ -309,12 +309,14 @@ def test_scaling():
 	nt.assert_equal(Phi.scaling(.1), 0)
 
 def test_phi_scaled_mat(l=2,d=6):
-	z = np.array([[1.,2.],[3.,1.]])
+	A =  np.array([[1.,2.],[3.,1.]])
 ## 	z = np.random.rand(2,2)
 	phi = Phi(l,d)
-	expected = phi_l(z,l)
-	computed = phi(z)[-1]
-	nt.assert_almost_equal(computed, expected)
+	for z in [.01*A, .1*A, A, 2*A, 10*A]:
+		print z
+		expected = phi_l(z,l)
+		computed = phi(z)[-1]
+		nt.assert_almost_equal(computed/expected, np.ones_like(expected))
 		
 if __name__ == '__main__':
 	test_mat_pol()
