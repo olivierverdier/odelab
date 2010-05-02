@@ -254,6 +254,10 @@ def test_time():
 		
 import scipy.linalg as slin
 
+def compare_linear_exponential(computed, expected, phi):
+	npt.assert_array_almost_equal(computed, expected)
+	npt.assert_array_almost_equal(computed, phi)
+
 class Test_LinearExponential(object):
 	def test_run(self):
 		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
@@ -261,7 +265,7 @@ class Test_LinearExponential(object):
 				self.L = L
 				print L
 				self.sys = Linear(self.L)
-				self.s = SingleStepSolver(RKMK4T(), self.sys)
+				self.s = SingleStepSolver(SchemeClass(), self.sys)
 				self.u0 = np.array([1.,0.])
 				self.s.initialize(u0 = self.u0)
 	
@@ -273,5 +277,4 @@ class Test_LinearExponential(object):
 				print tf
 				phi_0 = np.dot(phi(tf*self.L)[0], self.u0)
 				expected = np.dot(slin.expm(tf*self.L), self.u0)
-				npt.assert_array_almost_equal(computed, expected)
-				npt.assert_array_almost_equal(computed, phi_0)
+				yield compare_linear_exponential, computed, expected, phi_0
