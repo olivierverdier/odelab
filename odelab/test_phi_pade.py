@@ -102,6 +102,11 @@ def test_phi_1_mat():
 	computed = phi_l(z,1)
 	nt.assert_almost_equal(computed, expected)
 
+def compare_phi_pade(computed, expected, phi):
+	nt.assert_almost_equal(computed/expected, np.ones_like(expected))
+	nt.assert_almost_equal(expected, phi)
+
+
 def test_phi_pade(k=4,d=10):
 	"""
 	Test of the Padé approximation of :math:`φ_l` on matrices.
@@ -117,8 +122,7 @@ def test_phi_pade(k=4,d=10):
 			Nz = simple_mul(N[l].coeffs, z)
 			Dz = simple_mul(D[l].coeffs, z)
 			computed = lin.solve(Dz,Nz)
-			nt.assert_almost_equal(computed/expected, np.ones_like(expected))
-			nt.assert_almost_equal(expected, phis[l])
+			yield compare_phi_pade, computed, expected, phis[l]
 
 def test_phi_eval_pade_mat(k=8,d=6):
 	z = .1*np.array([[1.,2.],[3.,1.]])
