@@ -305,7 +305,7 @@ class Exponential(ODESolver):
 			for j, coeff in enumerate(uas[1:]):
 				if coeff is not None:
 					Y[:,s] += np.dot(coeff, Y[:,j])
-			Y[:,s] = self.system.non_linear(t+uas[0]*h, Y[:,s])
+			Y[:,s] = self.system.f(t+uas[0]*h, Y[:,s])
 		for r in range(nb_steps):
 			vbr = vb[r]
 			for j, coeff in enumerate(vbr):

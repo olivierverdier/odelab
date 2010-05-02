@@ -216,11 +216,20 @@ perturbation of the contact oscillator.
 		return constraint
 
 class Exponential(System):
-	pass
+	def __init__(self, f, L):
+		self.L = L
+		self.f = f
+	
+	def linear(self):
+		return self.L
+
+def zero_dynamics(t,u):
+	return np.zeros_like(u)
 
 class Linear(Exponential):
 	def __init__(self, L):
-		self.L = L
+		super(Linear, self).__init__(zero_dynamics, L)
+
 	
 	def linear(self):
 		return self.L
