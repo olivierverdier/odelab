@@ -8,6 +8,10 @@ A collection of solvers for ODEs of various types.
 .. module :: solver
 .. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
 
+The :class:`Scheme` class contains methods on how to perform one iteration step. 
+It is its responsibility to take care of the time step.
+
+The higher level class is :class:`Solver`, which is initialized with an instance of a :class:`Scheme` class.
 """
 from __future__ import division
 
@@ -30,33 +34,20 @@ class Simulator(object):
 	
 
 
-class ODESolver (object):
+class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
 	
 	:Parameters:
 		system : :class:`System`
-			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses.
+			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses. The system may also be specified later, although before any simulation of course.
 	"""
 
 	def __init__(self, system=None):
 		self.system = system
-		self.h = self._h
 	
-	@property
-	def f(self):
-		return self.system.f
-
-	def increment_stepsize(self):
-		"""
-		Change the step size based on error estimation.
-		To be overridden for a variable step size method.
-		"""
-		pass
-
 	
-	# default values for h and time
-	_h = .01
+	# default values for the total time
 	time = 1.
 
 	def initialize(self, u0=None, t0=0, h=None, time=None):
@@ -82,22 +73,20 @@ class ODESolver (object):
 			self.h = h
 		if time is not None:
 			self.time = time
+		self.initialize_scheme()
+
+	def initialize_scheme(self):
+		pass
 
 	def generate(self, t, u):
 		"""
 		Generates the (t,u) values.
 		"""
 		for i in itertools.count(): # infinite loop
-			t, u = self.step(t, u)
+			t, u = self.scheme.step(t, u)
 			yield t, u
-			self.increment_stepsize()
+			self.scheme.increment_stepsize()
 	
-	def get_h(self):
-		return self._h
-	def set_h(self, h):
-		self._h = h
-		self._h_dirty = True
-	h = property(get_h, set_h)
 
 	max_iter = 100000
 	class FinalTimeNotReached(Exception):
@@ -206,23 +195,64 @@ class ODESolver (object):
 		vals = self.f(0,Z.transpose(2,0,1))
 		PL.quiver(X,Y,vals[0], vals[1])
 
+class SingleStepSolver(Solver):
+	def __init__(self, scheme, system):
+		super(SingleStepSolver, self).__init__(system)
+		self.set_scheme(scheme)
 
-class ExplicitEuler (ODESolver):
-	def step(self, t, u):
-		return t + self.h, u + self.h*self.f(t, u)
+	def initialize_scheme(self):
+		self.scheme.initialize()
+	
+	def set_scheme(self, scheme):
+		self.scheme = scheme
+		scheme.solver = self
 
-class ImplicitEuler (ODESolver):
+class Scheme(object):
+	
+	def __init__(self, h=None):
+		if h is None:
+			self.h = self.h_default
+
+	@property
+	def system(self):
+		return self.solver.system
+
+	def increment_stepsize(self):
+		"""
+		Change the step size based on error estimation.
+		To be overridden for a variable step size method.
+		"""
+		pass
+	
+	h_default = .01
+	
+	# to be removed; use a signal instead
+	def get_h(self):
+		return self._h
+	def set_h(self, h):
+		self._h = h
+		self._h_dirty = True
+	h = property(get_h, set_h)
+
+	def initialize(self):
+		pass
+
+class ExplicitEuler (Scheme):
 	def step(self, t, u):
-		res = self.f.res(u, t, self.h)
+		return t + self.h, u + self.h*self.system.f(t, u)
+
+class ImplicitEuler (Scheme):
+	def step(self, t, u):
+		res = self.system.f.res(u, t, self.h)
 		return t + self.h, res
 
 
-class RungeKutta4 (ODESolver):
+class RungeKutta4 (Scheme):
 	"""
 	Runge-Kutta of order 4.
 	"""
 	def step(self, t, u):
-		f = self.f
+		f = self.system.f
 		h = self.h
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
@@ -230,7 +260,7 @@ class RungeKutta4 (ODESolver):
 		Y4 = f(t + h, u + h*Y3)
 		return t+h, u + h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
 
-class RungeKutta34 (ODESolver):
+class RungeKutta34 (Scheme):
 	"""
 	Adaptive Runge-Kutta of order four.
 	"""
@@ -239,10 +269,13 @@ class RungeKutta34 (ODESolver):
 	tol = 1e-6
 
 	def increment_stepsize(self):
-		self.h *= (self.tol/self.error)**(1/self.error_order)
+		if self.error > 1e-15:
+			self.h *= (self.tol/self.error)**(1/self.error_order)
+		else:
+			self.h = 1.
 
 	def step(self, t, u):
-		f = self.f
+		f = self.system.f
 		h = self.h
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
@@ -252,7 +285,7 @@ class RungeKutta34 (ODESolver):
 		self.error = norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
 		return t+h, u + h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
 
-class ode15s(ODESolver):
+class ode15s(Scheme):
 	"""
 	Simulation of matlab's ``ode15s`` solver.
 	It is a BDF method of max order 5
@@ -263,7 +296,7 @@ class ode15s(ODESolver):
 
 	def setup(self, **kw):
 		import scipy.integrate
-		self.integ = scipy.integrate.ode(self.f)
+		self.integ = scipy.integrate.ode(self.system.f)
 		self.integ.set_integrator('vode', method='bdf', order=5, nsteps=3000, **kw)
 	
 	def initialize(self, *args, **kwargs):
@@ -280,7 +313,7 @@ class ode15s(ODESolver):
 
 from phi_pade import Phi, Polynomial
 
-class Exponential(ODESolver):
+class Exponential(Scheme):
 	"""
 	Explicit Exponential Integrator Class.
 	"""
@@ -288,9 +321,9 @@ class Exponential(ODESolver):
 		super(Exponential, self).__init__(*args, **kwargs)
 		self.phi = Phi(self.phi_order)
 	
-	def initialize(self, *args, **kwargs):
-		super(Exponential, self).initialize(*args, **kwargs)
-		self.tail = self.us[-1].reshape(-1,1)
+	def initialize(self):
+		super(Exponential, self).initialize()
+		self.tail = self.solver.us[-1].reshape(-1,1)
 	
 	def step(self, t, u):
 		h = self.h
@@ -351,7 +384,7 @@ class RKMK4T(Exponential):
 
 
 
-class McLachlan(ODESolver):
+class McLachlan(Scheme):
 	"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the
 algorithm given by equation (4.18) in [mclachlan06]_.
@@ -394,7 +427,7 @@ algorithm given by equation (4.18) in [mclachlan06]_.
 
 
 
-class Spark(ODESolver):
+class Spark(Scheme):
 	"""
 Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
  as presented in [jay03]_.
@@ -431,8 +464,8 @@ Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
 	
 	root_solver = FSolve
 
-	def __init__(self, system, nb_stages):
-		self.system = system
+	def __init__(self, nb_stages):
+		super(Spark, self).__init__()
 		self.nb_stages = nb_stages
 	
 	def Q(self):
@@ -483,7 +516,7 @@ Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
 
 # Coefficients for the Lobatto methods		
 
-class RungeKutta(ODESolver):
+class RungeKutta(Scheme):
 	"""
 	Collection of classes containing the coefficients of various Runge-Kutta methods.
 	
