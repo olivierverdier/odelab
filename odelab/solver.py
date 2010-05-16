@@ -67,6 +67,10 @@ class Solver (object):
 		if u0 is None:
 			u0 = self.us[0]
 			t0 = self.ts[0]
+		else:
+			if np.isscalar(u0):
+				u0 = [u0]
+			u0 = np.array(u0)
 		self.ts = [t0]
 		self.us = [u0]
 		if h is not None:
