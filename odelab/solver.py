@@ -335,7 +335,7 @@ class Exponential(Scheme):
 		ua, vb = self.general_linear()
 		nb_stages = len(ua)
 		nb_steps = len(vb)
-		Y = np.zeros([len(u), nb_stages+nb_steps])
+		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=u.dtype)
 		Y[:,-nb_steps:] = self.tail
 		newtail = np.zeros_like(self.tail) # alternative: work directly on self.tail
 		for s in range(nb_stages):

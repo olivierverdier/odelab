@@ -59,7 +59,7 @@ class Harness_Solver(Harness):
 		npt.assert_almost_equal(self.solver.us[-1], expected, 1)
 
 	def test_const(self):
-		for f,u0,expected in [(const_r, 1., 2.)]:
+		for f,u0,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j), (const_c, 1., 1.+1.j)]:
 			yield self.check_const, f, u0, expected
 
 class Test_EEuler(Harness_Solver):
