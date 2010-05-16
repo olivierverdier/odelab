@@ -144,7 +144,7 @@ where :data:`M` is a square array.
 	
 	def __call__(self, z):
 		scaling = self.scaling(z)
-		scaled_eval = self.eval_pade(z/2**scaling)
+		self.eval_pade(z/2**scaling)
 		for s in range(scaling):
 			self.square()
 		return self.phi
