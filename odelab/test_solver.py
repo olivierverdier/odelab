@@ -63,6 +63,10 @@ class Test_RK34(Harness_Solver):
 	def setUp(self):
 		self.solver = SingleStepSolver(RungeKutta34(), System(f))
 
+class Test_ode15s(Harness_Solver):
+	def setUp(self):
+		self.solver = SingleStepSolver(ode15s(), System(f))
+
 ## class Test_IEuler(Harness_Solver):
 ## 	def setUp(self):
 ## 		self.solver = SingleStepSolver(ImplicitEuler, System(f))

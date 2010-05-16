@@ -208,10 +208,6 @@ class SingleStepSolver(Solver):
 		scheme.solver = self
 
 class Scheme(object):
-	
-	def __init__(self, h=None):
-		if h is None:
-			self.h = self.h_default
 
 	@property
 	def system(self):
@@ -235,7 +231,10 @@ class Scheme(object):
 	h = property(get_h, set_h)
 
 	def initialize(self):
-		pass
+		try:
+			self.h = self.solver.h
+		except AttributeError:
+			self.h = self.h_default
 
 class ExplicitEuler (Scheme):
 	def step(self, t, u):
@@ -290,18 +289,18 @@ class ode15s(Scheme):
 	Simulation of matlab's ``ode15s`` solver.
 	It is a BDF method of max order 5
 	"""
-	def __init__(self, *args, **kwargs):
-		super(ode15s, self).__init__(*args, **kwargs)
-		self.setup()
+	
+	
+	def __init__(self, **kwargs):
+		self.integrator_kwargs = kwargs
 
-	def setup(self, **kw):
+	def initialize(self): # the system must be defined before this is called!
+		super(ode15s,self).initialize()
 		import scipy.integrate
 		self.integ = scipy.integrate.ode(self.system.f)
-		self.integ.set_integrator('vode', method='bdf', order=5, nsteps=3000, **kw)
-	
-	def initialize(self, *args, **kwargs):
-		super(ode15s, self).initialize(*args, **kwargs)
-		self.integ.set_initial_value(self.us[0], self.ts[0])
+		vodevariant = ['vode', 'zvode'][np.iscomplexobj(self.solver.us[0])]
+		self.integ.set_integrator(vodevariant, method='bdf', order=5, nsteps=3000, **self.integrator_kwargs)
+		self.integ.set_initial_value(self.solver.us[0], self.solver.ts[0])
 
 	def step(self, t, u):
 		self.integ.integrate(self.integ.t + self.h)
