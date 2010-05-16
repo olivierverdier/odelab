@@ -19,13 +19,20 @@ def res(u, t, h):
 
 f.res = res
 
-def const_f(t,u):
-	return 1.
+def const_f(c,t,u):
+	return c*np.ones_like(u)
 
 def time_f(t,u):
 	return t
 
+from functools import partial
+const_r = partial(const_f, 1.)
+const_c = partial(const_f, 1.j)
+
 class Harness_Solver(Harness):
+	def set_system(self, f):
+		self.solver.system = System(f)		
+	
 	def test_initialize(self):
 		u0 = np.random.rand(5)
 		self.solver.initialize(u0=u0)
@@ -37,19 +44,23 @@ class Harness_Solver(Harness):
 	def test_quadratic(self):
 		"""should solve f(t) = t pretty well"""
 		print type(self).__name__
-		self.solver.system = System(time_f)
+		self.set_system(time_f)
 		self.solver.initialize(u0=1., time=1.)
 		self.solver.run()
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
 		nt.assert_almost_equal(self.solver.us[-1], 3/2, 1)
 
-	def test_const(self):
-		"""should solve the f=1. exactly"""
+	def check_const(self, f, u0, expected):
+		"""should solve the f=c exactly"""
 		print type(self).__name__
-		self.solver.system = System(const_f)
-		self.solver.initialize(u0=1., time=1.)
+		self.set_system(f)
+		self.solver.initialize(u0=1.+0j, time=1.)
 		self.solver.run()
-		npt.assert_almost_equal(self.solver.us[-1], 2., 1)
+		npt.assert_almost_equal(self.solver.us[-1], expected, 1)
+
+	def test_const(self):
+		for f,u0,expected in [(const_r, 1., 2.)]:
+			yield self.check_const, f, u0, expected
 
 class Test_EEuler(Harness_Solver):
 	def setUp(self):
@@ -66,6 +77,12 @@ class Test_RK34(Harness_Solver):
 class Test_ode15s(Harness_Solver):
 	def setUp(self):
 		self.solver = SingleStepSolver(ode15s(), System(f))
+
+class Test_LawsonEuler(Harness_Solver):
+	def set_system(self, f):
+		self.solver.system = NoLinear(f,1)
+	def setUp(self):
+		self.solver = SingleStepSolver(LawsonEuler(), NoLinear(f,1))
 
 ## class Test_IEuler(Harness_Solver):
 ## 	def setUp(self):
