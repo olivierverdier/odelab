@@ -27,6 +27,12 @@ class System(object):
 
 	def label(self, component):
 		return '%d' % component
+	
+	def preprocess(self, u0):
+		return u0
+	
+	def postprocess(self, u1):
+		return u1
 
 
 class JayExample(System):
@@ -255,6 +261,12 @@ class BurgersComplex(Burgers):
 		self.laplace = self.viscosity*np.diag(self.k**2)
 		x = np.linspace(0,1,self.size,endpoint=False)
 		self.points = x - x.mean() # too lazy to compute x.mean manually here...
+	
+	def preprocess(self, u0):
+		return np.fft.fft(u0)
+	
+	def postprocess(self, u1):
+		return np.fft.ifft(u1)
 	
 	def nonlin(self, t, u):
 		return -0.5j * self.k * np.fft.fft(np.real(np.fft.ifft(u)) ** 2)

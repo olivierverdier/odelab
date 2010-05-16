@@ -229,7 +229,7 @@ class Test_Jay(object):
 
 class Test_Exceptions(object):
 	limit = 20
-	class LimitedSys(object):
+	class LimitedSys(System):
 		class LimitReached(Exception):
 			pass
 		def __init__(self, limit):
@@ -307,7 +307,7 @@ class Test_ComplexConvection(object):
 	def test_run(self):
 		B = BurgersComplex(viscosity=0.)
 		umax=.5
-		u0 = np.fft.fft(2*umax*(.5 - np.abs(B.points)))
+		u0 = 2*umax*(.5 - np.abs(B.points))
 		time = .5
 		mid = time*umax # the peak at final time
 		sol = (B.points+.5)*umax/(mid+.5)*(B.points < mid) + (B.points-.5)*umax/(mid-.5)*(B.points > mid)
@@ -319,7 +319,7 @@ class Test_ComplexConvection(object):
 			self.s.initialize(u0=u0, time=time, h=h)
 			print scheme
 			self.s.run()
-			u1 = np.fft.ifft(self.s.us[-1])
+			u1 = B.postprocess(self.s.us[-1])
 			if np.any(np.isnan(u1)):
 				raise Exception('unstable!')
 ## 			pl.plot(B.points, np.fft.ifft(u0))
