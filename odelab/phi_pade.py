@@ -42,7 +42,7 @@ class Polynomial(object):
 		if np.isscalar(z):
 			ident = 1
 		else:
-			ident = np.identity(len(z))
+			ident = np.identity(len(z), dtype=z.dtype)
 		Z = [ident]
 		for i in range(s):
 			Z.append(np.dot(Z[-1],z))

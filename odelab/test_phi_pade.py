@@ -113,7 +113,7 @@ def test_phi_pade(k=4,d=10):
 	"""
 	phi = Phi(k,d)
 	N,D = phi.pade
-	for z in  [.1*np.array([[1.,2.],[3.,1.]]), np.array([[.01]]), np.array([[.1]])]:
+	for z in  [.1*np.array([[1.,2.],[3.,1.]]),.1j*np.array([[1.j,2.],[3.,1.]]), np.array([[.01]]), np.array([[.1]])]:
 		print z
 		phis = phi(z)
 		for l in range(1,k+1):
