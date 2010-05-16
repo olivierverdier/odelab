@@ -149,22 +149,25 @@ where :data:`M` is a square array.
 			self.square()
 		return self.phi
 	
-	def square(self):
+	def phi_square(self, l):
+		"""
+		Formula for squaring phi_l from existing phi_k for k≤l.
+		"""
 		ifac = self.C
 		phi = self.phi
-		newphi = []
-		for l in range(self.k+1):
-			odd = l % 2
-			half = l//2
-			next = half
-			if odd:
-				next += 1
-			res = np.dot(phi[half], phi[next])
-			res += sum(2*ifac[j]*phi[l-j] for j in xrange(half))
-			if odd:
-				res += ifac[half]*phi[half+1]
-			res /= 2**l
-			newphi.append(res)
-		self.phi = newphi
+		odd = l % 2
+		half = l//2
+		next = half
+		if odd:
+			next += 1
+		res = np.dot(phi[half], phi[next])
+		res += sum(2*ifac[j]*phi[l-j] for j in xrange(half))
+		if odd:
+			res += ifac[half]*phi[half+1]
+		res /= 2**l
+		return res
+
+	def square(self):
+		self.phi = [self.phi_square(l) for l in range(self.k+1)]
 		
 
