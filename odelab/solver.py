@@ -116,6 +116,8 @@ class Solver (object):
 		self.ats = array(self.ts)
 		self.aus = array(self.us).T
 
+	t_tol = 1e-12 # tolerance to tell whether the final time is reached
+	
 	def run(self, time=None):
 		"""
 		Run the simulation for a given time.
@@ -132,7 +134,7 @@ class Solver (object):
 			for i in xrange(self.max_iter):
 				t,u = next(sim_info.generator)
 				self.sim_info.qs.append((t,u))
-				if t > tf:
+				if t > tf - self.t_tol:
 					break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
