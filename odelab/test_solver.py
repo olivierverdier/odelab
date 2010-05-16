@@ -299,3 +299,32 @@ class Test_LinearExponential(object):
 				phi_0 = np.dot(phi(tf*self.L)[0], self.u0)
 				expected = np.dot(slin.expm(tf*self.L), self.u0)
 				yield compare_linear_exponential, computed, expected, phi_0
+
+
+## import pylab as pl
+
+class Test_ComplexConvection(object):
+	def test_run(self):
+		B = BurgersComplex(viscosity=0.)
+		umax=.5
+		u0 = np.fft.fft(2*umax*(.5 - np.abs(B.points)))
+		time = .5
+		mid = time*umax # the peak at final time
+		sol = (B.points+.5)*umax/(mid+.5)*(B.points < mid) + (B.points-.5)*umax/(mid-.5)*(B.points > mid)
+## 		pl.clf()
+## 		pl.plot(B.points, sol, lw=2)
+		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1)]
+		for scheme, h in shs:
+			self.s = SingleStepSolver(scheme, B)
+			self.s.initialize(u0=u0, time=time, h=h)
+			print scheme
+			self.s.run()
+			u1 = np.fft.ifft(self.s.us[-1])
+			if np.any(np.isnan(u1)):
+				raise Exception('unstable!')
+## 			pl.plot(B.points, np.fft.ifft(u0))
+## 			pl.plot(B.points, u1)
+			npt.assert_array_almost_equal(u1, sol, decimal=2)
+		
+
+
