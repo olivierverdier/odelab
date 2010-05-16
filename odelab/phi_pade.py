@@ -129,7 +129,8 @@ where :data:`M` is a square array.
 	@classmethod
 	def scaling(self, z, threshold=0):
 		norm = ninf(z)
-		return max(threshold, int(math.ceil(math.log(norm,2))))
+		e = max(threshold, np.log2(norm))
+		return int(math.ceil(e))
 	
 	def eval_pade(self, z, s=None):
 		"""

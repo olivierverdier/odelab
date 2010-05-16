@@ -124,6 +124,18 @@ def test_phi_pade(k=4,d=10):
 			computed = lin.solve(Dz,Nz)
 			yield compare_phi_pade, computed, expected, phis[l]
 
+def compare_to_id(res):
+	nt.assert_array_almost_equal(res, np.identity(len(res)))
+
+def test_identity(k=6, d=10):
+	"""Test phi_k(0) = Id/k!"""
+	z = np.zeros([2,2])
+	phi = Phi(k,d)
+	phis = phi(z)
+	for j,p in enumerate(phis):
+		yield compare_to_id, p/phi.C[j]
+
+
 def test_phi_eval_pade_mat(k=8,d=6):
 	z = .1*np.array([[1.,2.],[3.,1.]])
 	phi = Phi(k,d)
