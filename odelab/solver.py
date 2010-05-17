@@ -392,7 +392,24 @@ class RKMK4T(Exponential):
 				)
 		
 
-
+class HochOst4(Exponential):
+	phi_order = 3
+	phi_degree = 13
+	
+	def general_linear_z(self, z):
+		one = Polynomial.exponents(z,0)[0]
+		ez, phi_1, phi_2, phi_3 = self.phi(z)
+		ez2, phi_12, phi_22, phi_32 = self.phi(z/2)
+		a_52 = 1/2*phi_22 - phi_3 + 1/4*phi_2 - 1/2*phi_32
+		a_54 = 1/4*phi_22 - a_52
+		return ([	[0, None, None, None, None, None, one],
+					[1/2, 1/2*phi_12, None, None, None, None, ez2],
+					[1/2, 1/2*phi_12 - phi_22, phi_22, None, None, None, ez2],
+					[1, phi_1-2*phi_2, phi_2, phi_2, None, None, ez],
+					[1/2, 1/2*phi_12 - 2*a_52 - a_54, a_52, a_52, a_54, None, ez2]
+				],
+				[	[phi_1 - 3*phi_2 + 4*phi_3, None, None, -phi_2 + 4*phi_3, 4*phi_2 - 8*phi_3, ez],
+				])
 
 class McLachlan(Scheme):
 	"""

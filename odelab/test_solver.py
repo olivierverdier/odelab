@@ -282,11 +282,11 @@ def compare_linear_exponential(computed, expected, phi):
 class Test_LinearExponential(object):
 	def test_run(self):
 		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-			for SchemeClass in [LawsonEuler, RKMK4T]:
+			for scheme in [LawsonEuler(), RKMK4T(), HochOst4()]:
 				self.L = L
 				print L
 				self.sys = Linear(self.L)
-				self.s = SingleStepSolver(SchemeClass(), self.sys)
+				self.s = SingleStepSolver(scheme, self.sys)
 				self.u0 = np.array([1.,0.])
 				self.s.initialize(u0 = self.u0)
 	
@@ -301,30 +301,36 @@ class Test_LinearExponential(object):
 				yield compare_linear_exponential, computed, expected, phi_0
 
 
-## import pylab as pl
+import pylab as pl
 
 class Test_ComplexConvection(object):
-	def test_run(self):
-		B = BurgersComplex(viscosity=0.)
+
+	def check_convection(self, scheme, h, do_plot):
+		self.s = SingleStepSolver(scheme, self.B)
+		self.s.initialize(u0=self.u0, time=self.time, h=h)
+		print scheme
+		self.s.run()
+		u1 = self.B.postprocess(self.s.us[-1])
+		if np.any(np.isnan(u1)):
+			raise Exception('unstable!')
+		if do_plot:
+			pl.plot(self.B.points, u0)
+			pl.plot(self.B.points, u1)
+		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
+
+	def test_run(self, do_plot=False):
+		self.B = BurgersComplex(viscosity=0.)
 		umax=.5
-		u0 = 2*umax*(.5 - np.abs(B.points))
-		time = .5
-		mid = time*umax # the peak at final time
-		sol = (B.points+.5)*umax/(mid+.5)*(B.points < mid) + (B.points-.5)*umax/(mid-.5)*(B.points > mid)
-## 		pl.clf()
-## 		pl.plot(B.points, sol, lw=2)
-		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1)]
+		self.u0 = 2*umax*(.5 - np.abs(self.B.points))
+		self.time = .5
+		mid = self.time*umax # the peak at final time
+		self.sol = (self.B.points+.5)*umax/(mid+.5)*(self.B.points < mid) + (self.B.points-.5)*umax/(mid-.5)*(self.B.points > mid)
+		if do_plot:
+			pl.clf()
+			pl.plot(self.B.points, sol, lw=2)
+		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1), (HochOst4(), .01)]
 		for scheme, h in shs:
-			self.s = SingleStepSolver(scheme, B)
-			self.s.initialize(u0=u0, time=time, h=h)
-			print scheme
-			self.s.run()
-			u1 = B.postprocess(self.s.us[-1])
-			if np.any(np.isnan(u1)):
-				raise Exception('unstable!')
-## 			pl.plot(B.points, np.fft.ifft(u0))
-## 			pl.plot(B.points, u1)
-			npt.assert_array_almost_equal(u1, sol, decimal=2)
+			self.check_convection(scheme, h, do_plot)
 		
 
 
