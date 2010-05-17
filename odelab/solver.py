@@ -25,14 +25,6 @@ from odelab.newton import Newton, FSolve
 
 import itertools
 
-class SimulationInfo(object):
-	pass
-
-class Simulator(object):
-	def __init__(self, solver, time=None):
-		self.solver = solver
-	
-
 
 class Solver (object):
 	"""
@@ -101,19 +93,13 @@ class Solver (object):
 		return self
 	
 	def __enter__(self):
-		sim_info = SimulationInfo()
 		# start from the last time we stopped
 		t = t0 = self.ts[-1]
 		u = self.us[-1]
-		sim_info.qs = []
-		sim_info.generator = self.generate(t, u)
-		self.sim_info = sim_info
-		return sim_info
+		generator = self.generate(t, u)
+		return generator
 		
 	def __exit__(self, ex_type, ex_value, traceback):
-		self.ts.extend(q[0] for q in self.sim_info.qs)
-		self.us.extend(q[1] for q in self.sim_info.qs)
-
 		self.ats = array(self.ts)
 		self.aus = array(self.us).T
 
@@ -131,10 +117,11 @@ class Solver (object):
 			time = self.time
 		t0 = self.ts[0]
 		tf = t0 + time # final time
-		with self as sim_info:
+		with self as generator:
 			for i in xrange(self.max_iter):
-				t,u = next(sim_info.generator)
-				self.sim_info.qs.append((t,u))
+				t,u = next(generator)
+				self.ts.append(t)
+				self.us.append(u)
 				if t > tf - self.t_tol:
 					break
 			else:
