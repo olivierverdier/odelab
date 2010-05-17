@@ -325,7 +325,9 @@ class Exponential(Scheme):
 	"""
 	def __init__(self, *args, **kwargs):
 		super(Exponential, self).__init__(*args, **kwargs)
-		self.phi = Phi(self.phi_order)
+		self.phi = Phi(self.phi_order, self.phi_degree)
+	
+	phi_degree = 6
 	
 	def initialize(self):
 		super(Exponential, self).initialize()
