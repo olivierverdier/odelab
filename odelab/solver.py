@@ -88,9 +88,9 @@ class Solver (object):
 		Generates the (t,u) values.
 		"""
 		for i in itertools.count(): # infinite loop
-			t, u = self.scheme.step(t, u)
+			t, u = self.step(t, u)
 			yield t, u
-			self.scheme.increment_stepsize()
+			self.increment_stepsize()
 	
 
 	max_iter = 100000
@@ -213,6 +213,13 @@ class SingleStepSolver(Solver):
 	def set_scheme(self, scheme):
 		self.scheme = scheme
 		scheme.solver = self
+	
+	def step(self, t,u):
+		return self.scheme.step(t,u)
+	
+	def increment_stepsize(self):
+		self.scheme.increment_stepsize()
+
 
 class Scheme(object):
 
