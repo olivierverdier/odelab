@@ -103,11 +103,11 @@ class HochOst4(Exponential):
 				])
 
 class ABLawson2(Exponential):
-	phi_order = 2
+	phi_order = 0
 	tail_length = 2
 	
 	def general_linear_z(self, z):
-		ez, phi_1, phi_2 = self.phi(z)
+		ez = self.phi(z)[0]
 		one, ez, e2z = Polynomial.exponents(ez,2)
 		ez2 = self.phi(z/2)[0]
 		return ([	[0, None, None, one, None],
