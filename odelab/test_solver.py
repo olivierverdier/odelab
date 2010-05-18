@@ -304,9 +304,11 @@ class Test_LinearExponential(object):
 
 import pylab as pl
 
-class Test_ComplexConvection(object):
+class Harness_ComplexConvection(object):
 
-	def check_convection(self, scheme, h, do_plot):
+	def check_convection(self, do_plot):
+		scheme = self.scheme
+		h = self.h
 		self.s = MultiStepSolver(scheme, self.B)
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
@@ -329,9 +331,29 @@ class Test_ComplexConvection(object):
 		if do_plot:
 			pl.clf()
 			pl.plot(self.B.points, self.sol, lw=2)
-		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (ABLawson2(), .001), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1), (HochOst4(), .01)]
-		for scheme, h in shs:
-			self.check_convection(scheme, h, do_plot)
+		self.check_convection(do_plot)
 		
+class Test_CC_EE(Harness_ComplexConvection):
+	scheme = ExplicitEuler()
+	h = .0001
 
+class Test_CC_RK4(Harness_ComplexConvection):
+	scheme = RungeKutta4()
+	h = .01
+
+class Test_CC_ABL2(Harness_ComplexConvection):
+	scheme = ABLawson2()
+	h = .001
+
+class Test_CC_LE(Harness_ComplexConvection):
+	scheme = LawsonEuler()
+	h = .0001
+
+class Test_CC_RKMK4T(Harness_ComplexConvection):
+	scheme = RKMK4T()
+	h = .01
+
+class Test_CC_ode15s(Harness_ComplexConvection):
+	scheme = ode15s()
+	h = .1
 
