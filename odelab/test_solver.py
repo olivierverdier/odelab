@@ -315,7 +315,7 @@ class Test_ComplexConvection(object):
 		if np.any(np.isnan(u1)):
 			raise Exception('unstable!')
 		if do_plot:
-			pl.plot(self.B.points, u0)
+			pl.plot(self.B.points, self.u0)
 			pl.plot(self.B.points, u1)
 		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
 
@@ -328,7 +328,7 @@ class Test_ComplexConvection(object):
 		self.sol = (self.B.points+.5)*umax/(mid+.5)*(self.B.points < mid) + (self.B.points-.5)*umax/(mid-.5)*(self.B.points > mid)
 		if do_plot:
 			pl.clf()
-			pl.plot(self.B.points, sol, lw=2)
+			pl.plot(self.B.points, self.sol, lw=2)
 		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (ABLawson2(), .001), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1), (HochOst4(), .01)]
 		for scheme, h in shs:
 			self.check_convection(scheme, h, do_plot)
