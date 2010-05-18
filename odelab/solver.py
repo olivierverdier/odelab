@@ -212,8 +212,8 @@ class SingleStepSolver(Solver):
 		super(SingleStepSolver, self).__init__(system)
 		self.scheme = scheme
 	
-	def __str__(self):
-		return '<%s: %s>' % ('SingleStepSolver', str(self.scheme))
+	def __repr__(self):
+		return '<%s: %s>' % ('Solver', str(self.scheme))
 	
 	def set_scheme(self, scheme):
 		self.current_scheme = scheme

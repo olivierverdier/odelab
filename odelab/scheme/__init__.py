@@ -6,7 +6,7 @@ import numpy.linalg
 
 class Scheme(object):
 		
-	def __str__(self):
+	def __repr__(self):
 		try:
 			h = self.h
 			hs = "%.2e" % h
