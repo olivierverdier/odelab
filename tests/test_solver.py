@@ -98,6 +98,12 @@ class Test_LawsonEuler(Harness_Solver):
 ## 	def setUp(self):
 ## 		self.solver = SingleStepSolver(ImplicitEuler, System(f))
 
+@nt.raises(Solver.Unstable)
+def test_unstable():
+	s = SingleStepSolver(LawsonEuler(), Linear(np.array([[1.e2]])))
+	s.initialize(u0 = 1., time = 100, h = 10)
+	s.run()
+
 class Harness_Circle(Harness):
 	def setUp(self):
 		def f(t,u):

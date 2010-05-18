@@ -80,7 +80,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 	max_iter = 100000
 	class FinalTimeNotReached(Exception):
-		pass
+		"""
+		Raised when the final time was not reached within the given ``max_iter`` number of iterations.
+		"""
+	
+	class Unstable(Exception):
+		"""
+		Raised when the scheme produces NaN values.
+		"""
 	
 	def simulating(self):
 		return self
@@ -113,6 +120,9 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		with self as generator:
 			for i in xrange(self.max_iter):
 				t,u = next(generator)
+				if np.any(np.isnan(u)):
+					raise self.Unstable('Unstable after %d steps.' % i)
+
 				self.ts.append(t)
 				self.us.append(u)
 				if t > tf - self.t_tol:
