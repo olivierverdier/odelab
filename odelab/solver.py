@@ -16,10 +16,7 @@ The higher level class is :class:`Solver`, which is initialized with an instance
 from __future__ import division
 
 import numpy as np
-from numpy import array, dot
-from numpy.linalg import norm, inv
 import pylab as PL
-from pylab import plot, legend
 
 from odelab.newton import Newton, FSolve
 
@@ -96,8 +93,8 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		return generator
 		
 	def __exit__(self, ex_type, ex_value, traceback):
-		self.ats = array(self.ts)
-		self.aus = array(self.us).T
+		self.ats = np.array(self.ts)
+		self.aus = np.array(self.us).T
 
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
 	
@@ -158,10 +155,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			exact = self.system.exact(self.ats)
 		for component in components:
 			label = self.system.label(component)
-			plot(self.ats, self.aus[component], ',-', label=label)
+			PL.plot(self.ats, self.aus[component], ',-', label=label)
 			if has_exact:
 				PL.gca()._get_lines.count -= 1
-				plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
+				PL.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
 		PL.xlabel('time')
 		PL.legend()
 	
@@ -180,15 +177,15 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
 		values = self.system.__getattribute__(function)(np.vstack([self.aus, self.ats]))
-		plot(self.ats, values.T)
+		PL.plot(self.ats, values.T)
 
 	def plot2D(self):
 		"""
 		Plot ux vs uy
 		"""
-		plot(self.aus[:,0],self.aus[:,1], '.-')
-		xlabel('ux')
-		ylabel('uy')
+		PL.plot(self.aus[:,0],self.aus[:,1], '.-')
+		PL.xlabel('ux')
+		PL.ylabel('uy')
 	
 	quiver_res = 20
 	def quiver(self):
@@ -234,463 +231,14 @@ class MultiStepSolver(SingleStepSolver):
 	def __init__(self, scheme, system, single_step_scheme=None):
 		super(MultiStepSolver, self).__init__(scheme, system)
 		if single_step_scheme is None:
+			from odelab.scheme.exponential import HochOst4
 			single_step_scheme = HochOst4() # hard coded for the moment
 		self.single_step_scheme = single_step_scheme
 		self.single_step_scheme.solver = self
 	
 
-class Scheme(object):
-		
-	def __str__(self):
-		try:
-			h = self.h
-			hs = "%.2e" % h
-		except AttributeError:
-			hs = "-"
-		return '<%s: h=%s>' % (self.__class__.__name__, hs)
 
-	tail_length = 1
-
-	@property
-	def system(self):
-		return self.solver.system
-	
-	def increment_stepsize(self):
-		"""
-		Change the step size based on error estimation.
-		To be overridden for a variable step size method.
-		"""
-		pass
-	
-	h_default = .01
-	
-	# to be removed; use a signal instead
-	def get_h(self):
-		return self._h
-	def set_h(self, h):
-		self._h = h
-		self._h_dirty = True
-	h = property(get_h, set_h)
-
-	def initialize(self):
-		try:
-			self.h = self.solver.h
-		except AttributeError:
-			self.h = self.h_default
-
-class ExplicitEuler (Scheme):
-	def step(self, t, u):
-		return t + self.h, u + self.h*self.system.f(t, u)
-
-class ImplicitEuler (Scheme):
-	def step(self, t, u):
-		res = self.system.f.res(u, t, self.h)
-		return t + self.h, res
-
-
-class RungeKutta4 (Scheme):
-	"""
-	Runge-Kutta of order 4.
-	"""
-	def step(self, t, u):
-		f = self.system.f
-		h = self.h
-		Y1 = f(t, u)
-		Y2 = f(t + h/2., u + h*Y1/2.)
-		Y3 = f(t + h/2., u + h*Y2/2.)
-		Y4 = f(t + h, u + h*Y3)
-		return t+h, u + h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
-
-class RungeKutta34 (Scheme):
-	"""
-	Adaptive Runge-Kutta of order four.
-	"""
-	error_order = 4.
-	# default tolerance
-	tol = 1e-6
-
-	def increment_stepsize(self):
-		if self.error > 1e-15:
-			self.h *= (self.tol/self.error)**(1/self.error_order)
-		else:
-			self.h = 1.
-
-	def step(self, t, u):
-		f = self.system.f
-		h = self.h
-		Y1 = f(t, u)
-		Y2 = f(t + h/2., u + h*Y1/2.)
-		Y3 = f(t + h/2, u + h*Y2/2)
-		Z3 = f(t + h, u - h*Y1 + 2*h*Y2)
-		Y4 = f(t + h, u + h*Y3)
-		self.error = norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
-		return t+h, u + h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
-
-class ode15s(Scheme):
-	"""
-	Simulation of matlab's ``ode15s`` solver.
-	It is a BDF method of max order 5
-	"""
-	
-	
-	def __init__(self, **kwargs):
-		self.integrator_kwargs = kwargs
-
-	def initialize(self): # the system must be defined before this is called!
-		super(ode15s,self).initialize()
-		import scipy.integrate
-		self.integ = scipy.integrate.ode(self.system.f)
-		vodevariant = ['vode', 'zvode'][np.iscomplexobj(self.solver.us[0])]
-		self.integ.set_integrator(vodevariant, method='bdf', order=5, nsteps=3000, **self.integrator_kwargs)
-		self.integ.set_initial_value(self.solver.us[0], self.solver.ts[0])
-
-	def step(self, t, u):
-		self.integ.integrate(self.integ.t + self.h)
-		if not self.integ.successful():
-			print("vode error")
-		return self.integ.t, self.integ.y
-
-# exponential integrators
-
-from phi_pade import Phi, Polynomial
-
-class Exponential(Scheme):
-	"""
-	Explicit Exponential Integrator Class.
-	"""
-	def __init__(self, *args, **kwargs):
-		super(Exponential, self).__init__(*args, **kwargs)
-		self.phi = Phi(self.phi_order, self.phi_degree)
-	
-	phi_degree = 6
-	
-	def initialize(self):
-		super(Exponential, self).initialize()
-		ts = self.solver.ts[-self.tail_length:]
-		tail = self.solver.us[-self.tail_length:]
-		# this is specific to those Exponential solvers:
-		for i in range(len(tail)-1):
-			tail[i] = self.h*self.system.nonlin(ts[i], tail[i])
-		self.tail = np.array(list(reversed(tail))).T
-	
-	def step(self, t, u):
-		h = self.h
-		ua, vb = self.general_linear()
-		nb_stages = len(ua)
-		nb_steps = len(vb)
-		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=u.dtype)
-		Y[:,-nb_steps:] = self.tail
-		newtail = np.zeros_like(self.tail) # alternative: work directly on self.tail
-		for s in range(nb_stages):
-			uas = ua[s]
-			for j, coeff in enumerate(uas[1:]):
-				if coeff is not None:
-					Y[:,s] += np.dot(coeff, Y[:,j])
-			Y[:,s] = h*self.system.nonlin(t+uas[0]*h, Y[:,s])
-			if np.any(np.isnan(Y[:,s])):
-				raise Exception('unstable %d' % s)
-		for r in range(nb_steps):
-			vbr = vb[r]
-			for j, coeff in enumerate(vbr):
-				if coeff is not None:
-					newtail[:,r] += np.dot(coeff, Y[:,j])
-		self.tail = newtail
-		return t + h, self.tail[:,0]
-		
-
-	def general_linear(self):
-		"""
-		Currently returns a cached version of the coefficients of the method.
-		"""
-		if self._h_dirty: # recompute the coefficients if h had changed
-			z = self.h * self.system.linear()
-			self._general_linear = self.general_linear_z(z)
-			self._h_dirty = False
-		return self._general_linear
-
-class LawsonEuler(Exponential):
-	phi_order = 0
-	
-	def general_linear_z(self, z):
-		ez = self.phi(z)[0]
-		one = Polynomial.exponents(z,0)[0]
-		return [[0., None, one]], [[ez, ez]]
-
-class RKMK4T(Exponential):
-	phi_order = 1
-	
-	def general_linear_z(self, z):
-		one = Polynomial.exponents(z,0)[0]
-		ez, phi_1 = self.phi(z)
-		ez2, phi_12 = self.phi(z/2)
-		return ([	[0, None, None, None, None, one],
-					[1/2, 1/2*phi_12, None, None, None, ez2],
-					[1/2, 1/8*np.dot(z, phi_12), 1/2*np.dot(phi_12,one-1/4*z), None, None, ez2],
-					[1, None, None, phi_1, None, ez]
-				],
-				[[1/6*np.dot(phi_1,one+1/2*z), 1/3*phi_1, 1/3*phi_1, 1/6*np.dot(phi_1,one-1/2*z), ez]]
-				)
-		
-
-class HochOst4(Exponential):
-	phi_order = 3
-	phi_degree = 13
-	
-	def general_linear_z(self, z):
-		one = Polynomial.exponents(z,0)[0]
-		ez, phi_1, phi_2, phi_3 = self.phi(z)
-		ez2, phi_12, phi_22, phi_32 = self.phi(z/2)
-		a_52 = 1/2*phi_22 - phi_3 + 1/4*phi_2 - 1/2*phi_32
-		a_54 = 1/4*phi_22 - a_52
-		return ([	[0, None, None, None, None, None, one],
-					[1/2, 1/2*phi_12, None, None, None, None, ez2],
-					[1/2, 1/2*phi_12 - phi_22, phi_22, None, None, None, ez2],
-					[1, phi_1-2*phi_2, phi_2, phi_2, None, None, ez],
-					[1/2, 1/2*phi_12 - 2*a_52 - a_54, a_52, a_52, a_54, None, ez2]
-				],
-				[	[phi_1 - 3*phi_2 + 4*phi_3, None, None, -phi_2 + 4*phi_3, 4*phi_2 - 8*phi_3, ez],
-				])
-
-class ABLawson2(Exponential):
-	phi_order = 2
-	tail_length = 2
-	
-	def general_linear_z(self, z):
-		one = Polynomial.exponents(z,0)[0]
-		ez, phi_1, phi_2 = self.phi(z)
-		ez2 = self.phi(z/2)[0]
-		e2z = np.dot(ez,ez)
-		return ([	[0, None, None, one, None],
-					[1., 3/2*ez, None, ez, -1/2*e2z]
-				],
-				[	[3/2*ez, None, ez, -1/2*ez2],
-					[one, None, None, None]
-				])
-
-class McLachlan(Scheme):
-	"""
-Solver for the Lagrange-d'Alembert (LDA) equations using the
-algorithm given by equation (4.18) in [mclachlan06]_.
- 
- The Lagrangian is assumed to be of the form:
- 
-.. math::
-
-    L(q,v) = 0.5 \|v^2\| - V(q)
- 
-where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
-where :math:`A` is the mxn constraint matrix.
- 
- 
-:References:
-	
-.. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) (`url <http://dx.doi.org/10.1007/s00332-005-0698-1>`_)
-	"""
 
 	
-	root_solver = Newton
-	
-	def step(self, t, u):
-		h = self.h
-		vel = self.system.velocity(u)
-		qh = self.system.position(u) + .5*self.h*vel
-		force = self.system.force(qh)
-		codistribution = self.system.codistribution(qh)
-		lag = self.system.lag(u)
-		def residual(vl):
-			v,l = self.system.vel_lag_split(vl)
-			return np.hstack([v - vel - h * (force + dot(codistribution.T, l)), dot(self.system.codistribution(qh+.5*h*v), v)])
-		N = self.root_solver(residual)
-		vl = N.run(self.system.vel_lag_stack(vel, lag))
-		vnew, lnew = self.system.vel_lag_split(vl)
-		qnew = qh + .5*h*vnew
-		return t+h, self.system.assemble(qnew,vnew,lnew)
-	
-	
 
-
-
-class Spark(Scheme):
-	r"""
-Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
- as presented in [jay03]_.
- 
-We consider the following system of DAEs:
-
-.. math::
-    y' = f(t,y,z)\\
-     0 = g(t,y)
- 
-where t is the independent variable, y is a vector of length n containing
-the differential variables and z is a vector of length m containing the 
-algebraic variables. Also,
-
-.. math::
- 
-    f:\ R × R^n × R^m → R^n\\
-    g:\ R × R^n → R^m
- 
-It is assumed that :math:`g_y f_z` exists and is invertible.
-
-The above system is integrated from ``t0`` to ``tfinal``, where 
-tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
-given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK 
-methods used is given by ``s``.
- 
- 
- 
-The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.
- 
- 
- References:
-	
-.. [jay03] \L. Jay - Solution of index 2 implicit differential-algebraic equations
-	    by Lobatto Runge-Kutta methods (2003).
-	"""
-	
-	root_solver = FSolve
-
-	def __init__(self, nb_stages):
-		super(Spark, self).__init__()
-		self.nb_stages = nb_stages
-	
-	def Q(self):
-		s = self.nb_stages
-		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
-		es = np.zeros(s)
-		es[-1] = 1.
-		Q = np.zeros([s,s+1])
-		Q[:-1,:-1] = A1t
-		Q[-1,-1] = 1.
-		L = np.linalg.inv(np.vstack([A1t, es]))
-		Q = dot(L,Q)
-		return Q
-	
-	def get_residual_function(self, t, u):
-		s = self.nb_stages
-		h = self.h
-		c = LobattoIIIA.tableaux[s][:,0]
-		T = t + c*h
-		Q = self.Q()
-		y = self.system.state(u).copy()
-		yc = y.reshape(-1,1) # "column" vector
-		
-		def residual(YZ):
-			YZT = np.vstack([YZ,T])
-			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
-			Y = self.system.state(YZ)
-			dyn = [dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
-			r1 = Y - yc - h*sum(dyn)
-			r2 = np.dot(self.system.constraint(YZT), Q.T)
-			# unused final versions of z
-			r3 = self.system.lag(YZ[:,-1])
-			return [r1,r2,r3]
-		
-		return residual
-
-	def step(self, t, u):
-		s = self.nb_stages
-		residual = self.get_residual_function(t, u)
-		guess = np.column_stack([u.copy()]*(s+1))
-		N = self.root_solver(residual)
-		residual(guess)
-		full_result = N.run(guess) # all the values of Y,Z at all stages
-		# we keep the last Z value:
-		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+self.h, result
-	
-
-# Coefficients for the Lobatto methods		
-
-class RungeKutta(Scheme):
-	"""
-	Collection of classes containing the coefficients of various Runge-Kutta methods.
-	
-	:Attributes:
-		tableaux : dictionary
-			dictionary containing a Butcher tableau for every available number of stages.
-	"""
-
-class LobattoIIIA(RungeKutta):
-	
-	sf = np.sqrt(5)
-	tableaux = {
-	2: array([	[0., 0.,0.],
-				[1., .5,.5],
-				[1, .5,.5]]),
-	3: array([	[0  ,0.,0.,0.],
-				[1/2,5/24,1/3,-1/24],
-				[1  ,1/6,2/3,1/6],
-				[1 ,1/6,2/3,1/6]]),
-	4: array([	[0        ,0., 0.,0.,0.],
-				[(5-sf)/10,(11+sf)/120, (25-sf)/120,    (25-13*sf)/120, (-1+sf)/120],
-				[(5+sf)/10,(11-sf)/120, (25+13*sf)/120, (25+sf)/120, (-1-sf)/120],
-				[1        ,1/12,             5/12,                5/12,                1/12],
-				[1       ,1/12, 5/12, 5/12, 1/12]])
-	}
-
-class LobattoIIIB(RungeKutta):
-	sf = np.sqrt(5)
-	tableaux = {	
-	2: array([	[0.,1/2, 0],
-				[1.,1/2, 0],
-				[1,1/2, 1/2]]),
-				
-	3: array([	[0  ,1/6, -1/6, 0],
-				[1/2,1/6,  1/3, 0],
-				[1  ,1/6,  5/6, 0],
-				[1 ,1/6, 2/3, 1/6]]),
-				
-	4: array([	[0        ,1/12, (-1-sf)/24,     (-1+sf)/24,     0],
-				[(5-sf)/10,1/12, (25+sf)/120,    (25-13*sf)/120, 0],
-				[(5+sf)/10,1/12, (25+13*sf)/120, (25-sf)/120,    0],
-				[1        ,1/12, (11-sf)/24,    (11+sf)/24,    0],
-				[1       ,1/12, 5/12, 5/12, 1/12]])
-	}
-
-class LobattoIIIC(RungeKutta):
-	sf = np.sqrt(5)
-	tableaux = {
-2: array([
-[0.,1/2, -1/2],
-[1.,1/2,  1/2],
-[1,1/2, 1/2]]),
-3: array([
-[0  ,1/6, -1/3,   1/6],
-[1/2,1/6,  5/12, -1/12],
-[1  ,1/6,  2/3,   1/6],
-[1 ,1/6, 2/3, 1/6]]),
-4: array([
-[0        ,1/12, -sf/12,       sf/12,        -1/12],
-[(5-sf)/10,1/12, 1/4,               (10-7*sf)/60, sf/60],
-[(5+sf)/10,1/12, (10+7*sf)/60, 1/4,               -sf/60],
-[1        ,1/12, 5/12,              5/12,              1/12],
-[1       ,1/12, 5/12, 5/12, 1/12]])
-}
-
-class LobattoIIICs(RungeKutta):
-	tableaux = {
-2: array([
-[0.,0., 0],
-[1.,1, 0],
-[1,1/2, 1/2]]),
-3: array([
-[0  ,0,   0,   0],
-[1/2,1/4, 1/4, 0],
-[1  ,0,   1,   0],
-[1 ,1/6, 2/3, 1/6]])
-	}
-
-class LobattoIIID(RungeKutta):
-	tableaux = {
-2: array([
-[0.,1/4, -1/4],
-[1.,3/4, 1/4],
-[1,1/2, 1/2]]),
-3: array([
-[0  ,1/12, -1/6,  1/12],
-[1/2,5/24,  1/3, -1/24],
-[1  ,1/12,  5/6,  1/12],
-[1 ,1/6, 2/3, 1/6]])
-	}
 

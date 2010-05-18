@@ -13,12 +13,11 @@ Examples of ODE systems.
 from __future__ import division
 
 import numpy as np
-from numpy import array, dot
-from numpy.linalg import norm, inv
-import pylab as PL
-from pylab import plot, legend
+from numpy import array
 
-import odelab.solver as solver
+import scipy.sparse as sparse
+
+import odelab.scheme.rungekutta as rk
 
 class System(object):
 	def __init__(self, f=None):
@@ -62,11 +61,11 @@ stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
 	def multi_dynamics(self, tu):
 		y1,y2,z,t = tu
 		return {
-			solver.LobattoIIIA: array([y2 - 2*y1**2*y2, -y1**2]),
-			solver.LobattoIIIB: array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
-			solver.LobattoIIIC: array([-y2**2*z, -3*y2**2*z]),
-			solver.LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(-2*t)*y1*y2, z]),
-			solver.LobattoIIID: array([2*y2**2*z**2, y1**2*y2**2])
+			rk.LobattoIIIA: array([y2 - 2*y1**2*y2, -y1**2]),
+			rk.LobattoIIIB: array([y1*y2**2*z**2, np.exp(-t)*z - y1]),
+			rk.LobattoIIIC: array([-y2**2*z, -3*y2**2*z]),
+			rk.LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(-2*t)*y1*y2, z]),
+			rk.LobattoIIID: array([2*y2**2*z**2, y1**2*y2**2])
 			}
 	
 	def constraint(self, tu):
@@ -109,8 +108,8 @@ class GraphSystem(System):
 	def multi_dynamics(self, t, u):
 		x,y = self.state(u)
 		return {
-			solver.LobattoIIIA: np.zeros_like(self.state(u)), 
-			solver.LobattoIIIB: array([np.ones_like(x), self.lag(u)[0]]),
+			rk.LobattoIIIA: np.zeros_like(self.state(u)), 
+			rk.LobattoIIIB: array([np.ones_like(x), self.lag(u)[0]]),
 			}
 	
 	def constraint(self, t, u):
@@ -124,7 +123,7 @@ class ODESystem(System):
 	"""
 	Simple wrapper to transform an ODE into a semi-explicit DAE.
 	"""
-	def __init__(self, f, RK_class=solver.LobattoIIIA):
+	def __init__(self, f, RK_class=rk.LobattoIIIA):
 		self.f = f
 		self.RK_class = RK_class
 	
@@ -214,8 +213,8 @@ perturbation of the contact oscillator.
 	def multi_dynamics(self, u):
 		v = self.velocity(u)
 		return {
-		solver.LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
-		solver.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + self.reaction_force(u)])
+		rk.LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
+		rk.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + self.reaction_force(u)])
 		}
 	
 	def constraint(self, u):

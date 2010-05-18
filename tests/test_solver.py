@@ -2,8 +2,13 @@
 from __future__ import division
 
 
-from odelab.solver import *
+from odelab.scheme import *
+from odelab.scheme.constrained import *
+from odelab.scheme.exponential import *
+
 from odelab.system import *
+from odelab.solver import *
+
 
 import numpy.testing as npt
 import nose.tools as nt
