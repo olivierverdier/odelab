@@ -283,11 +283,11 @@ def compare_linear_exponential(computed, expected, phi):
 class Test_LinearExponential(object):
 	def test_run(self):
 		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-			for scheme in [LawsonEuler(), RKMK4T(), HochOst4()]:
+			for scheme in [LawsonEuler(), RKMK4T(), HochOst4(), ABLawson2()]:
 				self.L = L
 				print L
 				self.sys = Linear(self.L)
-				self.s = SingleStepSolver(scheme, self.sys)
+				self.s = MultiStepSolver(scheme, self.sys)
 				self.u0 = np.array([1.,0.])
 				h = .1
 				self.s.initialize(u0 = self.u0, h=h)
