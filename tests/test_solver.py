@@ -298,7 +298,15 @@ def compare_linear_exponential(computed, expected, phi):
 class Test_LinearExponential(object):
 	def test_run(self):
 		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-			for scheme in [LawsonEuler(), RKMK4T(), HochOst4(), ABLawson2(), ABLawson3, ABLawson4]:
+			for scheme in [
+				LawsonEuler(), 
+				RKMK4T(), 
+				HochOst4(), 
+				ABLawson2(), 
+				ABLawson3(), 
+				ABLawson4(),
+				Lawson4(),
+			]:
 				self.L = L
 				print L
 				self.sys = Linear(self.L)
@@ -367,6 +375,10 @@ class Test_CC_ABL3(Harness_ComplexConvection):
 class Test_CC_ABL4(Harness_ComplexConvection):
 	scheme = ABLawson4()
 	h = .001
+
+class Test_CC_L4(Harness_ComplexConvection):
+	scheme = Lawson4()
+	h = .01
 
 class Test_CC_LE(Harness_ComplexConvection):
 	scheme = LawsonEuler()

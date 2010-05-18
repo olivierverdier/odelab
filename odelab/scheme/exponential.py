@@ -147,3 +147,18 @@ class ABLawson4(Exponential):
 					[None, None, None, one, None, None],
 					[None, None, None, None, one, None]
 				])
+
+class Lawson4(Exponential):
+	phi_order = 0
+	tail_length = 1
+	
+	def general_linear_z(self, z):
+		one = Polynomial.exponents(z,0)[0]
+		ez = self.phi(z)[0]
+		ez2 = self.phi(z/2)[0]
+		return ([	[0, None, None, None, None, one],
+					[1/2, 1/2*ez2, None, None, None, ez2],
+					[1/2, None, 1/2*one, None, None, ez2],
+					[1., None, None, ez2, None, ez]
+				],
+				[[1/6*ez, 1/3*ez2, 1/3*ez2, 1/6*one, ez]])
