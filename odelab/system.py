@@ -267,7 +267,7 @@ class BurgersComplex(Burgers):
 		return np.fft.fft(u0)
 	
 	def postprocess(self, u1):
-		return np.fft.ifft(u1)
+		return np.real(np.fft.ifft(u1))
 	
 	def nonlin(self, t, u):
 		return -0.5j * self.k * np.fft.fft(np.real(np.fft.ifft(u)) ** 2)
