@@ -107,13 +107,27 @@ class ABLawson2(Exponential):
 	tail_length = 2
 	
 	def general_linear_z(self, z):
-		one = Polynomial.exponents(z,0)[0]
 		ez, phi_1, phi_2 = self.phi(z)
+		one, ez, e2z = Polynomial.exponents(ez,2)
 		ez2 = self.phi(z/2)[0]
-		e2z = np.dot(ez,ez)
 		return ([	[0, None, None, one, None],
 					[1., 3/2*ez, None, ez, -1/2*e2z]
 				],
 				[	[3/2*ez, None, ez, -1/2*ez2],
 					[one, None, None, None]
+				])
+
+class ABLawson3(Exponential):
+	phi_order = 0
+	tail_length = 3
+	
+	def general_linear_z(self, z):
+		ez = self.phi(z)[0]
+		one, ez, e2z, e3z = Polynomial.exponents(ez,3)
+		return ([	[0, None, None, one, None, None],
+					[1., 23/12*ez, None, ez,  -4/3*e3z,  5/12*e3z]
+				],
+				[	[23/12*ez, None, ez, -4/3*e2z, 5/12*e3z],
+					[one, None, None, None, None],
+					[None, None, None, one, None],
 				])
