@@ -131,3 +131,19 @@ class ABLawson3(Exponential):
 					[one, None, None, None, None],
 					[None, None, None, one, None],
 				])
+
+class ABLawson4(Exponential):
+	phi_order = 0
+	tail_length = 4
+	
+	def general_linear_z(self, z):
+		ez = self.phi(z)[0]
+		one, ez, e2z, e3z, e4z = Polynomial.exponents(ez, 4)
+		return ([	[0, None, None, one, None, None, None],
+					[1, 55/24*ez, None, ez, -59/24*e2z, 37/24*e3z, -3/8*e4z]
+				],
+				[	[55/24*ez, None, ez, -59/24*e2z, 37/24*e3z, -3/8*e4z],
+					[one, None, None, None, None, None],
+					[None, None, None, one, None, None],
+					[None, None, None, None, one, None]
+				])
