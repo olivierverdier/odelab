@@ -103,7 +103,7 @@ def test_phi_1_mat():
 	nt.assert_almost_equal(computed, expected)
 
 def compare_phi_pade(computed, expected, phi):
-	nt.assert_almost_equal(computed/expected, np.ones_like(expected))
+	nt.assert_almost_equal(computed/expected, np.ones_like(expected), decimal=5)
 	nt.assert_almost_equal(expected, phi)
 
 
