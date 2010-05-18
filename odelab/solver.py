@@ -70,10 +70,7 @@ class Solver (object):
 			self.h = h
 		if time is not None:
 			self.time = time
-		self.initialize_scheme()
 
-	def initialize_scheme(self):
-		pass
 
 	def generate(self, t, u):
 		"""
@@ -192,28 +189,50 @@ class Solver (object):
 class SingleStepSolver(Solver):
 	def __init__(self, scheme, system):
 		super(SingleStepSolver, self).__init__(system)
-		self.set_scheme(scheme)
-
-	def initialize_scheme(self):
-		self.scheme.initialize()
+		self.scheme = scheme
+	
+	def __str__(self):
+		return '<%s: %s>' % ('SingleStepSolver', str(self.scheme))
 	
 	def set_scheme(self, scheme):
-		self.scheme = scheme
-		scheme.solver = self
+		self.current_scheme = scheme
+		self.current_scheme.solver = self
+		self.current_scheme.initialize()
+	
+	def step_current(self, t,u):
+		return self.current_scheme.step(t,u)
 	
 	def step(self, t,u):
-		return self.scheme.step(t,u)
+		stage = len(self.us)
+		if stage < self.scheme.tail_length: # not enough past values to run main scheme
+			if stage == 1:
+				self.set_scheme(self.single_step_scheme)
+		if stage == self.scheme.tail_length: # main scheme kicks in
+			self.set_scheme(self.scheme)
+		return self.step_current(t,u)
 	
 	def increment_stepsize(self):
-		self.scheme.increment_stepsize()
+		self.current_scheme.increment_stepsize()
 
+class MultiStepSolver(SingleStepSolver):
+## 	default_single_step_scheme = HochOst4()
+	
+	def __init__(self, scheme, system, single_step_scheme=None):
+		super(MultiStepSolver, self).__init__(scheme, system)
+		if single_step_scheme is None:
+			single_step_scheme = HochOst4() # hard coded for the moment
+		self.single_step_scheme = single_step_scheme
+		self.single_step_scheme.solver = self
+	
 
 class Scheme(object):
+		
+	tail_length = 1
 
 	@property
 	def system(self):
 		return self.solver.system
-
+	
 	def increment_stepsize(self):
 		"""
 		Change the step size based on error estimation.

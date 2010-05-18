@@ -12,12 +12,7 @@ class Harness(object):
 	no_plot = True
 
 def f(t,u):
-	return t
-
-def res(u, t, h):
-	return u + (t+h)*h
-
-f.res = res
+	return t*np.ones_like(u)
 
 def const_f(c,t,u):
 	return c*np.ones_like(u)
@@ -30,16 +25,22 @@ const_r = partial(const_f, 1.)
 const_c = partial(const_f, 1.j)
 
 class Harness_Solver(Harness):
+	dim = 1
 	def set_system(self, f):
 		self.solver.system = System(f)		
 	
 	def test_initialize(self):
-		u0 = np.random.rand(5)
+		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		nt.assert_true(self.solver.time == Solver.time)
-		nt.assert_true(self.solver.scheme.h == Scheme.h_default)
 		nt.assert_true(len(self.solver.ts) == 1)
 		nt.assert_true(len(self.solver.us) == 1)
+	
+	def test_initialize_scheme(self):
+		h = 10.
+		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
+		self.solver.step(self.solver.ts[0], self.solver.us[0])
+		nt.assert_true(self.solver.scheme.h == h)
 	
 	def test_quadratic(self):
 		"""should solve f(t) = t pretty well"""
@@ -80,9 +81,9 @@ class Test_ode15s(Harness_Solver):
 
 class Test_LawsonEuler(Harness_Solver):
 	def set_system(self, f):
-		self.solver.system = NoLinear(f,1)
+		self.solver.system = NoLinear(f,self.dim)
 	def setUp(self):
-		self.solver = SingleStepSolver(LawsonEuler(), NoLinear(f,1))
+		self.solver = SingleStepSolver(LawsonEuler(), NoLinear(f,self.dim))
 
 ## class Test_IEuler(Harness_Solver):
 ## 	def setUp(self):
@@ -167,9 +168,9 @@ class Harness_Osc(object):
 	
 	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
-		self.s.initialize(u0=self.sys.initial(z0))
-		self.s.scheme.h = self.sys.time_step(self.N)
-		self.s.time = nb_Poincare_iterations*self.N*self.s.scheme.h
+		h = self.sys.time_step(self.N)
+		time = nb_Poincare_iterations*self.N*h
+		self.s.initialize(u0=self.sys.initial(z0), h=h, time=time)
 		self.s.run()
 		npt.assert_almost_equal(self.sys.energy(self.s.us[-1]), self.sys.energy(self.s.us[0]), decimal=1)
 
@@ -288,9 +289,9 @@ class Test_LinearExponential(object):
 				self.sys = Linear(self.L)
 				self.s = SingleStepSolver(scheme, self.sys)
 				self.u0 = np.array([1.,0.])
-				self.s.initialize(u0 = self.u0)
+				h = .1
+				self.s.initialize(u0 = self.u0, h=h)
 	
-				h = self.s.scheme.h
 				self.s.run(time=h)
 				computed = self.s.us[-1]
 				phi = Phi(0)
@@ -306,7 +307,7 @@ import pylab as pl
 class Test_ComplexConvection(object):
 
 	def check_convection(self, scheme, h, do_plot):
-		self.s = SingleStepSolver(scheme, self.B)
+		self.s = MultiStepSolver(scheme, self.B)
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
 		self.s.run()
