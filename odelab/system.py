@@ -36,7 +36,7 @@ class System(object):
 
 
 class JayExample(System):
-	"""
+	r"""
 	 The example in [jay06]_ §5. This is a test to check implementation of the
 	 SRK-DAE2 methods given in [jay06]_. We want to compare our results to 
 	 [jay06]_ Fig. 1.
@@ -45,13 +45,15 @@ class JayExample(System):
 	
 .. math::
 	 
-	    y1(t) = e^t;  y2(t) = e^(-2t);  z1(t) = e^(2t);
+	y1(t) = \ee^t\\
+	y2(t) = \ee^{-2t}\\
+	z1(t) = \ee^{2t}
 	 
-	 We will compute the global error at :math:`t=1` at plot this relative to the
-	 stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
+We will compute the global error at :math:`t=1` at plot this relative to the
+stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
 	 
 	 
-	 References:
+:References:
 	 
 .. [jay06] Jay - Specialized Runge-Kutta Methods for index 2 DAEs (2006)
 	"""
@@ -88,13 +90,13 @@ class JayExample(System):
 		return res
 
 class GraphSystem(System):
-	"""
+	r"""
 	Trivial semi-explicit index 2 DAE of the form:
 	
 .. math::
 
-		x' = 1
-		y' = lambda
+		x' = 1\\
+		y' = λ\\
 		y  = f(x)
 	"""
 	

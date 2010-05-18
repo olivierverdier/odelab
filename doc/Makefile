@@ -68,12 +68,12 @@ qthelp:
 	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/odelab.qhc"
 
 devhelp:
-	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) _build/devhelp
+	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
 	@echo "# mkdir -p $$HOME/.local/share/devhelp/odelab"
-	@echo "# ln -s _build/devhelp $$HOME/.local/share/devhelp/odelab"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/odelab"
 	@echo "# devhelp"
 
 latex:
@@ -84,10 +84,10 @@ latex:
 	      "run these through (pdf)latex."
 
 latexpdf: latex
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
-	make -C _build/latex all-pdf
-	@echo "pdflatex finished; the PDF files are in _build/latex."
+	make -C $(BUILDDIR)/latex all-pdf
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes

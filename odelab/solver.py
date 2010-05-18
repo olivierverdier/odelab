@@ -44,17 +44,16 @@ class Solver (object):
 
 	def initialize(self, u0=None, t0=0, h=None, time=None):
 		"""
-		Initialize the solver to the initial condition :math:`u(t0) = u0`.
-		
-		:Parameters:
-			u0 : array
-				initial condition; if it is not provided, it is set to the previous initial condition.
-			t0 : scalar
-				initial time
-			h : scalar
-				time step
-			time : scalar
-				time span of the simulation
+Initialize the solver to the initial condition :math:`u(t0) = u0`.
+
+:type u0: array
+:param u0: initial condition; if it is not provided, it is set to the previous initial condition.
+:type t0: scalar
+:param t0: initial time
+:type h: scalar
+:param h: time step
+:type time: scalar
+:param time: span of the simulation
 		"""
 		if u0 is not None:
 			if np.isscalar(u0):
@@ -154,9 +153,8 @@ class Solver (object):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
 		
-		:Parameters:
-			function : string
-				name of the method to call on the current system object.
+		:param function: name of the method to call on the current system object
+		:type function: string
 		
 		:Example:
 			the code::
@@ -456,8 +454,8 @@ algorithm given by equation (4.18) in [mclachlan06]_.
 
     L(q,v) = 0.5 \|v^2\| - V(q)
  
- where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
- where :math:`A` is the mxn constraint matrix.
+where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
+where :math:`A` is the mxn constraint matrix.
  
  
 :References:
@@ -489,32 +487,35 @@ algorithm given by equation (4.18) in [mclachlan06]_.
 
 
 class Spark(Scheme):
-	"""
+	r"""
 Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
  as presented in [jay03]_.
  
- We consider the following system of DAEs
- 
-    y' = f(t,y,z)
+We consider the following system of DAEs:
+
+.. math::
+    y' = f(t,y,z)\\
      0 = g(t,y)
  
- where t is the independent variable, y is a vector of length n containing
- the differential variables and z is a vector of length m containing the 
- algebraic variables. Also,
+where t is the independent variable, y is a vector of length n containing
+the differential variables and z is a vector of length m containing the 
+algebraic variables. Also,
+
+.. math::
  
-    f: R x R^n x R^m -> R^n
-    g: R x R^n -> R^m
+    f:\ R × R^n × R^m → R^n\\
+    g:\ R × R^n → R^m
  
- It is assumed that $g_y f_z$ exists and is invertible.
+It is assumed that :math:`g_y f_z` exists and is invertible.
+
+The above system is integrated from ``t0`` to ``tfinal``, where 
+tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
+given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK 
+methods used is given by ``s``.
  
- The above system is integrated from t0 to tfinal, where 
- tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
- given by (y,z) = (y0,z0) and the number of stages in the Lobatto III RK 
- methods used is given by s.
  
  
- 
- The set of nonlinear SPARK equations are solved using the solver in ``root_solver``.
+The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.
  
  
  References:

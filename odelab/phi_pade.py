@@ -29,7 +29,12 @@ def solve(A,b):
 
 class Polynomial(object):
 	"""
-	Polynomial class used in the Padé approximation.
+Polynomial class used in the Padé approximation.
+Usage is as follows::
+
+	p = Polynomial([4.,2.,1.,...]) # polynomial 4 + 2x + x**2 + ...
+	Z = Polynomial.exponents(z, 3) # compute z**2 and z**3
+	p(Z) # value of the polynomial p(z)
 	"""
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
@@ -37,7 +42,10 @@ class Polynomial(object):
 	@classmethod
 	def exponents(self, z, s):
 		"""
-		Compute the first s+1 exponents of z		
+Compute the first s+1 exponents of z.
+
+:Returns:
+	[I,z,z**2,...,z**s]
 		"""
 		if np.isscalar(z):
 			ident = 1
@@ -86,18 +94,20 @@ def ninf(M):
 	return lin.norm(M,np.inf)
 
 class Phi(object):
-	"""
-Main class to compute the :math:`φ_l` functions. The simplest way to define those functions is:
+	r"""
+Main class to compute the :math:`φ_l` functions. 
+The simplest way to define those functions is by the formula:
 
 .. math::
-	φ_l = ∑_{k=0}^{∞} \frac{x^k}{(l+k)!}
+	φ_{\ell}(x) = ∑_{k=0}^{∞} \frac{x^k}{(\ell+k)!}
 
 Usage is as follows::
 
 	phi = Phi(k,d)
-	phi(M)
+	result = phi(M)
 
 where :data:`M` is a square array.
+The variable ``result`` is a list of all the values of :math:`φ_{k}(M)` for :math:`0≤k≤l`.
 	"""
 	
 	def __init__(self, k, d=6):
@@ -106,8 +116,32 @@ where :data:`M` is a square array.
 		self.pade = self.compute_Pade()
 	
 	def compute_Pade(self):
-		"""
-		Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for :math:`0 ≤ l ≤ k`.
+		r"""
+Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for :math:`0 ≤ l ≤ k`.
+
+The goal is to produce an approximation of the form:
+
+.. math::
+	φ_{\ell} = \frac{N}{D}
+	
+where :math:`N` and :math:`D` are polynomials.
+The formula for :math:`D` is first computed recursively using the following recursion relations:
+
+.. math::
+	D_0^0 = 1\\
+	D_{j+1}^0 = \frac{-(d-j)}{(2d -j)(j+1)} D_{j}^0\\
+	D_{j}^{\ell+1} = (2d-\ell)(2d+\ell+1-j) D_{j}^{\ell}
+	
+Then, considering the inverse factorial series:
+	
+.. math::
+	C_j := \frac{1}{j!}
+	
+The numerator :math:`N` is now computed by:
+
+.. math::
+	N = D*C
+
 		"""
 		d = self.d
 		k = self.k
@@ -144,6 +178,14 @@ where :data:`M` is a square array.
 	
 	
 	def __call__(self, z):
+		"""
+The final call to compute the values of :math:`φ_k(z)`.
+It proceeds in three steps:
+
+1. figure out a scaling exponent :math:`s` such that :math:`z/2^s` is reasonably little
+2. compute :math:`φ_k(z/2^s)` using the Padé approximation
+3. scale back by repeatedly squaring
+		"""
 		scaling = self.scaling(z)
 		self.eval_pade(z/2**scaling)
 		for s in range(scaling):

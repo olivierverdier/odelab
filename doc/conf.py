@@ -171,6 +171,14 @@ htmlhelp_basename = 'odelabdoc'
 
 # -- Options for LaTeX output --------------------------------------------------
 
+latex_elements = {
+'papersize': 'a4paper',
+'preamble': r"""\SetUnicodeOption{mathletters}
+\usepackage{hyperref}
+\newcommand{\ee}{\mathrm{e}}""",
+'inputenc': r'\usepackage[utf8x]{inputenc}',
+}
+
 # The paper size ('letter' or 'a4').
 #latex_paper_size = 'letter'
 
