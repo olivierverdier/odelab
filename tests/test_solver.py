@@ -307,6 +307,7 @@ class Test_LinearExponential(object):
 				ABLawson4(),
 				Lawson4(),
 				ABNorset4(),
+				GenLawson45(),
 			]:
 				self.L = L
 				print L
@@ -384,6 +385,10 @@ class Test_CC_ABL4(Harness_ComplexConvection):
 class Test_CC_L4(Harness_ComplexConvection):
 	scheme = Lawson4()
 	h = .01
+
+class Test_CC_GL45(Harness_ComplexConvection):
+	scheme = GenLawson45()
+	h = .001
 
 class Test_CC_LE(Harness_ComplexConvection):
 	scheme = LawsonEuler()
