@@ -27,7 +27,11 @@ const_c = partial(const_f, 1.j)
 class Harness_Solver(Harness):
 	dim = 1
 	def set_system(self, f):
-		self.solver.system = System(f)		
+		self.solver.system = System(f)
+	
+	def test_scheme_str(self):
+		# should not raise an exception even though h is not yet set in the underlying scheme:
+		print str(self.solver)
 	
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)

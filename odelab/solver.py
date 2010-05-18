@@ -241,6 +241,14 @@ class MultiStepSolver(SingleStepSolver):
 
 class Scheme(object):
 		
+	def __str__(self):
+		try:
+			h = self.h
+			hs = "%.2e" % h
+		except AttributeError:
+			hs = "-"
+		return '<%s: h=%s>' % (self.__class__.__name__, hs)
+
 	tail_length = 1
 
 	@property
