@@ -123,7 +123,23 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
 
+	def get_u(self, index):
+		"""
+		Return u[index] after post-processing.
+		"""
+		return self.system.postprocess(self.us[index])
+
+	def initial(self):
+		"""
+		Convenience method to obtain the initial condition.
+		"""
+		return self.get_u(0)
 	
+	def final(self):
+		"""
+		Convenience method to obtain the last computed value.
+		"""
+		return self.get_u(-1)
 	
 	def plot(self, components=None):
 		"""

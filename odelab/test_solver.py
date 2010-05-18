@@ -39,7 +39,7 @@ class Harness_Solver(Harness):
 	def test_initialize_scheme(self):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
-		self.solver.step(self.solver.ts[0], self.solver.us[0])
+		self.solver.step(self.solver.ts[0], self.solver.initial())
 		nt.assert_true(self.solver.scheme.h == h)
 	
 	def test_quadratic(self):
@@ -49,7 +49,7 @@ class Harness_Solver(Harness):
 		self.solver.initialize(u0=1., time=1.)
 		self.solver.run()
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
-		nt.assert_almost_equal(self.solver.us[-1], 3/2, 1)
+		nt.assert_almost_equal(self.solver.final(), 3/2, 1)
 
 	def check_const(self, f, u0, expected):
 		"""should solve the f=c exactly"""
@@ -57,7 +57,7 @@ class Harness_Solver(Harness):
 		self.set_system(f)
 		self.solver.initialize(u0=1.+0j, time=1.)
 		self.solver.run()
-		npt.assert_almost_equal(self.solver.us[-1], expected, 1)
+		npt.assert_almost_equal(self.solver.final(), expected, 1)
 
 	def test_const(self):
 		for f,u0,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j), (const_c, 1., 1.+1.j)]:
@@ -172,7 +172,7 @@ class Harness_Osc(object):
 		time = nb_Poincare_iterations*self.N*h
 		self.s.initialize(u0=self.sys.initial(z0), h=h, time=time)
 		self.s.run()
-		npt.assert_almost_equal(self.sys.energy(self.s.us[-1]), self.sys.energy(self.s.us[0]), decimal=1)
+		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=1)
 
 	def plot_qv(self, i=2, skip=None, *args, **kwargs):
 		if skip is None:
@@ -205,9 +205,9 @@ class Test_SparkODE(object):
 		self.s.run()
 		exact = np.exp(-self.s.ats)
 		print exact[-1]
-		print self.s.us[-1]
+		print self.s.final()
 ## 		npt.assert_array_almost_equal(self.s.aus, exact, 5)
-		npt.assert_almost_equal(self.s.us[-1], exact[-1])
+		npt.assert_almost_equal(self.s.final(), exact[-1])
 ## 		plot(self.s.ats, np.vstack([self.s.aus, exact]).T)
 
 class Test_Jay(object):
@@ -223,10 +223,10 @@ class Test_Jay(object):
 	def test_run(self):
 		self.s.run()
 		print self.s.ts[-1]
-		print self.s.us[-1]
+		print self.s.final()
 		exact = self.sys.exact(self.s.ts[-1])
 		print exact
-		npt.assert_array_almost_equal(self.s.us[-1][:2], exact[:2], decimal=2)
+		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
 class Test_Exceptions(object):
 	limit = 20
@@ -293,7 +293,7 @@ class Test_LinearExponential(object):
 				self.s.initialize(u0 = self.u0, h=h)
 	
 				self.s.run(time=h)
-				computed = self.s.us[-1]
+				computed = self.s.final()
 				phi = Phi(0)
 				tf = self.s.ts[-1]
 				print tf
@@ -311,7 +311,7 @@ class Test_ComplexConvection(object):
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
 		self.s.run()
-		u1 = self.B.postprocess(self.s.us[-1])
+		u1 = self.s.final()
 		if np.any(np.isnan(u1)):
 			raise Exception('unstable!')
 		if do_plot:
