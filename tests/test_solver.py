@@ -316,7 +316,7 @@ class Test_LinearExponential(object):
 				h = .1
 				self.s.initialize(u0 = self.u0, h=h)
 	
-				self.s.run(time=h)
+				self.s.run(time=1.)
 				computed = self.s.final()
 				phi = Phi(0)
 				tf = self.s.ts[-1]
