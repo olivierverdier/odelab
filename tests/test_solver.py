@@ -306,6 +306,7 @@ class Test_LinearExponential(object):
 				ABLawson3(), 
 				ABLawson4(),
 				Lawson4(),
+				ABNorset4(),
 			]:
 				self.L = L
 				print L
@@ -363,6 +364,10 @@ class Test_CC_EE(Harness_ComplexConvection):
 class Test_CC_RK4(Harness_ComplexConvection):
 	scheme = RungeKutta4()
 	h = .01
+
+class Test_CC_ABN4(Harness_ComplexConvection):
+	scheme = ABNorset4()
+	h = .001
 
 class Test_CC_ABL2(Harness_ComplexConvection):
 	scheme = ABLawson2()
