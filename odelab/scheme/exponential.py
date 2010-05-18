@@ -1,4 +1,17 @@
 # -*- coding: UTF-8 -*-
+"""
+:mod:`exponential`
+
+The numerical values of this exponential scheme are taken from the code of the `Expint package`_.
+The peculiarities of the :meth:`tail` method are explained and argumented in the `Expint documentation`_.
+
+.. _Expint project: http://www.math.ntnu.no/num/expint/
+.. _Expint documentation: http://www.math.ntnu.no/preprint/numerics/2005/N4-2005.pdf
+
+.. module:: exponential
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
+"""
 from __future__ import division
 
 import numpy as np
