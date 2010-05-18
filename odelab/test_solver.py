@@ -329,7 +329,7 @@ class Test_ComplexConvection(object):
 		if do_plot:
 			pl.clf()
 			pl.plot(self.B.points, sol, lw=2)
-		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1), (HochOst4(), .01)]
+		shs = [(ExplicitEuler(), .0001), (RungeKutta4(), .01), (ABLawson2(), .001), (LawsonEuler(), .0001), (RKMK4T(), .01), (ode15s(), .1), (HochOst4(), .01)]
 		for scheme, h in shs:
 			self.check_convection(scheme, h, do_plot)
 		

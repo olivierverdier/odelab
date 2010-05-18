@@ -344,7 +344,12 @@ class Exponential(Scheme):
 	
 	def initialize(self):
 		super(Exponential, self).initialize()
-		self.tail = self.solver.us[-1].reshape(-1,1)
+		ts = self.solver.ts[-self.tail_length:]
+		tail = self.solver.us[-self.tail_length:]
+		# this is specific to those Exponential solvers:
+		for i in range(len(tail)-1):
+			tail[i] = self.h*self.system.nonlin(ts[i], tail[i])
+		self.tail = np.array(list(reversed(tail))).T
 	
 	def step(self, t, u):
 		h = self.h
@@ -422,6 +427,22 @@ class HochOst4(Exponential):
 					[1/2, 1/2*phi_12 - 2*a_52 - a_54, a_52, a_52, a_54, None, ez2]
 				],
 				[	[phi_1 - 3*phi_2 + 4*phi_3, None, None, -phi_2 + 4*phi_3, 4*phi_2 - 8*phi_3, ez],
+				])
+
+class ABLawson2(Exponential):
+	phi_order = 2
+	tail_length = 2
+	
+	def general_linear_z(self, z):
+		one = Polynomial.exponents(z,0)[0]
+		ez, phi_1, phi_2 = self.phi(z)
+		ez2 = self.phi(z/2)[0]
+		e2z = np.dot(ez,ez)
+		return ([	[0, None, None, one, None],
+					[1., 3/2*ez, None, ez, -1/2*e2z]
+				],
+				[	[3/2*ez, None, ez, -1/2*ez2],
+					[one, None, None, None]
 				])
 
 class McLachlan(Scheme):
