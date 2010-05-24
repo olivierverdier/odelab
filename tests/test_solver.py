@@ -205,6 +205,7 @@ class Test_McOsc(Harness_Osc):
 		self.s = SingleStepSolver(McLachlan(), self.sys)
 
 class Test_JayOsc(Harness_Osc):
+	N=5 # bigger time step to make Jay test faster
 	def set_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 	
