@@ -115,8 +115,10 @@ class HochOst4(Exponential):
 				[	[phi_1 - 3*phi_2 + 4*phi_3, None, None, -phi_2 + 4*phi_3, 4*phi_2 - 8*phi_3, ez],
 				])
 
-class ABLawson2(Exponential):
+class ABLawson(Exponential):
 	phi_order = 0
+	
+class ABLawson2(ABLawson):
 	tail_length = 2
 	
 	def general_linear_z(self, z):
@@ -130,7 +132,7 @@ class ABLawson2(Exponential):
 					[one, None, None, None]
 				])
 
-class ABLawson3(Exponential):
+class ABLawson3(ABLawson):
 	phi_order = 0
 	tail_length = 3
 	
@@ -145,7 +147,7 @@ class ABLawson3(Exponential):
 					[None, None, None, one, None],
 				])
 
-class ABLawson4(Exponential):
+class ABLawson4(ABLawson):
 	phi_order = 0
 	tail_length = 4
 	
