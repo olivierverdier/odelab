@@ -333,7 +333,7 @@ class Harness_ComplexConvection(object):
 
 	def check_convection(self, do_plot):
 		scheme = self.scheme
-		h = self.h
+		h = self.time/self.N
 		self.s = MultiStepSolver(scheme, self.B)
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
@@ -347,7 +347,7 @@ class Harness_ComplexConvection(object):
 		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
 
 	def test_run(self, do_plot=False):
-		self.B = BurgersComplex(viscosity=0.)
+		self.B = BurgersComplex(viscosity=0., size=32)
 		umax=.5
 		self.u0 = 2*umax*(.5 - np.abs(self.B.points))
 		self.time = .5
@@ -357,48 +357,62 @@ class Harness_ComplexConvection(object):
 			pl.clf()
 			pl.plot(self.B.points, self.sol, lw=2)
 		self.check_convection(do_plot)
+	
+	def find_N(self):
+		for N in [10,20,50,75,100,120,150]:
+			self.N = N
+			try:
+				self.notest_run()
+			except AssertionError:
+				continue
+			else:
+				break
+		else:
+			raise Exception('No N!')
+		print type(self.scheme).__name__, N
 		
 class Test_CC_EE(Harness_ComplexConvection):
 	scheme = ExplicitEuler()
-	h = .0001
+	N=150
 
 class Test_CC_RK4(Harness_ComplexConvection):
 	scheme = RungeKutta4()
-	h = .01
+	N = 10
 
 class Test_CC_ABN4(Harness_ComplexConvection):
 	scheme = ABNorset4()
-	h = .001
+	N = 50
 
 class Test_CC_ABL2(Harness_ComplexConvection):
 	scheme = ABLawson2()
-	h = .001
+	N = 50
 
 class Test_CC_ABL3(Harness_ComplexConvection):
 	scheme = ABLawson3()
-	h = .001
+	N=50
 
 class Test_CC_ABL4(Harness_ComplexConvection):
 	scheme = ABLawson4()
-	h = .001
+	N=50
 
 class Test_CC_L4(Harness_ComplexConvection):
 	scheme = Lawson4()
-	h = .01
+	N=10
 
 class Test_CC_GL45(Harness_ComplexConvection):
 	scheme = GenLawson45()
-	h = .001
+	N=10
 
 class Test_CC_LE(Harness_ComplexConvection):
 	scheme = LawsonEuler()
-	h = .0001
+	N=150
 
 class Test_CC_RKMK4T(Harness_ComplexConvection):
 	scheme = RKMK4T()
-	h = .01
+	N=10
 
 class Test_CC_ode15s(Harness_ComplexConvection):
 	scheme = ode15s()
-	h = .1
+	N=2
+
 
