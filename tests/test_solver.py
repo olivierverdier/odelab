@@ -377,7 +377,15 @@ class Test_CC_EE(Harness_ComplexConvection):
 	N=150
 
 class Test_CC_RK4(Harness_ComplexConvection):
-	scheme = RungeKutta4()
+	scheme = Kutta(4)
+	N = 10
+
+class Test_CC_RK38(Harness_ComplexConvection):
+	scheme = Kutta(38)
+	N = 10
+
+class Test_CC_Heun(Harness_ComplexConvection):
+	scheme = Heun()
 	N = 10
 
 class Test_CC_ABN4(Harness_ComplexConvection):
@@ -416,4 +424,23 @@ class Test_CC_ode15s(Harness_ComplexConvection):
 	scheme = ode15s()
 	N=2
 
+class Test_CC_AB1(Harness_ComplexConvection):
+	scheme = AdamsBashforth(1)
+	N = 150
+
+class Test_CC_AB2(Harness_ComplexConvection):
+	scheme = AdamsBashforth(2)
+	N = 50
+
+class Test_CC_AB2e(Harness_ComplexConvection):
+	scheme = AdamsBashforth('2e')
+	N = 50
+
+class Test_CC_B1(Harness_ComplexConvection):
+	scheme = Butcher(1)
+	N=50
+
+class Test_CC_B3(Harness_ComplexConvection):
+	scheme = Butcher(3)
+	N=120
 
