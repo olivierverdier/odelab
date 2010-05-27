@@ -104,16 +104,7 @@ def test_unstable():
 	s.initialize(u0 = 1., time = 100, h = 10)
 	s.run()
 
-class Test_Initialize(object):
-	def setUp(self):
-		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[1]])))
-	@nt.raises(Solver.NotInitialized)
-	def test_no_u0(self):
-		self.s.initialize()
-	@nt.raises(Solver.NotInitialized)
-	def test_no_initialize(self):
-		self.s.run()
-
+	
 class Harness_Circle(Harness):
 	def setUp(self):
 		def f(t,u):
@@ -254,7 +245,7 @@ class Test_Jay(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
-class Test_Exceptions(object):
+class Test_FinalTimeExceptions(object):
 	limit = 20
 	class LimitedSys(System):
 		class LimitReached(Exception):
@@ -286,10 +277,32 @@ class Test_Exceptions(object):
 	def test_sys_exception(self):
 		try:
 			self.s.run()
-		except self.LimitedSys.LimitReached:
+		except self.s.Runtime:
 			npt.assert_equal(len(self.s.ts), self.limit + 1)
 		else:
 			raise Exception("Exception not raised")
+
+class Test_Exceptions(object):
+	def setUp(self):
+		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[1]])))
+	@nt.raises(Solver.NotInitialized)
+	def test_no_u0(self):
+		self.s.initialize()
+	@nt.raises(Solver.NotInitialized)
+	def test_no_initialize(self):
+		self.s.run()
+	@nt.raises(Solver.Unstable)
+	def test_unstable(self):
+		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[float('inf')]])))
+		self.s.initialize(u0=np.array([0]))
+		self.s.run()
+	@nt.raises(Solver.Runtime)
+	def test_runtime_exception(self):
+		def f(t,u):
+			raise Exception()
+		self.s = SingleStepSolver(ExplicitEuler(), System(f))
+		self.s.initialize(u0=0)
+		self.s.run()
 	
 def test_time():
 	sys = System(lambda t,x: -x)

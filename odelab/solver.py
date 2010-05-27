@@ -97,6 +97,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		Raised when the solver is not properly initialized.
 		"""
 	
+	class Runtime(Exception):
+		"""
+		Raised to relay an exception occurred while running the solver.
+		"""
+	
 	def simulating(self):
 		return self
 	
@@ -130,7 +135,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		tf = t0 + time # final time
 		with self as generator:
 			for i in xrange(self.max_iter):
-				t,u = next(generator)
+				try:
+					t,u = next(generator)
+				except Exception as e:
+					raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.message), e, i)
 				if np.any(np.isnan(u)):
 					raise self.Unstable('Unstable after %d steps.' % i)
 
