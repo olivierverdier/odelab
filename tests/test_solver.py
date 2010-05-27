@@ -311,8 +311,17 @@ def test_time():
 	sol.initialize(u0=0.)
 	sol.run(sol.h)
 	npt.assert_(sol.ts[-1] < Solver.time)
-	
-		
+
+def test_extra_run():
+	"""test that an extra run continues from last time"""
+	sys = System(lambda t,x: -x)
+	sol = SingleStepSolver(ExplicitEuler(),sys)
+	sol.initialize(u0=1.)
+	sol.run()
+	npt.assert_almost_equal(sol.ts[-1],Solver.time)
+	sol.run()
+	npt.assert_almost_equal(sol.ts[-1],2*Solver.time)
+
 import scipy.linalg as slin
 
 def compare_linear_exponential(computed, expected, phi):

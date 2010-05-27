@@ -129,7 +129,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if time is None:
 			time = self.time
 		try:
-			t0 = self.ts[0]
+			t0 = self.ts[-1]
 		except AttributeError:
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		tf = t0 + time # final time
