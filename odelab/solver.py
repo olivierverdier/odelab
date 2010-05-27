@@ -58,8 +58,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			u0 = np.array(u0)
 			u0 = self.system.preprocess(u0)
 		else: # start from the previous initial conditions
-			u0 = self.us[0]
-			t0 = self.ts[0]
+			try:
+				u0 = self.us[0]
+				t0 = self.ts[0]
+			except AttributeError:
+				raise self.NotInitialized("You must provide an initial condition.")
 		self.ts = [t0]
 		self.us = [u0]
 		if h is not None:
@@ -89,6 +92,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		Raised when the scheme produces NaN values.
 		"""
 	
+	class NotInitialized(Exception):
+		"""
+		Raised when the solver is not properly initialized.
+		"""
+	
 	def simulating(self):
 		return self
 	
@@ -115,7 +123,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		if time is None:
 			time = self.time
-		t0 = self.ts[0]
+		try:
+			t0 = self.ts[0]
+		except AttributeError:
+			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		tf = t0 + time # final time
 		with self as generator:
 			for i in xrange(self.max_iter):

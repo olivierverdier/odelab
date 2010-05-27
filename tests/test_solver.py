@@ -104,6 +104,16 @@ def test_unstable():
 	s.initialize(u0 = 1., time = 100, h = 10)
 	s.run()
 
+class Test_Initialize(object):
+	def setUp(self):
+		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[1]])))
+	@nt.raises(Solver.NotInitialized)
+	def test_no_u0(self):
+		self.s.initialize()
+	@nt.raises(Solver.NotInitialized)
+	def test_no_initialize(self):
+		self.s.run()
+
 class Harness_Circle(Harness):
 	def setUp(self):
 		def f(t,u):
