@@ -167,7 +167,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.get_u(-1)
 	
-	def plot(self, components=None):
+	def plot(self, components=None, **plot_args):
 		"""
 		Plot some components of the solution.
 		
@@ -182,16 +182,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		has_exact = hasattr(self.system, 'exact')
 		if has_exact:
 			exact = self.system.exact(self.ats)
+		axis = PL.gca()
+		previous_line = len(axis.lines)
 		for component in components:
 			label = self.system.label(component)
-			PL.plot(self.ats, self.aus[component], ',-', label=label)
+			defaults = {'ls':'-', 'marker':','}
+			defaults.update(plot_args)
+			axis.plot(self.ats, self.aus[component], ',-', label=label, **defaults)
 			if has_exact:
-				PL.gca()._get_lines.count -= 1
-				PL.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
-		PL.xlabel('time')
-		PL.legend()
+				axis._get_lines.count -= 1
+				axis.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
+		axis.set_xlabel('time')
+		axis.legend()
+		return axis.lines[previous_line:]
 	
-	def plot_function(self, function):
+	def plot_function(self, function, **plot_args):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
 		
@@ -206,7 +211,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
 		values = self.system.__getattribute__(function)(np.vstack([self.aus, self.ats]))
-		PL.plot(self.ats, values.T)
+		return PL.plot(self.ats, values.T, label=function, **plot_args)
 
 	def plot2D(self):
 		"""

@@ -13,6 +13,9 @@ from odelab.solver import *
 import numpy.testing as npt
 import nose.tools as nt
 
+import pylab as pl
+pl.ioff()
+
 class Harness(object):
 	no_plot = True
 
@@ -303,24 +306,47 @@ class Test_Exceptions(object):
 		self.s = SingleStepSolver(ExplicitEuler(), System(f))
 		self.s.initialize(u0=0)
 		self.s.run()
-	
-def test_time():
-	sys = System(lambda t,x: -x)
-	sol = SingleStepSolver(ExplicitEuler(), sys)
-	sol.h = Solver.time/10
-	sol.initialize(u0=0.)
-	sol.run(sol.h)
-	npt.assert_(sol.ts[-1] < Solver.time)
 
-def test_extra_run():
-	"""test that an extra run continues from last time"""
-	sys = System(lambda t,x: -x)
-	sol = SingleStepSolver(ExplicitEuler(),sys)
-	sol.initialize(u0=1.)
-	sol.run()
-	npt.assert_almost_equal(sol.ts[-1],Solver.time)
-	sol.run()
-	npt.assert_almost_equal(sol.ts[-1],2*Solver.time)
+class Test_Simple(object):
+	def setUp(self):
+		class TotSys(System):
+			def total(self, xt):
+				return np.sum(xt[:-1],axis=0)
+		sys = TotSys(lambda t,x: -x)
+		self.s = SingleStepSolver(ExplicitEuler(), sys)
+	
+	def test_time(self):
+		sol = self.s
+		sol.h = Solver.time/10
+		sol.initialize(u0=0.)
+		sol.run(sol.h)
+		npt.assert_(sol.ts[-1] < Solver.time)
+
+	def test_extra_run(self):
+		"""test that an extra run continues from last time"""
+		sol = self.s
+		sol.initialize(u0=1.)
+		sol.run()
+		npt.assert_almost_equal(sol.ts[-1],Solver.time)
+		sol.run()
+		npt.assert_almost_equal(sol.ts[-1],2*Solver.time)
+	
+	def test_plot_args(self):
+		self.s.initialize(u0=np.array([1.,1.,1.]))
+		self.s.run()
+		lines = self.s.plot(0,lw=5)
+		npt.assert_equal(len(lines),1)
+		lines = self.s.plot(lw=5)
+		npt.assert_equal(len(lines),3)
+		npt.assert_equal(lines[-1].get_linewidth(),5)
+	
+	def test_plot_function(self):
+		self.s.initialize(u0=np.array([1.,1.,1.]))
+		self.s.run()
+		lines = self.s.plot_function('total', lw=4)
+		npt.assert_equal(lines[-1].get_linewidth(), 4)
+		
+
 
 import scipy.linalg as slin
 
