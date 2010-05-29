@@ -350,40 +350,39 @@ class Test_Simple(object):
 
 import scipy.linalg as slin
 
-def compare_linear_exponential(computed, expected, phi):
-	npt.assert_array_almost_equal(computed, expected)
-	npt.assert_array_almost_equal(computed, phi)
+class CompareLinearExponential(object):
+	def __init__(self, scheme):
+		self.description = 'Compare exponential for %s' % type(scheme).__name__
+	def __call__(self, computed, expected, phi):
+		npt.assert_array_almost_equal(computed, expected)
+		npt.assert_array_almost_equal(computed, phi)
 
-class Test_LinearExponential(object):
-	def test_run(self):
-		for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-			for scheme in [
-				LawsonEuler(), 
-				RKMK4T(), 
-				HochOst4(), 
-				ABLawson2(), 
-				ABLawson3(), 
-				ABLawson4(),
-				Lawson4(),
-				ABNorset4(),
-				GenLawson45(),
-			]:
-				self.L = L
-				print L
-				self.sys = Linear(self.L)
-				self.s = MultiStepSolver(scheme, self.sys)
-				self.u0 = np.array([1.,0.])
-				h = .1
-				self.s.initialize(u0 = self.u0, h=h)
-	
-				self.s.run(time=1.)
-				computed = self.s.final()
-				phi = Phi(0)
-				tf = self.s.ts[-1]
-				print tf
-				phi_0 = np.dot(phi(tf*self.L)[0], self.u0)
-				expected = np.dot(slin.expm(tf*self.L), self.u0)
-				yield compare_linear_exponential, computed, expected, phi_0
+def test_linear_exponential():
+	for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
+		for scheme in [
+			LawsonEuler(), 
+			RKMK4T(), 
+			HochOst4(), 
+			ABLawson2(), 
+			ABLawson3(), 
+			ABLawson4(),
+			Lawson4(),
+			ABNorset4(),
+			GenLawson45(),
+		]:
+			sys = Linear(L)
+			s = MultiStepSolver(scheme, sys)
+			u0 = np.array([1.,0.])
+			h = .1
+			s.initialize(u0 = u0, h=h)
+
+			s.run(time=1.)
+			computed = s.final()
+			phi = Phi(0)
+			tf = s.ts[-1]
+			phi_0 = np.dot(phi(tf*L)[0], u0)
+			expected = np.dot(slin.expm(tf*L), u0)
+			yield CompareLinearExponential(scheme), computed, expected, phi_0
 
 
 import pylab as pl
