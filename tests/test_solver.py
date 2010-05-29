@@ -302,7 +302,7 @@ class Test_Exceptions(object):
 	@nt.raises(Solver.Runtime)
 	def test_runtime_exception(self):
 		def f(t,u):
-			raise Exception()
+			raise Exception('message')
 		self.s = SingleStepSolver(ExplicitEuler(), System(f))
 		self.s.initialize(u0=0)
 		self.s.run()

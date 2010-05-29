@@ -138,7 +138,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				try:
 					t,u = next(generator)
 				except Exception as e:
-					raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.message), e, i)
+					raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
 				if np.any(np.isnan(u)):
 					raise self.Unstable('Unstable after %d steps.' % i)
 
