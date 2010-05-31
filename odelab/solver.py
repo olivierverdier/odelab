@@ -18,8 +18,6 @@ from __future__ import division
 import numpy as np
 import pylab as PL
 
-from odelab.newton import Newton, FSolve
-
 import itertools
 
 
