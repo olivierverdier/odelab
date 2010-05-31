@@ -192,6 +192,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				axis.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
 		axis.set_xlabel('time')
 		axis.legend()
+		PL.plot() # plot only in interactive mode
 		return axis.lines[previous_line:]
 	
 	def plot_function(self, function, **plot_args):
