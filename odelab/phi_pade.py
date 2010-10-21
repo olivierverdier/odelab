@@ -9,6 +9,12 @@ Computation of φ functions using Padé approximations and Scaling and Squaring.
 	:synopsis: Computation of φ functions.
 .. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
 
+Some formulae are taken from the `Expint documentation`_, of Håvard Berland, Bård Skaflestad and Will Wright.
+
+.. _Expint project: http://www.math.ntnu.no/num/expint/
+.. _Expint documentation: http://www.math.ntnu.no/preprint/numerics/2005/N4-2005.pdf
+
+
 """
 from __future__ import division
 
@@ -194,7 +200,9 @@ It proceeds in three steps:
 	
 	def phi_square(self, l):
 		"""
-		Formula for squaring phi_l from existing phi_k for k≤l.
+Formula for squaring phi_l from existing phi_k for k≤l, taken from the `Expint documentation`_.
+
+.. _Expint documentation: http://www.math.ntnu.no/preprint/numerics/2005/N4-2005.pdf
 		"""
 		ifac = self.C
 		phi = self.phi
