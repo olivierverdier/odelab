@@ -81,7 +81,7 @@ class Newton(RootSolver):
 ##			if self.is_zero(x):
 ##				break
 		else:
-			raise Exception("Newton algorithm did not converge. ∆x=%.2e" % norm(incr))
+			raise Exception(u"Newton algorithm did not converge after %d iterations. ∆x=%.2e" % (i, norm(incr)))
 		self.required_iter = i
 		return self.get_result(x)
 	
