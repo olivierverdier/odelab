@@ -93,8 +93,9 @@ class FSolve(RootSolver):
 	"""
 	Wrapper around scipy.optimize.fsolve
 	"""
+	xtol = 1.49012e-08 # default fsolve xtol
 	def run(self, x0):
 		guess = self.get_initial(x0)
 		import scipy.optimize
-		full_result = scipy.optimize.fsolve(self.residual, guess, warning=False)
+		full_result = scipy.optimize.fsolve(self.residual, guess, warning=False, xtol = self.xtol)
 		return self.get_result(full_result)
