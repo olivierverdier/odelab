@@ -231,7 +231,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		PL.quiver(X,Y,vals[0], vals[1])
 
 class SingleStepSolver(Solver):
-	def __init__(self, scheme, system):
+	def __init__(self, scheme, system=None):
 		super(SingleStepSolver, self).__init__(system)
 		self.scheme = scheme
 	
