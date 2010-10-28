@@ -71,10 +71,11 @@ class Newton(RootSolver):
 			else:
 				try:
 					incr = np.linalg.solve(d, y)
-				except np.linalg.LinAlgError, ex: # should use the "as" syntax!!
+				except np.linalg.LinAlgError as ex:
 					eigvals, eigs = np.linalg.eig(d)
 					zerovecs = eigs[:, np.abs(eigvals) < 1e-10]
 					raise np.linalg.LinAlgError("%s: %s" % (ex.message, repr(zerovecs)))
+## 					raise np.linalg.LinAlgError("Condition: %.1e" % np.linalg.cond(d))
 			x += incr
 			if norm(incr) < self.tol:
 				break
