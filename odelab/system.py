@@ -218,6 +218,72 @@ perturbation of the contact oscillator.
 		constraint = tensordiag(constraint)
 		return constraint
 
+class VerticalRollingDisk(System):
+	"""
+	Vertical Rolling Disk
+	"""
+	def __init__(self, mass=1., radius=1., Iflip=1., Irot=1.):
+		"""
+		:mass: mass of the disk
+		:radius: Radius of the disk
+		:Iflip: inertia momentum around the "flip" axis
+		:Irot: inertia momentum, around the axis of rotation symmetry of the disk (perpendicular to it)
+		"""
+		self.mass = mass
+		self.radius = radius
+		self.Iflip = Iflip
+		self.Irot = Irot
+
+	def position(self, u):
+		"""
+		Positions x,y,φ (SE(2) coordinates), θ (rotation)
+		"""
+		return u[:4]
+
+	def velocity(self, u):
+		return u[4:8]
+
+	def lag(self,u):
+		return u[-2:]
+
+	def codistribution(self, u):
+		q = self.position(u)
+		phi = q[2]
+		R = self.radius
+		return np.array([[1., 0, 0, -R*np.cos(phi)],[0, 1, 0, -R*np.sin(phi)]])
+
+	def force(self,u):
+		return np.zeros_like(u)
+
+	def assemble(self,q,v,l):
+		return np.hstack([q,v,l])
+
+	def exact(self,t,u0):
+		"""
+		Exact solution for initial condition u0 at times t
+
+:param array(N) t: time points of size N
+:param array(8+) u0: initial condition
+:return: a 10xN matrix of the exact solution
+		"""
+		ohm_phi,ohm_theta = u0[6:8]
+		R = self.radius
+		rho = ohm_theta*R/ohm_phi
+		x_0,y_0,phi_0,theta_0 = u0[:4]
+		phi = ohm_phi*t+phi_0
+		one = np.ones_like(t)
+		m = self.mass
+		return np.vstack([rho*(np.sin(phi)-np.sin(phi_0)) + x_0,
+					-rho*(np.cos(phi)-np.cos(phi_0)) + y_0,
+					ohm_phi*t+phi_0,
+					ohm_theta*t+theta_0,
+					R*np.cos(phi)*ohm_theta,
+					R*np.sin(phi)*ohm_theta,
+					ohm_phi*one,
+					ohm_theta*one,
+					-m*ohm_phi*R*ohm_theta*np.sin(phi),
+					m*ohm_phi*R*ohm_theta*np.cos(phi),])
+
 class Exponential(System):
 	def __init__(self, nonlin, L):
 		self.L = L
