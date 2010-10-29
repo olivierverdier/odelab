@@ -98,5 +98,8 @@ class FSolve(RootSolver):
 	def run(self, x0):
 		guess = self.get_initial(x0)
 		import scipy.optimize
-		full_result = scipy.optimize.fsolve(self.residual, guess, warning=False, xtol = self.xtol)
-		return self.get_result(full_result)
+		full_output = scipy.optimize.fsolve(self.residual, guess, full_output=True, warning=True, xtol = self.xtol)
+		result, info, success, msg = full_output
+		if success != 1:
+			raise Exception(msg)
+		return self.get_result(result)
