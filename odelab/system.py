@@ -33,6 +33,27 @@ class System(object):
 	def postprocess(self, u1):
 		return u1
 
+	def velocity(self,u):
+		"""select the velocity component"""
+
+	def position(self, u):
+		"""select the position component"""
+
+	def lag(self, u):
+		"""select the lagrangian component"""
+
+	def vel_lag_split(self, vl):
+		"""splits between velocity and lagrangian"""
+
+	def vel_lag_stack(self,v,l):
+		"""stacks together the velocity and lagrangian parts"""
+
+	def force(self, u):
+		"""compute the force as a function of `u`"""
+
+	def codistribution(self, u):
+		"""compute the codistribution matrix at `u`"""
+
 
 class JayExample(System):
 	r"""

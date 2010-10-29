@@ -22,8 +22,17 @@ algorithm given by equation (4.18) in [mclachlan06]_.
  
 where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
 where :math:`A` is the mxn constraint matrix.
- 
- 
+
+More precisely, the :class:`odelab.system.System` object must implement:
+
+* :meth:`odelab.system.System.velocity`
+* :meth:`odelab.system.System.position`
+* :meth:`odelab.system.System.lag`
+* :meth:`odelab.system.System.force`
+* :meth:`odelab.system.System.codistribution`
+* :meth:`odelab.system.System.assemble`
+
+
 :References:
 	
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) (`url <http://dx.doi.org/10.1007/s00332-005-0698-1>`_)
