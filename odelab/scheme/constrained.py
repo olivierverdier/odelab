@@ -105,8 +105,12 @@ The set of nonlinear SPARK equations are solved using the solver in :attr:`root_
 	def __init__(self, nb_stages):
 		super(Spark, self).__init__()
 		self.nb_stages = nb_stages
+		self.Q = self.compute_mean_stage_constraint()
 	
-	def Q(self):
+	def compute_mean_stage_constraint(self):
+		"""
+		Compute the s x (s+1) matrix defined in `jay03`.
+		"""
 		s = self.nb_stages
 		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
 		es = np.zeros(s)
@@ -123,7 +127,7 @@ The set of nonlinear SPARK equations are solved using the solver in :attr:`root_
 		h = self.h
 		c = LobattoIIIA.tableaux[s][:,0]
 		T = t + c*h
-		Q = self.Q()
+		Q = self.Q
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 		
