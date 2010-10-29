@@ -168,21 +168,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.get_u(-1)
 	
-	def plot(self, components=None, **plot_args):
+	def plot(self, components=None, plot_exact=True, **plot_args):
 		"""
 		Plot some components of the solution.
 		
-		:Parameters:
-			components : scalar|array_like
-				either a given component of the solution, or a list of components to plot.
+:param scalar|array_like components: either a given component of the solution, or a list of components to plot.
+:param boolean plot_exact: whether to plot the exact solution (if available)
 		"""
 		if components is None:
 			components = range(len(self.us[0]))
 		if not np.iterable(components):
 			components = [components]
-		has_exact = hasattr(self.system, 'exact')
-		if has_exact:
-			exact = self.system.exact(self.ats)
+		if plot_exact:
+			has_exact = hasattr(self.system, 'exact')
+			if has_exact:
+				exact = self.system.exact(self.ats, self.us[0])
 		axis = PL.gca()
 		previous_line = len(axis.lines)
 		for component in components:

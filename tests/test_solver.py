@@ -244,7 +244,7 @@ class Test_Jay(object):
 		self.s.run()
 		print self.s.ts[-1]
 		print self.s.final()
-		exact = self.sys.exact(self.s.ts[-1])
+		exact = self.sys.exact(self.s.ts[-1],array([1.,1.,1.]))
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 

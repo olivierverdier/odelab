@@ -77,14 +77,16 @@ stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
 	def lag(self, u):
 		return u[2:3]
 	
-	def exact(self, t):
-		return array([np.exp(t), np.exp(-2*t), np.exp(2*t)])
+	def exact(self, t, u0):
+		if np.allclose(u0[:2], array([1.,1.])):
+			return array([np.exp(t), np.exp(-2*t), np.exp(2*t)])
+		raise Exception("Exact solution not defined")
 	
 	def label(self, component):
 		return ['y1','y2','z'][component]
 	
-	def test_exact(self, t):
-		dyn = self.multi_dynamics(np.hstack([self.exact(t),t]))
+	def test_exact(self, t):#TODO: use this to test that system!
+		dyn = self.multi_dynamics(np.hstack([self.exact(t,array([1.,1.])),t]))
 		res = sum(v for v in dyn.values()) - array([np.exp(t), -2*np.exp(-2*t)])
 		return res
 
