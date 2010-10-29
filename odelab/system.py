@@ -176,12 +176,6 @@ perturbation of the contact oscillator.
 	def assemble(self, q,v,l):
 		return np.hstack([q,v,l])
 	
-	def vel_lag_split(self, vl):
-		return vl[:3], vl[3:4]
-	
-	def vel_lag_stack(self, v,l):
-		return np.hstack([v,l])
-	
 	def force(self, u):
 		q = self.position(u) # copy?
 		return -q - self.epsilon*q[2]*q[0]*array([q[2],np.zeros_like(q[0]),q[0]])

@@ -39,12 +39,13 @@ where :math:`A` is the mxn constraint matrix.
 		force = self.system.force(qh)
 		codistribution = self.system.codistribution(qh)
 		lag = self.system.lag(u)
+		dof = len(vel)
 		def residual(vl):
-			v,l = self.system.vel_lag_split(vl)
+			v,l = vl[:dof], vl[dof:]
 			return np.hstack([v - vel - h * (force + np.dot(codistribution.T, l)), np.dot(self.system.codistribution(qh+.5*h*v), v)])
 		N = self.root_solver(residual)
-		vl = N.run(self.system.vel_lag_stack(vel, lag))
-		vnew, lnew = self.system.vel_lag_split(vl)
+		vl = N.run(np.hstack([vel, lag]))
+		vnew, lnew = vl[:dof], vl[dof:]
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
 	
