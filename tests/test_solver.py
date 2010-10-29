@@ -248,11 +248,12 @@ class Test_Jay(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
+class DummyException(Exception):
+	pass
+
 class Test_FinalTimeExceptions(object):
 	limit = 20
 	class LimitedSys(System):
-		class LimitReached(Exception):
-			pass
 		def __init__(self, limit):
 			self.limit = limit
 			self.i = 0
@@ -261,7 +262,7 @@ class Test_FinalTimeExceptions(object):
 				self.i += 1
 			 	return 0
 			else:
-				raise self.LimitReached()
+				raise DummyException()
 	def setUp(self):
 		self.sys = self.LimitedSys(self.limit)
 		self.s = SingleStepSolver(ExplicitEuler(),self.sys)
@@ -277,13 +278,13 @@ class Test_FinalTimeExceptions(object):
 		else:
 			raise Exception("FinalTimeNotReached not raised!")
 	
+	@nt.raises(Solver.Runtime)
 	def test_sys_exception(self):
-		try:
-			self.s.run()
-		except self.s.Runtime:
-			npt.assert_equal(len(self.s.ts), self.limit + 1)
-		else:
-			raise Exception("Exception not raised")
+		self.s.run()
+
+	@nt.raises(DummyException)
+	def test_sys_no_runtime_exception(self):
+		self.s.run(catch_runtime=False)
 
 class Test_Exceptions(object):
 	def setUp(self):

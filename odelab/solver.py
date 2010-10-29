@@ -116,13 +116,12 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
 	
-	def run(self, time=None):
+	def run(self, time=None, catch_runtime=True):
 		"""
 		Run the simulation for a given time.
 		
-		:Parameters:
-			time : scalar
-				the time span for which to run; if none is given, the default ``self.time`` is used
+:param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
+:param boolean catch_runtime: whether to catch runtime exception (not catching allows to see the traceback)
 		"""
 		if time is None:
 			time = self.time
@@ -136,14 +135,18 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				try:
 					t,u = next(generator)
 				except Exception as e:
-					raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
-				if np.any(np.isnan(u)):
-					raise self.Unstable('Unstable after %d steps.' % i)
+					if catch_runtime:
+						raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
+					else:
+						raise
+				else:
+					if np.any(np.isnan(u)):
+						raise self.Unstable('Unstable after %d steps.' % i)
 
-				self.ts.append(t)
-				self.us.append(u)
-				if t > tf - self.t_tol:
-					break
+					self.ts.append(t)
+					self.us.append(u)
+					if t > tf - self.t_tol:
+						break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
 
