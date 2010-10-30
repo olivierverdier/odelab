@@ -5,6 +5,11 @@
 
 Examples of ODE systems.
 
+Collection of subclasses of the class :class:`odelab.system.System`.
+The interface needed depends on the solver. For example, exponential solvers will need a `linear` method,
+dae solvers will need a `constraint`, or `multi-dynamics` method. See the documentation of the :doc:`scheme`
+section for more information.
+
 .. module :: system
 	:synopsis: Examples of ODE systems.
 .. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
@@ -20,16 +25,19 @@ import scipy.sparse as sparse
 import odelab.scheme.rungekutta as rk
 
 class System(object):
+	"""
+	General System class to define a simple dynamics given by a right-hand side.
+	"""
 	def __init__(self, f=None):
 		if f is not None:
 			self.f = f
 
 	def label(self, component):
 		return '%d' % component
-	
+
 	def preprocess(self, u0):
 		return u0
-	
+
 	def postprocess(self, u1):
 		return u1
 

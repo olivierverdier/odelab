@@ -26,7 +26,7 @@ class Solver (object):
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
 	
 	:Parameters:
-		system : :class:`System`
+		system : :class:`odelab.system.System`
 			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses. The system may also be specified later, although before any simulation of course.
 	"""
 
@@ -41,14 +41,10 @@ class Solver (object):
 		"""
 Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
-:type u0: array
-:param u0: initial condition; if it is not provided, it is set to the previous initial condition.
-:type t0: scalar
-:param t0: initial time
-:type h: scalar
-:param h: time step
-:type time: scalar
-:param time: span of the simulation
+:param array u0: initial condition; if it is not provided, it is set to the previous initial condition.
+:param scalar t0: initial time
+:param scalar h: time step
+:param scalar time: span of the simulation
 		"""
 		if u0 is not None:
 			if np.isscalar(u0):

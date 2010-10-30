@@ -1,6 +1,10 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
+"""
+Collection of schemes. The main function of a :class:`odelab.scheme.Scheme` class is to define a :meth:`odelab.scheme.Scheme.step` which computes one step of the numerical solution.
+"""
+
 import numpy as np
 import numpy.linalg
 
@@ -42,6 +46,13 @@ class Scheme(object):
 			self.h = self.solver.h
 		except AttributeError:
 			self.h = self.h_default
+
+	def step(self, t, u):
+		"""
+		Compute one step of the solution. The stepsize is not given because it might be computed inside this functions.
+		For simple schemes, one uses the value of the property :attr:`odelab.scheme.Scheme.h`.
+		"""
+		raise NotImplementedError()
 
 class ExplicitEuler (Scheme):
 	def step(self, t, u):

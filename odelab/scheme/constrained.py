@@ -92,9 +92,17 @@ methods used is given by ``s``.
  
  
 The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.
- 
- 
- References:
+
+The corresponding :class:`odelab.system.System` object must implement a *tensor* version the following methods:
+
+* :meth:`odelab.system.System.state`
+* :meth:`odelab.system.System.multi_dynamics`
+* :meth:`odelab.system.System.constraint`
+* :meth:`odelab.system.System.lag`
+
+By vector, it is meant that methods must accept vector arguments, i.e., accept a nxs matrix as input parameter.
+
+References:
 	
 .. [jay03] \L. Jay - Solution of index 2 implicit differential-algebraic equations
 	    by Lobatto Runge-Kutta methods (2003).
@@ -109,7 +117,7 @@ The set of nonlinear SPARK equations are solved using the solver in :attr:`root_
 	
 	def compute_mean_stage_constraint(self):
 		"""
-		Compute the s x (s+1) matrix defined in `jay03`.
+		Compute the s x (s+1) matrix defined in [jay03]_.
 		"""
 		s = self.nb_stages
 		A1t = LobattoIIIA.tableaux[s][1:-1,1:]
