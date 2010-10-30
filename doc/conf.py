@@ -173,10 +173,9 @@ htmlhelp_basename = 'odelabdoc'
 
 latex_elements = {
 'papersize': 'a4paper',
-'preamble': r"""\SetUnicodeOption{mathletters}
-\usepackage{hyperref}
-\newcommand{\ee}{\mathrm{e}}""",
+'preamble': r"""\newcommand{\ee}{\mathrm{e}}""",
 'inputenc': r'\usepackage[utf8x]{inputenc}',
+'utf8extra': r'\SetUnicodeOption{mathletters}',
 }
 
 # The paper size ('letter' or 'a4').
