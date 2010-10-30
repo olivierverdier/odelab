@@ -116,17 +116,18 @@ class Harness_Circle(Harness):
 		self.make_solver()
 		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
 	
-	def run(self):
+	def test_plot(self):
 		self.s.run()
 		self.s.plot2D()
+		self.s.plot(plot_exact=False)
 
 class Test_Circle_EEuler(Harness_Circle):
 	def make_solver(self):
-		self.s = ExplicitEuler(self.f)
+		self.s = SingleStepSolver(ExplicitEuler(), System(self.f))
 
 class Test_Circle_RK34(Harness_Circle):
 	def make_solver(self):
-		self.s = RungeKutta34(self.f)
+		self.s = SingleStepSolver(RungeKutta34(), System(self.f))
 
 def make_lin(A):
 	if np.isscalar(A):

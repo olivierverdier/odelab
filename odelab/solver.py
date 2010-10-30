@@ -186,7 +186,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			defaults = {'ls':'-', 'marker':','}
 			defaults.update(plot_args)
 			axis.plot(self.ats, self.aus[component], ',-', label=label, **defaults)
-			if has_exact:
+			if plot_exact and has_exact:
 				axis._get_lines.count -= 1
 				axis.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
 		axis.set_xlabel('time')
