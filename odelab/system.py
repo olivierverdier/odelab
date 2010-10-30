@@ -289,7 +289,7 @@ class VerticalRollingDisk(NonHolonomic):
 		return u[4:8]
 
 	def lag(self,u):
-		return u[-2:]
+		return u[8:10]
 
 	def codistribution(self, u):
 		q = self.position(u)
