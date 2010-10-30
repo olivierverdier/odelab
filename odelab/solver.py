@@ -164,12 +164,13 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.get_u(-1)
 	
-	def plot(self, components=None, plot_exact=True, **plot_args):
+	def plot(self, components=None, plot_exact=True, save=None, **plot_args):
 		"""
 		Plot some components of the solution.
 		
 :param scalar|array_like components: either a given component of the solution, or a list of components to plot.
 :param boolean plot_exact: whether to plot the exact solution (if available)
+:param string save: whether to save the plot in a file
 		"""
 		if components is None:
 			components = range(len(self.us[0]))
@@ -191,7 +192,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				axis.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
 		axis.set_xlabel('time')
 		axis.legend()
-		PL.plot() # plot only in interactive mode
+		if save:
+			PL.savefig(save, format='pdf')
+		else:
+			PL.plot() # plot only in interactive mode
 		return axis.lines[previous_line:]
 	
 	def plot_function(self, function, **plot_args):

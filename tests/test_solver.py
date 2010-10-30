@@ -9,6 +9,8 @@ from odelab.scheme.exponential import *
 from odelab.system import *
 from odelab.solver import *
 
+import tempfile
+import os
 
 import numpy.testing as npt
 import nose.tools as nt
@@ -120,6 +122,11 @@ class Harness_Circle(Harness):
 		self.s.run()
 		self.s.plot2D()
 		self.s.plot(plot_exact=False)
+		self.s.plot(plot_exact=True)
+		tmp = tempfile.gettempdir()
+		path = os.path.join(tmp, 'test_fig.pdf')
+		print path
+		self.s.plot(save=path)
 
 class Test_Circle_EEuler(Harness_Circle):
 	def make_solver(self):
