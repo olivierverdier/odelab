@@ -177,7 +177,38 @@ def tensordiag(T):
 		T = np.column_stack([T[:,s,s] for s in range(np.shape(T)[1])])
 	return T
 
-class ContactOscillator(System):
+class NonHolonomic(System):
+	"""
+	Creates a DAE system out of a non-holonomic one, suitable to be used with the :class:`odelab.scheme.constrained.Spark` scheme.
+	"""
+	def constraint(self, u):
+		constraint = np.tensordot(self.codistribution(u), self.velocity(u), [1,0])
+		constraint = tensordiag(constraint)
+		return constraint
+
+	def reaction_force(self, u):
+		 # a nxsxs tensor, where n is the degrees of freedom of the position:
+		reaction_force = np.tensordot(self.codistribution(u), self.lag(u), [0,0])
+		reaction_force = tensordiag(reaction_force)
+		return reaction_force
+
+	def multi_dynamics(self, ut):
+		"""
+		Split the Lagrange-d'Alembert equations in a Spark LobattoIIIA-B method.
+		It splits the vector field into two parts.
+		f_1 = [v, 0]
+		f_2 = [0, f + F]
+
+		where f is the external force and F is the reaction force stemming from the constraints.
+		"""
+		v = self.velocity(ut)
+		return {
+		rk.LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
+		rk.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(ut) + self.reaction_force(ut)])
+		}
+
+
+class ContactOscillator(NonHolonomic):
 	"""
 Example 5.2 in [MP]_.
 
@@ -230,24 +261,9 @@ perturbation of the contact oscillator.
 	def time_step(self, N=40):
 		return 2*np.sin(np.pi/N)
 	
-	def reaction_force(self, u):
-		reaction_force = np.tensordot(self.codistribution(u), self.lag(u), [0,0]) # a 3xsxs tensor
-		reaction_force = tensordiag(reaction_force)
-		return reaction_force
 	
-	def multi_dynamics(self, u):
-		v = self.velocity(u)
-		return {
-		rk.LobattoIIIA: np.concatenate([v, np.zeros_like(v)]),
-		rk.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(u) + self.reaction_force(u)])
-		}
-	
-	def constraint(self, u):
-		constraint = np.tensordot(self.codistribution(u), self.velocity(u), [1,0])
-		constraint = tensordiag(constraint)
-		return constraint
 
-class VerticalRollingDisk(System):
+class VerticalRollingDisk(NonHolonomic):
 	"""
 	Vertical Rolling Disk
 	"""
@@ -279,10 +295,15 @@ class VerticalRollingDisk(System):
 		q = self.position(u)
 		phi = q[2]
 		R = self.radius
-		return np.array([[1., 0, 0, -R*np.cos(phi)],[0, 1, 0, -R*np.sin(phi)]])
+		one = np.ones_like(phi)
+		zero = np.zeros_like(phi)
+		return np.array([[one, zero, zero, -R*np.cos(phi)],[zero, one, zero, -R*np.sin(phi)]])
+
+	def state(self,u):
+		return u[:8]
 
 	def force(self,u):
-		return np.zeros_like(u)
+		return np.zeros_like(self.position(u))
 
 	def assemble(self,q,v,l):
 		return np.hstack([q,v,l])
