@@ -9,7 +9,13 @@ Welcome to odelab's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+	:maxdepth: 2
+
+	rst/solver
+	rst/system
+	rst/scheme
+	rst/exponential
+
 
 Indices and tables
 ==================
@@ -19,13 +25,6 @@ Indices and tables
 * :ref:`search`
 
 
-.. automodule:: odelab.solver
-	:members:
-	
-.. automodule:: odelab.system
-	:members:
 
-.. automodule:: odelab.phi_pade
-	:members:
 
 
