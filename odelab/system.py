@@ -214,7 +214,8 @@ perturbation of the contact oscillator.
 
 .. [MP] R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16**, 283-328., (2006)
 	"""
-	 
+
+	size = 7 # 3+3+1
 
 	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
@@ -263,6 +264,9 @@ class VerticalRollingDisk(NonHolonomic):
 	"""
 	Vertical Rolling Disk
 	"""
+
+	size = 10 # 4+4+2
+
 	def __init__(self, mass=1., radius=1., Iflip=1., Irot=1.):
 		"""
 		:mass: mass of the disk

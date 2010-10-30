@@ -48,6 +48,28 @@ class Test_ContactOscillator(object):
 		for k in d:
 			npt.assert_array_almost_equal(ds[k] - d[k].reshape(-1,1),0)
 
+class Harness_Nonholonomic(object):
+	def test_constraint(self,nb_stages=4):
+		u = np.random.random_sample([self.sys.size,nb_stages])
+		constraints = self.sys.constraint(u)
+		for U,C in zip(u.T,constraints.T):
+			npt.assert_array_almost_equal(np.dot(self.sys.codistribution(U),self.sys.velocity(U)), C)
+
+	def test_reaction_force(self,nb_stages=4):
+		u = np.random.random_sample([self.sys.size,nb_stages])
+		force = self.sys.reaction_force(u)
+		for U,F in zip(u.T,force.T):
+			npt.assert_array_almost_equal(np.dot(self.sys.lag(U), self.sys.codistribution(U),), F)
+
+class Test_ContactOscillator_NH(Harness_Nonholonomic):
+	def setUp(self):
+		self.sys = ContactOscillator()
+
+class Test_VerticalRollingDisk_NH(Harness_Nonholonomic):
+	def setUp(self):
+		self.sys = VerticalRollingDisk()
+
+
 def test_Jay_exact(t=1.):
 	sys = JayExample()
 	dyn = sys.multi_dynamics(np.hstack([JayExample.exact(t,array([1.,1.])),t]))
