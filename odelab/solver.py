@@ -164,46 +164,77 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.get_u(-1)
 	
-	def plot(self, components=None, plot_exact=True, save=None, **plot_args):
+	max_plot_res = 500 # max plot resolution
+
+	def plot(self, components=None, plot_exact=True, error=False, save=None, **plot_args):
 		"""
 		Plot some components of the solution.
 		
-:param scalar|array_like components: either a given component of the solution, or a list of components to plot.
+:param list components: either a given component of the solution, or a list of components to plot, or a list of strings corresponding to methods of the system.
 :param boolean plot_exact: whether to plot the exact solution (if available)
 :param string save: whether to save the plot in a file
+:param boolean error: to plot (the log10 of) the error instead of the value itself
 		"""
-		if components is None:
+		# some sampling
+		size = len(self.ts)
+		stride = np.ceil(size/self.max_plot_res)
+		ats = self.ats[::stride]
+		aus = self.aus[:,::stride]
+
+		# components
+		if components is None: # plot all the components by default
 			components = range(len(self.us[0]))
-		if not np.iterable(components):
+		if not np.iterable(components): # makes the code work when plotting a single component
 			components = [components]
-		if plot_exact:
+
+		if plot_exact or error:
 			has_exact = hasattr(self.system, 'exact')
 			if has_exact:
-				exact = self.system.exact(self.ats, self.us[0])
+				exact = self.system.exact(ats, self.initial())
+		compute_exact = (plot_exact or error) and has_exact
 		axis = PL.gca()
+		if save: # if this is meant to be saved, clear the previous plot first
+			axis.cla()
 		previous_line = len(axis.lines)
+
+		ut = np.vstack([aus, ats])
 		for component in components:
-			label = self.system.label(component)
+			if isinstance(component, str):
+				label = component
+				data = self.system.__getattribute__(component)(ut)
+				if compute_exact:
+					exact_comp = self.system.__getattribute__(component)(np.vstack([exact, ats]))
+			else:
+				label = self.system.label(component)
+				data = aus[component]
+				if compute_exact:
+					exact_comp = exact[component]
+
+			# set up plot arguments
 			defaults = {'ls':'-', 'marker':','}
 			defaults.update(plot_args)
-			axis.plot(self.ats, self.aus[component], ',-', label=label, **defaults)
-			if plot_exact and has_exact:
+
+			if error and has_exact:
+				data = np.log10(np.abs(data - exact_comp))
+			axis.plot(ats, data, ',-', label=label, **defaults)
+			if compute_exact and not error:
 				axis._get_lines.count -= 1
-				axis.plot(self.ats, exact[component], ls='-', lw=2, label='%s_' % label)
+				axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label)
 		axis.set_xlabel('time')
 		axis.legend()
 		if save:
-			PL.savefig(save, format='pdf')
+			PL.savefig(save, format='pdf', **plot_args)
 		else:
 			PL.plot() # plot only in interactive mode
-		return axis.lines[previous_line:]
+		return axis
 	
-	def plot_function(self, function, **plot_args):
+	def plot_function(self, function, *args, **kwargs):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
-		
-		:param function: name of the method to call on the current system object
-		:type function: string
+
+		This is now a convenience function that calls `odelab.solver.plot`.
+
+:param string function: name of the method to call on the current system object
 		
 		:Example:
 			the code::
@@ -212,8 +243,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			
 			will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
-		values = self.system.__getattribute__(function)(np.vstack([self.aus, self.ats]))
-		return PL.plot(self.ats, values.T, label=function, **plot_args)
+		return self.plot(*args, components=[function], **kwargs)
 
 	def plot2D(self):
 		"""

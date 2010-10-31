@@ -109,7 +109,16 @@ def test_unstable():
 	s.initialize(u0 = 1., time = 100, h = 10)
 	s.run()
 
-	
+class DummySystem(System):
+	def __init__(self, f):
+		super(DummySystem,self).__init__(f)
+
+	def output(self, ut):
+		return np.ones(ut.shape[1])
+
+	def exact(self, t, u0):
+		return t*u0.reshape(-1,1)
+
 class Harness_Circle(Harness):
 	def setUp(self):
 		def f(t,u):
@@ -127,14 +136,21 @@ class Harness_Circle(Harness):
 		path = os.path.join(tmp, 'test_fig.pdf')
 		print path
 		self.s.plot(save=path)
+		a = self.s.plot(components=['output', 0],save=path, plot_exact=False)
+		nt.assert_equal(len(a.lines), 2)
+		a = self.s.plot(components=['output', 0],save=path, plot_exact=True)
+		nt.assert_equal(len(a.lines), 4)
+		self.s.plot(components=['output'], error=True)
+		self.s.plot_function('output')
+		self.s.plot(components=['output',0], save=path)
 
 class Test_Circle_EEuler(Harness_Circle):
 	def make_solver(self):
-		self.s = SingleStepSolver(ExplicitEuler(), System(self.f))
+		self.s = SingleStepSolver(ExplicitEuler(), DummySystem(self.f))
 
 class Test_Circle_RK34(Harness_Circle):
 	def make_solver(self):
-		self.s = SingleStepSolver(RungeKutta34(), System(self.f))
+		self.s = SingleStepSolver(RungeKutta34(), DummySystem(self.f))
 
 def make_lin(A):
 	if np.isscalar(A):
@@ -343,18 +359,19 @@ class Test_Simple(object):
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
-		lines = self.s.plot(0,lw=5)
+		pl.clf()
+		lines = self.s.plot(0,lw=5).lines
 		npt.assert_equal(len(lines),1)
-		lines = self.s.plot(lw=5)
+		pl.clf()
+		lines = self.s.plot(lw=5).lines
 		npt.assert_equal(len(lines),3)
 		npt.assert_equal(lines[-1].get_linewidth(),5)
 	
 	def test_plot_function(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
-		lines = self.s.plot_function('total', lw=4)
+		lines = self.s.plot_function('total', lw=4).lines
 		npt.assert_equal(lines[-1].get_linewidth(), 4)
-		
 
 
 import scipy.linalg as slin
