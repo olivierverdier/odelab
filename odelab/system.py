@@ -279,6 +279,9 @@ class VerticalRollingDisk(NonHolonomic):
 		self.Iflip = Iflip
 		self.Irot = Irot
 
+	def label(self, component):
+		return ['x','y',u'φ',u'θ','vx','vy',u'ωφ',u'ωη',u'λ1',u'λ2'][component]
+
 	def position(self, u):
 		"""
 		Positions x,y,φ (SE(2) coordinates), θ (rotation)
@@ -307,6 +310,12 @@ class VerticalRollingDisk(NonHolonomic):
 
 	def assemble(self,q,v,l):
 		return np.hstack([q,v,l])
+
+	def qnorm(self, ut):
+		return np.sqrt(ut[0]**2 + ut[1]**2)
+
+	def energy(self, ut):
+		return .5*(self.mass*(ut[4]**2 + ut[5]**2) + self.Iflip*ut[6]**2 + self.Irot*ut[7]**2)
 
 	def exact(self,t,u0):
 		"""
