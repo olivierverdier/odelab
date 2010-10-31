@@ -41,6 +41,11 @@ Usage is as follows::
 	p = Polynomial([4.,2.,1.,...]) # polynomial 4 + 2x + x**2 + ...
 	Z = Polynomial.exponents(z, 3) # compute z**2 and z**3
 	p(Z) # value of the polynomial p(z)
+
+The evaluation at a matrix value is computed using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
+The polynomial is split into chunks of size :data:`s`.
+
+.. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed. :gbook:`mlOa7wPX6OYC`
 	"""
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
@@ -66,19 +71,14 @@ Compute the first s+1 exponents of z.
 		"""
 Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
 
-This is done using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
-The polynomial is split into chunks of size :data:`s`.
+:param list[s+1] Z:
+		list of exponents of z up to s, so ``len(Z) == s+1``, where :data:`s` is the size of the chunks
+		the various cases are the following:
 
-:Parameters:
-	Z : list[s+1]
-		list of exponents of z up to s, so ``len(Z) == s+1``, where :data:`s` is the size of the chunks;
-		s=1, it is the Horner method
-		s ≥ d is the naive polynomial evaluation.
-		s ≈ sqrt(d) is the optimal choice
+		:s=1: Horner method
+		:s ≥ d: naive polynomial evaluation.
+		:s ≈ sqrt(d): optimal choice
 
-:Reference:
-
-.. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed..
 		"""
 		p = self.coeffs
 		P = 0

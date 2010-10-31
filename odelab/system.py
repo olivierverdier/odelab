@@ -83,7 +83,7 @@ stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
 	 
 :References:
 	 
-.. [jay06] Jay - Specialized Runge-Kutta Methods for index 2 DAEs (2006)
+.. [jay06] Jay - *Specialized Runge-Kutta methods for index $ 2$ differential-algebraic equations.* Math. Comput. 75, No. 254, 641-654 (2006). :doi:`10.1090/S0025-5718-05-01809-0`
 	"""
 
  
@@ -212,7 +212,7 @@ This is the example presented in [MP]_ § 5.2. It is a nonlinear
 perturbation of the contact oscillator.
 
 
-.. [MP] R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16**, 283-328., (2006)
+.. [MP] R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16**, No. 4, 283-328., (2006). :doi:`10.1007/s00332-005-0698-1`
 	"""
 
 	size = 7 # 3+3+1

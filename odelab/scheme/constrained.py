@@ -35,9 +35,9 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 :References:
 	
-.. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) (`url <http://dx.doi.org/10.1007/s00332-005-0698-1>`_)
+.. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
 	"""
-
+# TODO: support for momentum instead of velocities (i.e. with mass/inertia)
 	
 	root_solver = _rt.Newton
 	
@@ -104,8 +104,7 @@ By vector, it is meant that methods must accept vector arguments, i.e., accept a
 
 References:
 	
-.. [jay03] \L. Jay - Solution of index 2 implicit differential-algebraic equations
-	    by Lobatto Runge-Kutta methods (2003).
+.. [jay03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
 	"""
 	
 	root_solver = _rt.FSolve
