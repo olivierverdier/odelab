@@ -98,7 +98,7 @@ class AdamsBashforth(ExplicitGeneralLinear):
 
 	tableaux = {
 	1: ([[0, None, 1]], [[1, 1]]),
-	2: ([[0, None, 1, 3/2,-1/2]], 
+	2: ([[0, None, 1, 3/2,-1/2]],
 		[	[None,1, 3/2,-1/2],
 			[1, None, None, None],
 			[None,None,1,None]

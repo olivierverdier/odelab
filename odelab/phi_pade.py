@@ -101,7 +101,7 @@ def ninf(M):
 
 class Phi(object):
 	r"""
-Main class to compute the :math:`φ_l` functions. 
+Main class to compute the :math:`φ_l` functions.
 The simplest way to define those functions is by the formula:
 
 .. math::

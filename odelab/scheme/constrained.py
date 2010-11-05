@@ -1,4 +1,5 @@
-# -*- coding: UTF-8 -*-
+## -*- coding: UTF-8 -* -*- coding: UTF-8 -*-
+
 from __future__ import division
 
 import numpy as np
@@ -13,14 +14,14 @@ class McLachlan(Scheme):
 	"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the
 algorithm given by equation (4.18) in [mclachlan06]_.
- 
+
  The Lagrangian is assumed to be of the form:
- 
+
 .. math::
 
     L(q,v) = 0.5 \|v^2\| - V(q)
- 
-where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`, 
+
+where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`,
 where :math:`A` is the mxn constraint matrix.
 
 More precisely, the :class:`odelab.system.System` object must implement:
@@ -62,29 +63,29 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 class Spark(Scheme):
 	r"""
-Solver for semi-explicit index 2 DAEs by Lobatto III RK methods 
+Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
  as presented in [jay03]_.
- 
+
 We consider the following system of DAEs:
 
 .. math::
     y' = f(t,y,z)\\
      0 = g(t,y)
- 
+
 where t is the independent variable, y is a vector of length n containing
-the differential variables and z is a vector of length m containing the 
+the differential variables and z is a vector of length m containing the
 algebraic variables. Also,
 
 .. math::
- 
+
     f:\ R × R^n × R^m → R^n\\
     g:\ R × R^n → R^m
- 
+
 It is assumed that :math:`g_y f_z` exists and is invertible.
 
-The above system is integrated from ``t0`` to ``tfinal``, where 
-tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
-given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK 
+The above system is integrated from ``t0`` to ``tfinal``, where
+tspan = [t0, tfinal] using constant stepsize h. The initial condition is
+given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK
 methods used is given by ``s``.
 
 The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.

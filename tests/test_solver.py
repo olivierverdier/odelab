@@ -386,11 +386,11 @@ class CompareLinearExponential(object):
 def test_linear_exponential():
 	for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
 		for scheme in [
-			LawsonEuler(), 
-			RKMK4T(), 
-			HochOst4(), 
-			ABLawson2(), 
-			ABLawson3(), 
+			LawsonEuler(),
+			RKMK4T(),
+			HochOst4(),
+			ABLawson2(),
+			ABLawson3(),
 			ABLawson4(),
 			Lawson4(),
 			ABNorset4(),

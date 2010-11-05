@@ -8,7 +8,7 @@ A collection of solvers for ODEs of various types.
 .. module :: solver
 .. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
 
-The :class:`Scheme` class contains methods on how to perform one iteration step. 
+The :class:`Scheme` class contains methods on how to perform one iteration step.
 It is its responsibility to take care of the time step.
 
 The higher level class is :class:`Solver`, which is initialized with an instance of a :class:`Scheme` class.
@@ -257,7 +257,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 	def quiver(self):
 		mins = self.aus.min(axis=0)
 		maxs = self.aus.max(axis=0)
-		X,Y = np.meshgrid(linspace(mins[0], maxs[0], self.quiver_res), 
+		X,Y = np.meshgrid(linspace(mins[0], maxs[0], self.quiver_res),
 								linspace(mins[1], maxs[1], self.quiver_res))
 		Z = np.dstack([X,Y])
 		vals = self.f(0,Z.transpose(2,0,1))

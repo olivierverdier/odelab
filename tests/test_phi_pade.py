@@ -71,7 +71,7 @@ def phi_l(z, l=0):
 		fac /= i+1
 	return phi
 
-phi_formulae = { 
+phi_formulae = {
 	0: lambda z: np.exp(z),
 	1: lambda z: np.expm1(z)/z,
 	2: lambda z: (np.expm1(z) - z)/z**2,
