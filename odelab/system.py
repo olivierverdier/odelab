@@ -219,7 +219,10 @@ perturbation of the contact oscillator.
 
 	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
-	
+
+	def label(self, component):
+		return [u'x',u'y',u'z',u'ẋ',u'ẏ',u'ż',u'λ'][component]
+
 	def position(self, u):
 		return u[:3]
 	
