@@ -49,7 +49,7 @@ The polynomial is split into chunks of size :data:`s`.
 	"""
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
-	
+
 	@classmethod
 	def exponents(self, z, s):
 		"""
@@ -66,7 +66,7 @@ Compute the first s+1 exponents of z.
 		for i in range(s):
 			Z.append(np.dot(Z[-1],z))
 		return Z
-		
+
 	def __call__(self, Z):
 		"""
 Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
@@ -115,12 +115,12 @@ Usage is as follows::
 where :data:`M` is a square array.
 The variable ``result`` is a list of all the values of :math:`φ_{k}(M)` for :math:`0≤k≤l`.
 	"""
-	
+
 	def __init__(self, k, d=6):
 		self.k = k
 		self.d = d
 		self.pade = self.compute_Pade()
-	
+
 	def compute_Pade(self):
 		r"""
 Compute the Padé approximations of order :math:`d` of :math:`φ_l`, for :math:`0 ≤ l ≤ k`.
@@ -129,7 +129,7 @@ The goal is to produce an approximation of the form:
 
 .. math::
 	φ_{\ell} = \frac{N}{D}
-	
+
 where :math:`N` and :math:`D` are polynomials.
 The formula for :math:`D` is first computed recursively using the following recursion relations:
 
@@ -137,12 +137,12 @@ The formula for :math:`D` is first computed recursively using the following recu
 	D_0^0 = 1\\
 	D_{j+1}^0 = \frac{-(d-j)}{(2d -j)(j+1)} D_{j}^0\\
 	D_{j}^{\ell+1} = (2d-\ell)(2d+\ell+1-j) D_{j}^{\ell}
-	
+
 Then, considering the inverse factorial series:
-	
+
 .. math::
 	C_j := \frac{1}{j!}
-	
+
 The numerator :math:`N` is now computed by:
 
 .. math::
@@ -165,13 +165,13 @@ The numerator :math:`N` is now computed by:
 		self.C = C # save for future use; C[j] == 1/j!
 		N = [Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]) for m,Dr in enumerate(D)]
 		return N, [Polynomial(Dl) for Dl in D]
-	
+
 	@classmethod
 	def scaling(self, z, threshold=0):
 		norm = ninf(z)
 		e = max(threshold, np.log2(norm))
 		return int(math.ceil(e))
-	
+
 	def eval_pade(self, z, s=None):
 		"""
 		Evaluate :math:`φ_l(z)` using the Padé approximation.
@@ -181,8 +181,8 @@ The numerator :math:`N` is now computed by:
 		N,D = self.pade
 		Z = Polynomial.exponents(z,s)
 		self.phi = [solve(PD(Z), PN(Z)) for PN,PD in zip(N,D)]
-	
-	
+
+
 	def __call__(self, z):
 		"""
 The final call to compute the values of :math:`φ_k(z)`.
@@ -197,7 +197,7 @@ It proceeds in three steps:
 		for s in range(scaling):
 			self.square()
 		return self.phi
-	
+
 	def phi_square(self, l):
 		"""
 Formula for squaring phi_l from existing phi_k for k≤l, taken from the `Expint documentation`_.
@@ -220,5 +220,5 @@ Formula for squaring phi_l from existing phi_k for k≤l, taken from the `Expint
 
 	def square(self):
 		self.phi = [self.phi_square(l) for l in range(self.k+1)]
-		
+
 

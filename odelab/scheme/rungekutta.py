@@ -9,12 +9,12 @@ from numpy import array, sqrt
 class RungeKutta(Scheme):
 	"""
 	Collection of classes containing the coefficients of various Runge-Kutta methods.
-	
+
 	:Attributes:
 		tableaux : dictionary
 			dictionary containing a Butcher tableau for every available number of stages.
 	"""
-	
+
 class GeneralLinear(Scheme):
 	pass
 
@@ -23,16 +23,16 @@ class ExplicitGeneralLinear(GeneralLinear):
 	Scheme for explicit general linear methods.
 	"""
 	scaled_input = True # whether to have the input as (y_0, hf(y_1), hf(y_2)...)
-	
+
 	def __init__(self, nb_stages=None):
 		super(ExplicitGeneralLinear, self).__init__()
 		if nb_stages is not None:
 			self.nb_stages = nb_stages
-	
+
 	@property
 	def tail_length(self):
 		return len(self.tableaux[self.nb_stages][1])
-	
+
 	def initialize(self):
 		super(ExplicitGeneralLinear, self).initialize()
 		tail_length = self.tail_length
@@ -66,7 +66,7 @@ class ExplicitGeneralLinear(GeneralLinear):
 					newtail[:,r] += coeff * Y[:,j]
 		self.tail = newtail
 		return t + h, self.tail[:,0]
-		
+
 
 class Heun(ExplicitGeneralLinear):
 	nb_stages = 3
@@ -114,7 +114,7 @@ class AdamsBashforth(ExplicitGeneralLinear):
 
 class Butcher(ExplicitGeneralLinear):
 	scaled_input = False
-	
+
 	tableaux = {
 	1: ([[0, None, None, 1, 0],
 			[1., 2, None, 0, 1]],
@@ -127,7 +127,7 @@ class Butcher(ExplicitGeneralLinear):
 	}
 
 class LobattoIIIA(RungeKutta):
-	
+
 	sf = sqrt(5)
 	tableaux = {
 	2: array([	[0., 0.,0.],
@@ -146,16 +146,16 @@ class LobattoIIIA(RungeKutta):
 
 class LobattoIIIB(RungeKutta):
 	sf = sqrt(5)
-	tableaux = {	
+	tableaux = {
 	2: array([	[0.,1/2, 0],
 				[1.,1/2, 0],
 				[1,1/2, 1/2]]),
-				
+
 	3: array([	[0  ,1/6, -1/6, 0],
 				[1/2,1/6,  1/3, 0],
 				[1  ,1/6,  5/6, 0],
 				[1 ,1/6, 2/3, 1/6]]),
-				
+
 	4: array([	[0        ,1/12, (-1-sf)/24,     (-1+sf)/24,     0],
 				[(5-sf)/10,1/12, (25+sf)/120,    (25-13*sf)/120, 0],
 				[(5+sf)/10,1/12, (25+13*sf)/120, (25-sf)/120,    0],

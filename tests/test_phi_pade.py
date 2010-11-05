@@ -164,6 +164,6 @@ def test_phi_scaled_mat(l=2,d=6):
 		expected = phi_l(z,l)
 		computed = phi(z)[-1]
 		nt.assert_almost_equal(computed/expected, np.ones_like(expected))
-		
+
 if __name__ == '__main__':
 	test_mat_pol()

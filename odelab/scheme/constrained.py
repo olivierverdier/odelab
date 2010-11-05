@@ -34,13 +34,13 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 
 :References:
-	
+
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
 	"""
 # TODO: support for momentum instead of velocities (i.e. with mass/inertia)
-	
+
 	root_solver = _rt.Newton
-	
+
 	def step(self, t, u):
 		h = self.h
 		vel = self.system.velocity(u)
@@ -57,8 +57,6 @@ More precisely, the :class:`odelab.system.System` object must implement:
 		vnew, lnew = vl[:dof], vl[dof:]
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
-	
-	
 
 
 
@@ -88,9 +86,7 @@ The above system is integrated from ``t0`` to ``tfinal``, where
 tspan = [t0, tfinal] using constant stepsize h. The initial condition is 
 given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK 
 methods used is given by ``s``.
- 
- 
- 
+
 The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.
 
 The corresponding :class:`odelab.system.System` object must implement a *tensor* version the following methods:
@@ -103,17 +99,17 @@ The corresponding :class:`odelab.system.System` object must implement a *tensor*
 By vector, it is meant that methods must accept vector arguments, i.e., accept a nxs matrix as input parameter.
 
 References:
-	
+
 .. [jay03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
 	"""
-	
+
 	root_solver = _rt.FSolve
 
 	def __init__(self, nb_stages):
 		super(Spark, self).__init__()
 		self.nb_stages = nb_stages
 		self.Q = self.compute_mean_stage_constraint()
-	
+
 	def compute_mean_stage_constraint(self):
 		"""
 		Compute the s x (s+1) matrix defined in [jay03]_.
@@ -128,7 +124,7 @@ References:
 		L = np.linalg.inv(np.vstack([A1t, es]))
 		Q = np.dot(L,Q)
 		return Q
-	
+
 	def get_residual_function(self, t, u):
 		s = self.nb_stages
 		h = self.h
@@ -137,7 +133,7 @@ References:
 		Q = self.Q
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
-		
+
 		def residual(YZ):
 			YZT = np.vstack([YZ,T])
 			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
@@ -148,7 +144,7 @@ References:
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
 			return [r1,r2,r3]
-		
+
 		return residual
 
 	def step(self, t, u):

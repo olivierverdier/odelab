@@ -11,12 +11,12 @@ class Test_ContactOscillator(object):
 		self.s = 3
 	def setUp(self):
 		self.co = ContactOscillator()
-	
+
 	def prepare(self):
 		u = np.random.rand(7)
 		us = np.column_stack([u]*self.s)
 		return u, us
-	
+
 	def test_constraint(self):
 		u, us = self.prepare()
 		c = self.co.constraint(u)
@@ -28,7 +28,7 @@ class Test_ContactOscillator(object):
 		r = self.co.reaction_force(u)
 		rs = self.co.reaction_force(us)
 		npt.assert_array_almost_equal(rs - r.reshape(-1,1), 0)
-	
+
 	def test_prop_lag(self):
 		"""
 		reaction force is proportional to lambda

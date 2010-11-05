@@ -9,7 +9,7 @@ import numpy as np
 import numpy.linalg
 
 class Scheme(object):
-		
+
 	def __repr__(self):
 		try:
 			h = self.h
@@ -23,16 +23,16 @@ class Scheme(object):
 	@property
 	def system(self):
 		return self.solver.system
-	
+
 	def increment_stepsize(self):
 		"""
 		Change the step size based on error estimation.
 		To be overridden for a variable step size method.
 		"""
 		pass
-	
+
 	h_default = .01
-	
+
 	# to be removed; use a signal instead
 	def get_h(self):
 		return self._h
@@ -107,8 +107,8 @@ class ode15s(Scheme):
 	Simulation of matlab's ``ode15s`` solver.
 	It is a BDF method of max order 5
 	"""
-	
-	
+
+
 	def __init__(self, **kwargs):
 		self.integrator_kwargs = kwargs
 

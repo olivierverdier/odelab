@@ -7,9 +7,9 @@ import nose.tools as nt
 from odelab.newton import *
 
 class Test_Newton(object):
-	
+
 	dim = 10
-	
+
 	def test_run(self):
 		zr = np.random.rand(self.dim)
 		def f(x):
@@ -19,7 +19,7 @@ class Test_Newton(object):
 		x = n.run(xr)
 		print n.required_iter
 		npt.assert_array_almost_equal(x,zr)
-	
+
 	def test_scalar(self):
 		def f(x):
 			return (x-1)**2
@@ -27,7 +27,7 @@ class Test_Newton(object):
 		n.tol = 1e-9
 		z = n.run(10.)
 		npt.assert_almost_equal(z,1.)
-		
+
 	def test_copy(self):
 		"""Newton doesn't destroy the initial value"""
 		def f(x):
@@ -38,7 +38,7 @@ class Test_Newton(object):
 		N.run(x0)
 		nt.assert_true(x0 is not y0)
 		npt.assert_almost_equal(x0,y0)
-	
+
 	def test_array(self):
 		def f(a):
 			return a*a

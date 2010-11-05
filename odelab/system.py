@@ -70,7 +70,7 @@ class JayExample(System):
 	 [jay06]_ Fig. 1.
 	 
 	 The exact solution to this problem is known as is
-	
+
 .. math::
 	 
 	y1(t) = \ee^t\\
@@ -96,53 +96,53 @@ stepsize :math:`h`. This is what is done in [jay06]_ Fig.1.
 			rk.LobattoIIICs: array([2*y1*y2**2 - 2*np.exp(-2*t)*y1*y2, z]),
 			rk.LobattoIIID: array([2*y2**2*z**2, y1**2*y2**2])
 			}
-	
+
 	def constraint(self, tu):
 		return array([tu[0]**2*tu[1] -  1])
-	
+
 	def state(self, u):
 		return u[0:2]
-	
+
 	def lag(self, u):
 		return u[2:3]
-	
+
 	@classmethod
 	def exact(self, t, u0):
 		if np.allclose(u0[:2], array([1.,1.])):
 			return array([np.exp(t), np.exp(-2*t), np.exp(2*t)])
 		raise ValueError("Exact solution not defined")
-	
+
 	def label(self, component):
 		return ['y1','y2','z'][component]
 
 class GraphSystem(System):
 	r"""
 	Trivial semi-explicit index 2 DAE of the form:
-	
+
 .. math::
 
 		x' = 1\\
 		y' = λ\\
 		y  = f(x)
 	"""
-	
+
 	def state(self, u):
 		return u[:2]
-	
+
 	def lag(self, u):
 		return u[-1:]
-	
+
 	def multi_dynamics(self, t, u):
 		x,y = self.state(u)
 		return {
 			rk.LobattoIIIA: np.zeros_like(self.state(u)), 
 			rk.LobattoIIIB: array([np.ones_like(x), self.lag(u)[0]]),
 			}
-	
+
 	def constraint(self, t, u):
 		x,y = self.state(u)
 		return array([y - self.f(x)])
-	
+
 	def hidden_error(self, t, u):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
 
@@ -153,20 +153,20 @@ class ODESystem(System):
 	def __init__(self, f, RK_class=rk.LobattoIIIA):
 		self.f = f
 		self.RK_class = RK_class
-	
+
 	def state(self, u):
 		return u[:1]
-	
+
 	def lag(self,u):
 		return u[1:] # should be empty
-	
+
 	def multi_dynamics(self, tu):
 		return {self.RK_class: array([self.f(tu)])}
-	
+
 	def constraint(self, tu):
 		return np.zeros([0,np.shape(tu)[1]])
-	
-	
+
+
 def tensordiag(T):
 	if len(np.shape(T)) == 3: # vector case
 		assert T.shape[1] == T.shape[2]
@@ -225,43 +225,43 @@ perturbation of the contact oscillator.
 
 	def position(self, u):
 		return u[:3]
-	
+
 	def velocity(self, u):
 		return u[3:6]
-	
+
 	def state(self,u):
 		return u[:6]
-	
+
 	def lag(self, u):
 		return u[6:7]
-		
+
 	def assemble(self, q,v,l):
 		return np.hstack([q,v,l])
-	
+
 	def force(self, u):
 		q = self.position(u) # copy?
 		return -q - self.epsilon*q[2]*q[0]*array([q[2],np.zeros_like(q[0]),q[0]])
-	
+
 	def codistribution(self, u):
 		q = self.position(u)
 		return np.array([[np.ones_like(q[1]), np.zeros_like(q[1]), q[1]]])
-	
+
 	def energy(self, u):
 		vel = self.velocity(u)
 		q = self.position(u)
 		return .5*(vel[0]**2 + vel[1]**2 + vel[2]**2 + q[0]**2 + q[1]**2 + q[2]**2 + self.epsilon*q[0]**2*q[2]**2)
-	
+
 	def initial(self, z0, e0=1.5, z0dot=0.):
 		q0 = array([np.sqrt( (2*e0 - 2*z0dot**2 - z0**2 - 1) / (1 + self.epsilon*z0**2) ), 1., z0])
 		p0 = array([-z0dot, 0, z0dot])
 		v0 = p0
 		l0 = ( q0[0] + q0[1]*q0[2] - p0[1]*p0[2] + self.epsilon*(q0[0]*q0[2]**2 + q0[0]**2*q0[1]*q0[2] ) ) / ( 1 + q0[1]**2 )
 		return np.hstack([q0, v0, l0])
-	
+
 	def time_step(self, N=40):
 		return 2*np.sin(np.pi/N)
-	
-	
+
+
 
 class VerticalRollingDisk(NonHolonomic):
 	"""
@@ -350,10 +350,10 @@ class Exponential(System):
 	def __init__(self, nonlin, L):
 		self.L = L
 		self.nonlin = nonlin
-	
+
 	def linear(self):
 		return self.L
-	
+
 	def f(self, t, u):
 		return np.dot(self.linear(), u) + self.nonlin(t,u)
 
@@ -367,18 +367,18 @@ class Linear(Exponential):
 class NoLinear(Exponential):
 	def __init__(self, f, size):
 		super(NoLinear,self).__init__(f, np.zeros([size,size]))
-	
+
 
 class Burgers(Exponential):
 	def __init__(self, viscosity=0.03, size=128):
 		self.viscosity = viscosity
 		self.size = size
 		self.initialize()
-	
+
 	def linear(self):
 		return -self.laplace
 
-		
+
 class BurgersComplex(Burgers):
 	def initialize(self):
 		self.k = 2*np.pi*np.array(np.fft.fftfreq(self.size, 1/self.size),dtype='complex')
@@ -386,13 +386,13 @@ class BurgersComplex(Burgers):
 		self.laplace = self.viscosity*np.diag(self.k**2)
 		x = np.linspace(0,1,self.size,endpoint=False)
 		self.points = x - x.mean() # too lazy to compute x.mean manually here...
-	
+
 	def preprocess(self, u0):
 		return np.fft.fft(u0)
-	
+
 	def postprocess(self, u1):
 		return np.real(np.fft.ifft(u1))
-	
+
 	def nonlin(self, t, u):
 		return -0.5j * self.k * np.fft.fft(np.real(np.fft.ifft(u)) ** 2)
-	
+

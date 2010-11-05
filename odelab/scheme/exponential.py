@@ -27,9 +27,9 @@ class Exponential(Scheme):
 	def __init__(self, *args, **kwargs):
 		super(Exponential, self).__init__(*args, **kwargs)
 		self.phi = Phi(self.phi_order, self.phi_degree)
-	
+
 	phi_degree = 6
-	
+
 	def initialize(self):
 		super(Exponential, self).initialize()
 		ts = self.solver.ts[-self.tail_length:]
@@ -38,7 +38,7 @@ class Exponential(Scheme):
 		for i in range(len(tail)-1):
 			tail[i] = self.h*self.system.nonlin(ts[i], tail[i])
 		self.tail = np.array(list(reversed(tail))).T
-	
+
 	def step(self, t, u):
 		h = self.h
 		ua, vb = self.general_linear()
@@ -60,7 +60,7 @@ class Exponential(Scheme):
 					newtail[:,r] += np.dot(coeff, Y[:,j])
 		self.tail = newtail
 		return t + h, self.tail[:,0]
-		
+
 
 	def general_linear(self):
 		"""
@@ -74,7 +74,7 @@ class Exponential(Scheme):
 
 class LawsonEuler(Exponential):
 	phi_order = 0
-	
+
 	def general_linear_z(self, z):
 		ez = self.phi(z)[0]
 		one = Polynomial.exponents(z,0)[0]
@@ -82,7 +82,7 @@ class LawsonEuler(Exponential):
 
 class RKMK4T(Exponential):
 	phi_order = 1
-	
+
 	def general_linear_z(self, z):
 		one = Polynomial.exponents(z,0)[0]
 		ez, phi_1 = self.phi(z)
@@ -94,12 +94,12 @@ class RKMK4T(Exponential):
 				],
 				[[1/6*np.dot(phi_1,one+1/2*z), 1/3*phi_1, 1/3*phi_1, 1/6*np.dot(phi_1,one-1/2*z), ez]]
 				)
-		
+
 
 class HochOst4(Exponential):
 	phi_order = 3
 	phi_degree = 13
-	
+
 	def general_linear_z(self, z):
 		one = Polynomial.exponents(z,0)[0]
 		ez, phi_1, phi_2, phi_3 = self.phi(z)
@@ -117,10 +117,10 @@ class HochOst4(Exponential):
 
 class ABLawson(Exponential):
 	phi_order = 0
-	
+
 class ABLawson2(ABLawson):
 	tail_length = 2
-	
+
 	def general_linear_z(self, z):
 		ez = self.phi(z)[0]
 		one, ez, e2z = Polynomial.exponents(ez,2)
@@ -135,7 +135,7 @@ class ABLawson2(ABLawson):
 class ABLawson3(ABLawson):
 	phi_order = 0
 	tail_length = 3
-	
+
 	def general_linear_z(self, z):
 		ez = self.phi(z)[0]
 		one, ez, e2z, e3z = Polynomial.exponents(ez,3)
@@ -150,7 +150,7 @@ class ABLawson3(ABLawson):
 class ABLawson4(ABLawson):
 	phi_order = 0
 	tail_length = 4
-	
+
 	def general_linear_z(self, z):
 		ez = self.phi(z)[0]
 		one, ez, e2z, e3z, e4z = Polynomial.exponents(ez, 4)
@@ -166,7 +166,7 @@ class ABLawson4(ABLawson):
 class Lawson4(Exponential):
 	phi_order = 0
 	tail_length = 1
-	
+
 	def general_linear_z(self, z):
 		one = Polynomial.exponents(z,0)[0]
 		ez = self.phi(z)[0]
@@ -181,7 +181,7 @@ class Lawson4(Exponential):
 class ABNorset4(Exponential):
 	phi_order = 4
 	tail_length = 4
-	
+
 	def general_linear_z(self, z):
 		ez, phi_1, phi_2, phi_3, phi_4 = self.phi(z)
 		one = Polynomial.exponents(z,0)[0]
@@ -197,7 +197,7 @@ class ABNorset4(Exponential):
 class GenLawson45(Exponential):
 	phi_order = 5
 	tail_length = 5
-	
+
 	def general_linear_z(self, z):
 		one = Polynomial.exponents(z,0)[0]
 		ez, phi_1, phi_2, phi_3, phi_4, phi_5 = self.phi(z)
@@ -222,4 +222,4 @@ class GenLawson45(Exponential):
 						None,None,None,one,None], 
 				],
 				)
-		
+

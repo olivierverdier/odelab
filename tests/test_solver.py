@@ -38,24 +38,24 @@ class Harness_Solver(Harness):
 	dim = 1
 	def set_system(self, f):
 		self.solver.system = System(f)
-	
+
 	def test_scheme_str(self):
 		# should not raise an exception even though h is not yet set in the underlying scheme:
 		print str(self.solver)
-	
+
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		nt.assert_true(self.solver.time == Solver.time)
 		nt.assert_true(len(self.solver.ts) == 1)
 		nt.assert_true(len(self.solver.us) == 1)
-	
+
 	def test_initialize_scheme(self):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
 		self.solver.step(self.solver.ts[0], self.solver.initial())
 		nt.assert_true(self.solver.scheme.h == h)
-	
+
 	def test_quadratic(self):
 		"""should solve f(t) = t pretty well"""
 		print type(self).__name__
@@ -126,7 +126,7 @@ class Harness_Circle(Harness):
 		self.f = f
 		self.make_solver()
 		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
-	
+
 	def test_plot(self):
 		self.s.run()
 		self.s.plot2D()
@@ -181,7 +181,7 @@ class Harness_Solver(Harness):
 		order = self.solver.plot_error(do_plot=self.do_plot)
 		print order
 		nt.assert_true(order < self.order + .1)
-	
+
 class Test_ExplicitEuler(Harness_Solver):
 	def setUp(self):
 		self.solver = SingleStepSolver(ExplicitEuler(), System(make_lin(self.a)))
@@ -201,14 +201,14 @@ class Harness_Osc(object):
 		self.set_solver()
 		self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
 		self.s.time = 10.
-	
+
 ## 	def test_run(self):
 ## 		self.s.run()
-	
-	
+
+
 	z0s = np.linspace(-.9,.9,10)
 	N = 40
-	
+
 	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
 		h = self.sys.time_step(self.N)
@@ -226,8 +226,8 @@ class Harness_Osc(object):
 			kwargs['ls'] = ''
 			kwargs['marker'] = 'o'
 		plot(qs[i,::skip], vs[i,::skip], *args, **kwargs)
-	
-		
+
+
 class Test_McOsc(Harness_Osc):
 	def set_solver(self):
 		self.s = SingleStepSolver(McLachlan(), self.sys)
@@ -236,7 +236,7 @@ class Test_JayOsc(Harness_Osc):
 	N=5 # bigger time step to make Jay test faster
 	def set_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
-	
+
 class Test_SparkODE(object):
 	def setUp(self):
 		def f(xt):
@@ -244,7 +244,7 @@ class Test_SparkODE(object):
 		self.sys = ODESystem(f)
 		self.s = SingleStepSolver(Spark(4), self.sys)
 		self.s.initialize(array([1.]))
-	
+
 	def test_run(self):
 		self.s.run()
 		exact = np.exp(-self.s.ats)
@@ -263,7 +263,7 @@ class Test_Jay(object):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 		self.s.initialize(u0=array([1.,1.,1.]), time=1)
 ## 		self.s.initialize(array([1.]))
-	
+
 	def test_run(self):
 		self.s.run()
 		print self.s.ts[-1]
@@ -291,7 +291,7 @@ class Test_FinalTimeExceptions(object):
 		self.sys = self.LimitedSys(self.limit)
 		self.s = SingleStepSolver(ExplicitEuler(),self.sys)
 		self.s.initialize(u0=0)
-	
+
 	def test_max_iter(self):
 		self.max_iter = 1
 		self.s.max_iter = self.max_iter
@@ -301,7 +301,7 @@ class Test_FinalTimeExceptions(object):
 			npt.assert_equal(len(self.s.ts), self.max_iter + 1)
 		else:
 			raise Exception("FinalTimeNotReached not raised!")
-	
+
 	@nt.raises(Solver.Runtime)
 	def test_sys_exception(self):
 		self.s.run()
@@ -339,7 +339,7 @@ class Test_Simple(object):
 				return np.sum(xt[:-1],axis=0)
 		sys = TotSys(lambda t,x: -x)
 		self.s = SingleStepSolver(ExplicitEuler(), sys)
-	
+
 	def test_time(self):
 		sol = self.s
 		sol.h = Solver.time/10
@@ -355,7 +355,7 @@ class Test_Simple(object):
 		npt.assert_almost_equal(sol.ts[-1],Solver.time)
 		sol.run()
 		npt.assert_almost_equal(sol.ts[-1],2*Solver.time)
-	
+
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
@@ -366,7 +366,7 @@ class Test_Simple(object):
 		lines = self.s.plot(lw=5).lines
 		npt.assert_equal(len(lines),3)
 		npt.assert_equal(lines[-1].get_linewidth(),5)
-	
+
 	def test_plot_function(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
@@ -441,7 +441,7 @@ class Harness_ComplexConvection(object):
 			pl.clf()
 			pl.plot(self.B.points, self.sol, lw=2)
 		self.check_convection(do_plot)
-	
+
 	def find_N(self):
 		for N in [10,20,50,75,100,120,150]:
 			self.N = N
@@ -454,7 +454,7 @@ class Harness_ComplexConvection(object):
 		else:
 			raise Exception('No N!')
 		print type(self.scheme).__name__, N
-		
+
 class Test_CC_EE(Harness_ComplexConvection):
 	scheme = ExplicitEuler()
 	N=150

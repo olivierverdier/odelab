@@ -24,7 +24,7 @@ import itertools
 class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
-	
+
 	:Parameters:
 		system : :class:`odelab.system.System`
 			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses. The system may also be specified later, although before any simulation of course.
@@ -32,8 +32,8 @@ class Solver (object):
 
 	def __init__(self, system=None):
 		self.system = system
-	
-	
+
+
 	# default values for the total time
 	time = 1.
 
@@ -73,49 +73,49 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			t, u = self.step(t, u)
 			yield t, u
 			self.increment_stepsize()
-	
+
 
 	max_iter = 100000
 	class FinalTimeNotReached(Exception):
 		"""
 		Raised when the final time was not reached within the given ``max_iter`` number of iterations.
 		"""
-	
+
 	class Unstable(Exception):
 		"""
 		Raised when the scheme produces NaN values.
 		"""
-	
+
 	class NotInitialized(Exception):
 		"""
 		Raised when the solver is not properly initialized.
 		"""
-	
+
 	class Runtime(Exception):
 		"""
 		Raised to relay an exception occurred while running the solver.
 		"""
-	
+
 	def simulating(self):
 		return self
-	
+
 	def __enter__(self):
 		# start from the last time we stopped
 		t = t0 = self.ts[-1]
 		u = self.us[-1]
 		generator = self.generate(t, u)
 		return generator
-		
+
 	def __exit__(self, ex_type, ex_value, traceback):
 		self.ats = np.array(self.ts)
 		self.aus = np.array(self.us).T
 
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
-	
+
 	def run(self, time=None, catch_runtime=True):
 		"""
 		Run the simulation for a given time.
-		
+
 :param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
 :param boolean catch_runtime: whether to catch runtime exception (not catching allows to see the traceback)
 		"""
@@ -157,19 +157,19 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		Convenience method to obtain the initial condition.
 		"""
 		return self.get_u(0)
-	
+
 	def final(self):
 		"""
 		Convenience method to obtain the last computed value.
 		"""
 		return self.get_u(-1)
-	
+
 	max_plot_res = 500 # max plot resolution
 
 	def plot(self, components=None, plot_exact=True, error=False, save=None, **plot_args):
 		"""
 		Plot some components of the solution.
-		
+
 :param list components: either a given component of the solution, or a list of components to plot, or a list of strings corresponding to methods of the system.
 :param boolean plot_exact: whether to plot the exact solution (if available)
 :param string save: whether to save the plot in a file
@@ -227,7 +227,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		else:
 			PL.plot() # plot only in interactive mode
 		return axis
-	
+
 	def plot_function(self, function, *args, **kwargs):
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
@@ -235,12 +235,12 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		This is now a convenience function that calls `odelab.solver.plot`.
 
 :param string function: name of the method to call on the current system object
-		
+
 		:Example:
 			the code::
-			
+
 				solver.plot_function('energy')
-			
+
 			will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
 		return self.plot(*args, components=[function], **kwargs)
@@ -252,7 +252,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		PL.plot(self.aus[:,0],self.aus[:,1], '.-')
 		PL.xlabel('ux')
 		PL.ylabel('uy')
-	
+
 	quiver_res = 20
 	def quiver(self):
 		mins = self.aus.min(axis=0)
@@ -267,18 +267,18 @@ class SingleStepSolver(Solver):
 	def __init__(self, scheme, system=None):
 		super(SingleStepSolver, self).__init__(system)
 		self.scheme = scheme
-	
+
 	def __repr__(self):
 		return '<%s: %s>' % ('Solver', str(self.scheme))
-	
+
 	def set_scheme(self, scheme):
 		self.current_scheme = scheme
 		self.current_scheme.solver = self
 		self.current_scheme.initialize()
-	
+
 	def step_current(self, t,u):
 		return self.current_scheme.step(t,u)
-	
+
 	def step(self, t,u):
 		stage = len(self.us)
 		if stage < self.scheme.tail_length: # not enough past values to run main scheme
@@ -287,13 +287,13 @@ class SingleStepSolver(Solver):
 		if stage == self.scheme.tail_length: # main scheme kicks in
 			self.set_scheme(self.scheme)
 		return self.step_current(t,u)
-	
+
 	def increment_stepsize(self):
 		self.current_scheme.increment_stepsize()
 
 class MultiStepSolver(SingleStepSolver):
 ## 	default_single_step_scheme = HochOst4()
-	
+
 	def __init__(self, scheme, system, single_step_scheme=None):
 		super(MultiStepSolver, self).__init__(scheme, system)
 		if single_step_scheme is None:
@@ -301,10 +301,10 @@ class MultiStepSolver(SingleStepSolver):
 			single_step_scheme = HochOst4() # hard coded for the moment
 		self.single_step_scheme = single_step_scheme
 		self.single_step_scheme.solver = self
-	
 
 
 
-	
+
+
 
 

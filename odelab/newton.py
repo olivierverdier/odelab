@@ -42,7 +42,7 @@ class RootSolver(object):
 		self.shape = x.shape
 		x = x.ravel()
 		return x
-	
+
 	def get_result(self, x):
 		return x.reshape(self.shape)
 
@@ -50,12 +50,12 @@ class Newton(RootSolver):
 	"""
 	Simple Newton solver to solve F(x) = level.
 	"""
-	
+
 	h = 1e-6
 	def der(self, x):
 		return jacobian(self.residual, x, self.h)
-	
-	
+
+
 	maxiter = 600
 	tol = 1e-11
 	def run(self, x0):
@@ -85,7 +85,7 @@ class Newton(RootSolver):
 			raise Exception(u"Newton algorithm did not converge after %d iterations. ∆x=%.2e" % (i, norm(incr)))
 		self.required_iter = i
 		return self.get_result(x)
-	
+
 	def is_zero(self, x): # use np.allclose?
 		res = norm(self.F(x) - self.level)
 		return res < self.tol
