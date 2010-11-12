@@ -130,21 +130,25 @@ class GraphSystem(System):
 		return u[:2]
 
 	def lag(self, u):
-		return u[-1:]
+		return u[2:3]
 
-	def multi_dynamics(self, t, u):
-		x,y = self.state(u)
+	def multi_dynamics(self, ut):
+		x,y = self.state(ut)
 		return {
-			rk.LobattoIIIA: np.zeros_like(self.state(u)),
-			rk.LobattoIIIB: array([np.ones_like(x), self.lag(u)[0]]),
+			rk.RadauIIA: np.zeros_like(self.state(ut)),
+			rk.RadauIIA: array([np.ones_like(x), self.lag(ut)[0]]),
 			}
 
-	def constraint(self, t, u):
-		x,y = self.state(u)
+	def constraint(self, ut):
+		x,y = self.state(ut)
 		return array([y - self.f(x)])
 
 	def hidden_error(self, t, u):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
+
+	def exact(self, t, u0):
+		x = u0[0] + t
+		return array([x, self.f(x), self.f.der(x)])
 
 class ODESystem(System):
 	"""
