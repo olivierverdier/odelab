@@ -59,14 +59,19 @@ More precisely, the :class:`odelab.system.System` object must implement:
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
 
+
 class RKDAE(Scheme):
 	"""
 Partitioned Runge-Kutta for index 2 DAEs.
 	"""
+
+	root_solver = _rt.FSolve
+
 	def __init__(self, nb_stages, c):
 		super(RKDAE, self).__init__()
 		self.nb_stages = nb_stages
 		self.c = c
+		self.QT = np.eye(nb_stages+1, nb_stages)
 
 	def get_residual_function(self, t, u):
 		s = self.nb_stages
@@ -74,6 +79,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 		T = t + self.c*h
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
+		QT = self.QT
 
 		def residual(YZ):
 			YZT = np.vstack([YZ,T])
@@ -81,7 +87,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 			Y = self.system.state(YZ)
 			dyn = [np.dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
 			r1 = Y - yc - h*sum(dyn)
-			r2 = self.system.constraint(YZT)
+			r2 = np.dot(self.system.constraint(YZT), QT)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
 			return [r1,r2,r3]
@@ -144,10 +150,8 @@ References:
 .. [jay03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
 	"""
 
-	root_solver = _rt.FSolve
-
 	def __init__(self, nb_stages):
-		super(Spark, self).__init__(nb_stages, c = LobattoIIIA.tableaux[nb_stages][:,0])
+		super(Spark, self).__init__(nb_stages, c = RungeKutta.time_vector(LobattoIIIA.tableaux[nb_stages]))
 		self.QT = self.compute_mean_stage_constraint().T
 
 	def compute_mean_stage_constraint(self):
@@ -164,12 +168,3 @@ References:
 		L = np.linalg.inv(np.vstack([A1t, es]))
 		Q = np.dot(L,Q)
 		return Q
-
-	def get_residual_function(self, t, u):
-		residual = super(Spark, self).get_residual_function(t,u)
-		QT = self.QT
-		def Qresidual(YZ):
-			r1,r2,r3 = residual(YZ)
-			return [r1,np.dot(r2, QT),r3]
-		return Qresidual
-

@@ -14,6 +14,9 @@ class RungeKutta(Scheme):
 		tableaux : dictionary
 			dictionary containing a Butcher tableau for every available number of stages.
 	"""
+	@classmethod
+	def time_vector(cls, tableau):
+		return tableau[:,0]
 
 class GeneralLinear(Scheme):
 	pass
