@@ -1,21 +1,12 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
-if __name__ == '__main__':	
-	import sys
-	for mod in ['odelab.order', 'odelab.system', 'odelab.solver', 'odelab.phi_pade', 'odelab.scheme.exponential']:
-		try:
-			del sys.modules[mod]
-		except KeyError:
-			pass
-
-
 from odelab.order import *
 from odelab.solver import *
 from odelab.scheme.exponential import *
 from odelab.system import *
 
-class Test_Burgers(object):
+class Order_Burgers(object):
 	def test_run(self):
 		B = BurgersComplex(viscosity=.03)
 		size = B.size
