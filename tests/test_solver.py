@@ -18,6 +18,8 @@ import nose.tools as nt
 import pylab as pl
 pl.ioff()
 
+Solver.catch_runtime = False
+
 class Harness(object):
 	no_plot = True
 
@@ -290,6 +292,7 @@ class Test_FinalTimeExceptions(object):
 	def setUp(self):
 		self.sys = self.LimitedSys(self.limit)
 		self.s = SingleStepSolver(ExplicitEuler(),self.sys)
+		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
 
 	def test_max_iter(self):
@@ -308,7 +311,8 @@ class Test_FinalTimeExceptions(object):
 
 	@nt.raises(DummyException)
 	def test_sys_no_runtime_exception(self):
-		self.s.run(catch_runtime=False)
+		self.s.catch_runtime = False
+		self.s.run()
 
 class Test_Exceptions(object):
 	def setUp(self):
@@ -329,6 +333,7 @@ class Test_Exceptions(object):
 		def f(t,u):
 			raise Exception('message')
 		self.s = SingleStepSolver(ExplicitEuler(), System(f))
+		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
 		self.s.run()
 

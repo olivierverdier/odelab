@@ -33,7 +33,7 @@ class Harness_VerticalRollingDisk(object):
 		scipy.io.save_as_module('vrsave', {name: self.s})
 
 	def test_run(self):
-		self.s.run(catch_runtime=True)
+		self.s.run()
 ## 		self.s.plot(components=[6,7])
 		npt.assert_array_almost_equal(self.s.final(), self.sys.exact(array([self.s.ts[-1]]),u0=self.u0)[:,0], decimal=1)
 

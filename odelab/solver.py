@@ -110,14 +110,15 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		self.ats = np.array(self.ts)
 		self.aus = np.array(self.us).T
 
+	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)
+
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
 
-	def run(self, time=None, catch_runtime=True):
+	def run(self, time=None):
 		"""
 		Run the simulation for a given time.
 
 :param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
-:param boolean catch_runtime: whether to catch runtime exception (not catching allows to see the traceback)
 		"""
 		if time is None:
 			time = self.time
@@ -131,7 +132,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				try:
 					t,u = next(generator)
 				except Exception as e:
-					if catch_runtime:
+					if self.catch_runtime:
 						raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
 					else:
 						raise
