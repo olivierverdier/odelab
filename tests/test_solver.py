@@ -256,23 +256,41 @@ class Test_SparkODE(object):
 		npt.assert_almost_equal(self.s.final(), exact[-1])
 ## 		plot(self.s.ats, np.vstack([self.s.aus, exact]).T)
 
-class Test_Jay(object):
+class Test_JayExample(object):
 	def setUp(self):
-		def sq(x):
-			return x*x
-## 		self.sys = GraphSystem(sq)
 		self.sys = JayExample()
-		self.s = SingleStepSolver(Spark(2), self.sys)
-		self.s.initialize(u0=array([1.,1.,1.]), time=1)
 ## 		self.s.initialize(array([1.]))
 
-	def test_run(self):
+	def test_spark(self):
+		self.s = SingleStepSolver(Spark(2), self.sys)
+		self.s.initialize(u0=array([1.,1.,1.]), time=1)
 		self.s.run()
 		print self.s.ts[-1]
 		print self.s.final()
 		exact = self.sys.exact(self.s.ts[-1],array([1.,1.,1.]))
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
+
+def compare_exact(solver, u0, components, decimal=2):
+	print solver.ts[-1]
+	print solver.final()
+	exact = solver.system.exact(solver.ts[-1], u0)
+	npt.assert_array_almost_equal(solver.final()[:components], exact[:components], decimal=decimal)
+
+def sq(x):
+	return .5*x*x
+def lin(x):
+	return x
+sq.der = lin
+
+def test_rkdae():
+	sys = GraphSystem(sq)
+	u0 = array([0.,0.,1.])
+	for s in range(1,4):
+		sol = SingleStepSolver(RKDAE(s, RungeKutta.time_vector(RadauIIA.tableaux[s])), sys)
+		sol.initialize(u0=u0, time=1)
+		sol.run()
+		yield compare_exact, sol, u0, 2
 
 class DummyException(Exception):
 	pass
