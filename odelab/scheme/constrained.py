@@ -59,9 +59,49 @@ More precisely, the :class:`odelab.system.System` object must implement:
 		qnew = qh + .5*h*vnew
 		return t+h, self.system.assemble(qnew,vnew,lnew)
 
+class RKDAE(Scheme):
+	"""
+Partitioned Runge-Kutta for index 2 DAEs.
+	"""
+	def __init__(self, nb_stages):
+		super(RKDAE, self).__init__()
+		self.nb_stages = nb_stages
+
+	def get_residual_function(self, t, u):
+		s = self.nb_stages
+		h = self.h
+		c = LobattoIIIA.tableaux[s][:,0]
+		T = t + c*h
+		y = self.system.state(u).copy()
+		yc = y.reshape(-1,1) # "column" vector
+
+		def residual(YZ):
+			YZT = np.vstack([YZ,T])
+			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
+			Y = self.system.state(YZ)
+			dyn = [np.dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
+			r1 = Y - yc - h*sum(dyn)
+			r2 = self.system.constraint(YZT)
+			# unused final versions of z
+			r3 = self.system.lag(YZ[:,-1])
+			return [r1,r2,r3]
+
+		return residual
+
+	def step(self, t, u):
+		s = self.nb_stages
+		residual = self.get_residual_function(t, u)
+		# pretty bad guess here:
+		guess = np.column_stack([u.copy()]*(s+1))
+		N = self.root_solver(residual)
+		residual(guess)
+		full_result = N.run(guess) # all the values of Y,Z at all stages
+		# we keep the last Z value:
+		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
+		return t+self.h, result
 
 
-class Spark(Scheme):
+class Spark(RKDAE):
 	r"""
 Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
  as presented in [jay03]_.
@@ -107,9 +147,8 @@ References:
 	root_solver = _rt.FSolve
 
 	def __init__(self, nb_stages):
-		super(Spark, self).__init__()
-		self.nb_stages = nb_stages
-		self.Q = self.compute_mean_stage_constraint()
+		super(Spark, self).__init__(nb_stages)
+		self.QT = self.compute_mean_stage_constraint().T
 
 	def compute_mean_stage_constraint(self):
 		"""
@@ -127,34 +166,10 @@ References:
 		return Q
 
 	def get_residual_function(self, t, u):
-		s = self.nb_stages
-		h = self.h
-		c = LobattoIIIA.tableaux[s][:,0]
-		T = t + c*h
-		Q = self.Q
-		y = self.system.state(u).copy()
-		yc = y.reshape(-1,1) # "column" vector
+		residual = super(Spark, self).get_residual_function(t,u)
+		QT = self.QT
+		def Qresidual(YZ):
+			r1,r2,r3 = residual(YZ)
+			return [r1,np.dot(r2, QT),r3]
+		return Qresidual
 
-		def residual(YZ):
-			YZT = np.vstack([YZ,T])
-			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
-			Y = self.system.state(YZ)
-			dyn = [np.dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
-			r1 = Y - yc - h*sum(dyn)
-			r2 = np.dot(self.system.constraint(YZT), Q.T)
-			# unused final versions of z
-			r3 = self.system.lag(YZ[:,-1])
-			return [r1,r2,r3]
-
-		return residual
-
-	def step(self, t, u):
-		s = self.nb_stages
-		residual = self.get_residual_function(t, u)
-		guess = np.column_stack([u.copy()]*(s+1))
-		N = self.root_solver(residual)
-		residual(guess)
-		full_result = N.run(guess) # all the values of Y,Z at all stages
-		# we keep the last Z value:
-		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+self.h, result
