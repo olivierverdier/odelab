@@ -63,15 +63,15 @@ class RKDAE(Scheme):
 	"""
 Partitioned Runge-Kutta for index 2 DAEs.
 	"""
-	def __init__(self, nb_stages):
+	def __init__(self, nb_stages, c):
 		super(RKDAE, self).__init__()
 		self.nb_stages = nb_stages
+		self.c = c
 
 	def get_residual_function(self, t, u):
 		s = self.nb_stages
 		h = self.h
-		c = LobattoIIIA.tableaux[s][:,0]
-		T = t + c*h
+		T = t + self.c*h
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 
@@ -147,7 +147,7 @@ References:
 	root_solver = _rt.FSolve
 
 	def __init__(self, nb_stages):
-		super(Spark, self).__init__(nb_stages)
+		super(Spark, self).__init__(nb_stages, c = LobattoIIIA.tableaux[nb_stages][:,0])
 		self.QT = self.compute_mean_stage_constraint().T
 
 	def compute_mean_stage_constraint(self):
