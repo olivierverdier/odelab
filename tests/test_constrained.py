@@ -11,6 +11,8 @@ import numpy.testing as npt
 
 import scipy.io
 
+Solver.catch_runtime = False
+
 class Harness_VerticalRollingDisk(object):
 	def setUp(self):
 		self.sys = VerticalRollingDisk()
