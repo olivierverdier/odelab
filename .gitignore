@@ -1,1 +1,3 @@
 doc/.build
+bank*
+*.pdf
