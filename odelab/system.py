@@ -235,6 +235,9 @@ perturbation of the contact oscillator.
 	def velocity(self, u):
 		return u[3:6]
 
+	def average_velocity(self, u0, u1):
+		return (self.velocity(u0) + self.velocity(u1))/2
+
 	def state(self,u):
 		return u[:6]
 
@@ -247,6 +250,15 @@ perturbation of the contact oscillator.
 	def force(self, u):
 		q = self.position(u) # copy?
 		return -q - self.epsilon*q[2]*q[0]*array([q[2],np.zeros_like(q[0]),q[0]])
+
+	def average_force(self, u0, u1):
+		q0, q1 = self.position(u0), self.position(u1)
+		x0,z0 = q0[0],q0[2]
+		x1,z1 = q1[0],q1[2]
+		qm = (q0+q1)/2
+		px = (x0*z0**2 + x1*z1**2)/4 + (2*z0*z1*(x0+x1) + x0*z1**2 + x1*z0**2)/12
+		pz = (z0*x0**2 + z1*x1**2)/4 + (2*x0*x1*(z0+z1) + z0*x1**2 + z1*x0**2)/12
+		return -qm - self.epsilon*array([px, np.zeros_like(q0[0]), pz])
 
 	def codistribution(self, u):
 		q = self.position(u)
@@ -299,6 +311,12 @@ class VerticalRollingDisk(NonHolonomic):
 
 	def velocity(self, u):
 		return u[4:8]
+
+	def average_velocity(self, u0, u1):
+		return (self.velocity(u0) + self.velocity(u1))/2
+
+	def average_force(self, u0, u1):
+		return self.force(u0) # using the fact that the force is zero in this model
 
 	def lag(self,u):
 		return u[8:10]

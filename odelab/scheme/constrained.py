@@ -73,9 +73,10 @@ class NonHolonomicEnergy(Scheme):
 			q1,v1,l = self.system.position(x), self.system.velocity(x), self.system.lag(x)
 			cod = codistribution((q0+q1)/2)
 			return np.hstack([
-				q1 - q0 - h*(v0+v1)/2,
-				v1 - v0 - h * (self.system.force((q0+q1)/2) + np.dot(cod.T, l)),
-				np.dot(cod, v0+v1)])
+				q1 - q0 - h*self.system.average_velocity(u,x),
+				v1 - v0 - h * (self.system.average_force(u,x) + np.dot(cod.T, l)),
+				np.dot(cod, self.system.average_velocity(u,x)),
+				])
 		N = self.root_solver(residual)
 		y = N.run(u)
 		qnew, vnew, lnew = self.system.position(y), self.system.velocity(y), self.system.lag(y)

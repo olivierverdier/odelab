@@ -239,6 +239,11 @@ class Test_JayOsc(Harness_Osc):
 	def set_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 
+class Test_HOsc(Harness_Osc):
+	N=5 # bigger time step to make test faster
+	def set_solver(self):
+		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
+
 class Test_SparkODE(object):
 	def setUp(self):
 		def f(xt):
