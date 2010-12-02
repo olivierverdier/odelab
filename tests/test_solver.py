@@ -19,6 +19,10 @@ import pylab as pl
 pl.ioff()
 
 Solver.catch_runtime = False
+Solver.auto_save = True
+Solver.shelf_name = 'bank_solver'
+
+
 
 class Harness(object):
 	no_plot = True
@@ -43,6 +47,10 @@ const_r = partial(const_f, 1.)
 const_c = partial(const_f, 1.j)
 
 class Harness_Solver(Harness):
+	def setUp(self):
+		self.setup_solver()
+		self.solver.auto_save = False
+
 	dim = 1
 	def set_system(self, f):
 		self.solver.system = System(f)
@@ -86,29 +94,29 @@ class Harness_Solver(Harness):
 			yield self.check_const, f, u0, expected
 
 class Test_EEuler(Harness_Solver):
-	def setUp(self):
+	def setup_solver(self):
 		self.solver = SingleStepSolver(ExplicitEuler(), System(f))
 
 class Test_RK4(Harness_Solver):
-	def setUp(self):
+	def setup_solver(self):
 		self.solver = SingleStepSolver(RungeKutta4(), System(f))
 
 class Test_RK34(Harness_Solver):
-	def setUp(self):
+	def setup_solver(self):
 		self.solver = SingleStepSolver(RungeKutta34(), System(f))
 
 class Test_ode15s(Harness_Solver):
-	def setUp(self):
+	def setup_solver(self):
 		self.solver = SingleStepSolver(ode15s(), System(f))
 
 class Test_LawsonEuler(Harness_Solver):
 	def set_system(self, f):
 		self.solver.system = NoLinear(f,self.dim)
-	def setUp(self):
+	def setup_solver(self):
 		self.solver = SingleStepSolver(LawsonEuler(), NoLinear(f,self.dim))
 
 ## class Test_IEuler(Harness_Solver):
-## 	def setUp(self):
+## 	def setup_solver(self):
 ## 		self.solver = SingleStepSolver(ImplicitEuler, System(f))
 
 @nt.raises(Solver.Unstable)
@@ -127,11 +135,15 @@ class DummySystem(System):
 	def exact(self, t, u0):
 		return t*u0.reshape(-1,1)
 
+def rotational(t,u):
+	"""
+	Rotational vector field
+	"""
+	return array([-u[1], u[0]])
+
 class Harness_Circle(Harness):
 	def setUp(self):
-		def f(t,u):
-			return array([-u[1], u[0]])
-		self.f = f
+		self.f = rotational
 		self.make_solver()
 		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
 
@@ -241,7 +253,7 @@ class Test_McOsc(Harness_Osc):
 		self.s = SingleStepSolver(McLachlan(), self.sys)
 
 class Test_JayOsc(Harness_Osc):
-	N=5 # bigger time step to make Jay test faster
+	N=5 # bigger time step to make test faster
 	def set_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 
@@ -250,11 +262,12 @@ class Test_HOsc(Harness_Osc):
 	def set_solver(self):
 		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
 
+def minus_time(tx):
+	return -tx[0]
+
 class Test_SparkODE(object):
 	def setUp(self):
-		def f(xt):
-			return -xt[0]
-		self.sys = ODESystem(f)
+		self.sys = ODESystem(minus_time)
 		self.s = SingleStepSolver(Spark(4), self.sys)
 		self.s.initialize(array([1.]))
 
@@ -306,20 +319,21 @@ def test_rkdae():
 class DummyException(Exception):
 	pass
 
+class LimitedSys(System):
+	def __init__(self, limit):
+		self.limit = limit
+		self.i = 0
+	def f(self, t, x):
+		if self.i < self.limit:
+			self.i += 1
+			return 0
+		else:
+			raise DummyException()
+
 class Test_FinalTimeExceptions(object):
 	limit = 20
-	class LimitedSys(System):
-		def __init__(self, limit):
-			self.limit = limit
-			self.i = 0
-		def f(self, t, x):
-			if self.i < self.limit:
-				self.i += 1
-			 	return 0
-			else:
-				raise DummyException()
 	def setUp(self):
-		self.sys = self.LimitedSys(self.limit)
+		self.sys = LimitedSys(self.limit)
 		self.s = SingleStepSolver(ExplicitEuler(),self.sys)
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
@@ -343,9 +357,13 @@ class Test_FinalTimeExceptions(object):
 		self.s.catch_runtime = False
 		self.s.run()
 
+def faulty_function(t,u):
+	raise Exception('message')
+
 class Test_Exceptions(object):
 	def setUp(self):
 		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[1]])))
+		self.s.auto_save = False
 	@nt.raises(Solver.NotInitialized)
 	def test_no_u0(self):
 		self.s.initialize()
@@ -359,19 +377,21 @@ class Test_Exceptions(object):
 		self.s.run()
 	@nt.raises(Solver.Runtime)
 	def test_runtime_exception(self):
-		def f(t,u):
-			raise Exception('message')
-		self.s = SingleStepSolver(ExplicitEuler(), System(f))
+		self.s = SingleStepSolver(ExplicitEuler(), System(faulty_function))
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
 		self.s.run()
 
+class TotSys(System):
+	def total(self, xt):
+		return np.sum(xt[:-1],axis=0)
+
+def minus_x(t, x):
+	return -x
+
 class Test_Simple(object):
 	def setUp(self):
-		class TotSys(System):
-			def total(self, xt):
-				return np.sum(xt[:-1],axis=0)
-		sys = TotSys(lambda t,x: -x)
+		sys = TotSys(minus_x)
 		self.s = SingleStepSolver(ExplicitEuler(), sys)
 
 	def test_time(self):
@@ -445,14 +465,14 @@ def test_linear_exponential():
 			yield CompareLinearExponential(scheme), computed, expected, phi_0
 
 
-import pylab as pl
-
 class Harness_ComplexConvection(object):
 
 	def check_convection(self, do_plot):
 		scheme = self.scheme
 		h = self.time/self.N
 		self.s = MultiStepSolver(scheme, self.B)
+		if isinstance(self.scheme, ode15s):
+			self.s.auto_save = False
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
 		self.s.run()
@@ -586,3 +606,4 @@ def test_exp_square():
 			tail_length = obj.tail_length
 			yield CheckSquare(name),name, a,b, nb_stages, tail_length
 
+pl.ion()
