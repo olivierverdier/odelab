@@ -38,7 +38,6 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
 	"""
-# TODO: support for momentum instead of velocities (i.e. with mass/inertia)
 
 	root_solver = _rt.Newton
 

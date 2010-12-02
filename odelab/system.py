@@ -42,7 +42,8 @@ class System(object):
 		return u1
 
 	def velocity(self,u):
-		"""select the velocity component"""
+		r"""select the velocity component
+		It may be interpreted as :math:`\frac{∂H}{∂p}`"""
 
 	def position(self, u):
 		"""select the position component"""
@@ -57,7 +58,8 @@ class System(object):
 		"""stacks together the velocity and lagrangian parts"""
 
 	def force(self, u):
-		"""compute the force as a function of `u`"""
+		r"""compute the force as a function of `u`
+		It may be interpreted as :math:`-\frac{∂H}{∂q}`"""
 
 	def codistribution(self, u):
 		"""compute the codistribution matrix at `u`"""
