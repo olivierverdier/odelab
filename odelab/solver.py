@@ -15,6 +15,7 @@ The higher level class is :class:`Solver`, which is initialized with an instance
 """
 from __future__ import division
 
+import scipy.io # used for saving in shelves
 import numpy as np
 import pylab as PL
 
@@ -106,9 +107,13 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		generator = self.generate(t, u)
 		return generator
 
+	auto_save = False # whether to automatically save the session after a run; especially useful for tests
+
 	def __exit__(self, ex_type, ex_value, traceback):
 		self.ats = np.array(self.ts)
 		self.aus = np.array(self.us).T
+		if self.auto_save:
+			self.save()
 
 	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)
 
@@ -146,6 +151,24 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 						break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
+
+	def guess_name(self):
+		"""
+		Guess a name for this session.
+		"""
+		guess = "{system}_{scheme}_T{time}_N{nsteps}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time, nsteps=len(self.us))
+		sanitized = guess.replace('.','_')
+		return sanitized
+
+	shelf_name = 'bank' # default shelf name
+
+	def save(self, name=None):
+		"""
+		Save the current results in a scipy shelf.
+		"""
+		shelf_name = name or self.guess_name()
+		print shelf_name
+		scipy.io.save_as_module(self.shelf_name, {shelf_name: self})
 
 	def get_u(self, index):
 		"""

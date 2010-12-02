@@ -32,6 +32,12 @@ def const_f(c,t,u):
 def time_f(t,u):
 	return t
 
+def test_solver_autosave():
+	solver = SingleStepSolver(ExplicitEuler(), System(f))
+	solver.initialize(u0=1.)
+	solver.run()
+	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1_0_N101')
+
 from functools import partial
 const_r = partial(const_f, 1.)
 const_c = partial(const_f, 1.j)
