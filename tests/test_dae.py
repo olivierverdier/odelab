@@ -6,6 +6,11 @@ import odelab
 from odelab.scheme.stochastic import *
 from odelab.system import *
 from odelab.solver import *
+from odelab.newton import *
+
+import nose.tools as nt
+
+Solver.catch_runtime = False
 
 def Vsin(self,t):
 	return np.sin(t)
@@ -50,6 +55,7 @@ class SimpleDiff(System):
 	
 	
 class Test(object):
+	@nt.raises(RootSolverDidNotConverge)
 	def test_run(self):
 		sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
 		self.s = SingleStepSolver(EulerMaruyama(), sys)
