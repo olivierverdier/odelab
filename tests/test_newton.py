@@ -1,10 +1,16 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
+import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
 
 from odelab.newton import *
+
+import nose.tools as nt
+
+def no_root(x):
+	return 2+np.sin(x)
 
 class Test_Newton(object):
 
@@ -47,3 +53,13 @@ class Test_Newton(object):
 		x0 = np.ones([2,2])
 		res = N.run(x0)
 		npt.assert_almost_equal(res, expected)
+
+	@nt.raises(RootSolverDidNotConverge)
+	def test_N_no_convergence(self):
+		N = Newton(no_root)
+		res = N.run(0.)
+
+	@nt.raises(RootSolverDidNotConverge)
+	def test_F_no_convergence(self):
+		N = FSolve(no_root)
+		res = N.run(0.)
