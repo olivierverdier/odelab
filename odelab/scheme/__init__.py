@@ -8,7 +8,11 @@ Collection of schemes. The main function of a :class:`odelab.scheme.Scheme` clas
 import numpy as np
 import numpy.linalg
 
+import odelab.newton as _rt
+
 class Scheme(object):
+
+	root_solver = _rt.FSolve
 
 	def __repr__(self):
 		try:
