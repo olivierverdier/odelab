@@ -60,8 +60,12 @@ class ExplicitEuler (Scheme):
 
 class ImplicitEuler (Scheme):
 	def step(self, t, u):
-		res = self.system.f.res(u, t, self.h)
-		return t + self.h, res
+		h = self.h
+		def residual(u1):
+			return u1 - u - h*self.system.f(t+h,u1)
+		N = self.root_solver(residual)
+		u1 = N.run(u+h*self.system.f(t,u))
+		return t + self.h, u1
 
 
 class RungeKutta4 (Scheme):

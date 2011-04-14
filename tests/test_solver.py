@@ -124,9 +124,9 @@ class Test_LawsonEuler(Harness_Solver_NoComplex):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(LawsonEuler(), NoLinear(f,self.dim))
 
-## class Test_IEuler(Harness_Solver):
-## 	def setup_solver(self):
-## 		self.solver = SingleStepSolver(ImplicitEuler, System(f))
+class Test_IEuler(Harness_Solver):
+	def setup_solver(self):
+		self.solver = SingleStepSolver(ImplicitEuler(), System(f))
 
 @nt.raises(Solver.Unstable)
 def test_unstable():
@@ -177,6 +177,11 @@ class Test_Circle_EEuler(Harness_Circle):
 	def make_solver(self):
 		self.s = SingleStepSolver(ExplicitEuler(), DummySystem(self.f))
 
+class Test_Circle_IEuler(Harness_Circle):
+	def make_solver(self):
+		self.s = SingleStepSolver(ImplicitEuler(), DummySystem(self.f))
+
+
 class Test_Circle_RK34(Harness_Circle):
 	def make_solver(self):
 		self.s = SingleStepSolver(RungeKutta34(), DummySystem(self.f))
@@ -214,6 +219,11 @@ class Harness_Solver(Harness):
 class Test_ExplicitEuler(Harness_Solver):
 	def setUp(self):
 		self.solver = SingleStepSolver(ExplicitEuler(), System(make_lin(self.a)))
+		self.order = -1.
+
+class Test_ImplicitEuler(Harness_Solver):
+	def setUp(self):
+		self.solver = SingleStepSolver(ImplicitEuler(), System(make_lin(self.a)))
 		self.order = -1.
 
 class Test_RungeKutta4(Harness_Solver):
