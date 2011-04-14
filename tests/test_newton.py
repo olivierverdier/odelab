@@ -4,6 +4,7 @@ from __future__ import division
 import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
+from nose.plugins.skip import Skip, SkipTest
 
 from odelab.newton import *
 
@@ -12,24 +13,15 @@ import nose.tools as nt
 def no_root(x):
 	return 2+np.sin(x)
 
-class Test_Newton(object):
+class Harness(object):
 
 	dim = 10
 
-	def test_run(self):
-		zr = np.random.rand(self.dim)
-		def f(x):
-			return np.arctan(x - zr)
-		xr = np.zeros(self.dim)
-		n = Newton(f)
-		x = n.run(xr)
-		print n.required_iter
-		npt.assert_array_almost_equal(x,zr)
 
 	def test_scalar(self):
 		def f(x):
 			return (x-1)**2
-		n = Newton(f)
+		n = self.solver_class(f)
 		n.tol = 1e-9
 		z = n.run(10.)
 		npt.assert_almost_equal(z,1.)
@@ -38,7 +30,7 @@ class Test_Newton(object):
 		"""Newton doesn't destroy the initial value"""
 		def f(x):
 			return x
-		N = Newton(f)
+		N = self.solver_class(f)
 		x0 = array([1.])
 		y0 = x0.copy()
 		N.run(x0)
@@ -49,17 +41,39 @@ class Test_Newton(object):
 		def f(a):
 			return a*a
 		expected = np.zeros([2,2])
-		N = Newton(f)
+		N = self.solver_class(f)
 		x0 = np.ones([2,2])
 		res = N.run(x0)
 		npt.assert_almost_equal(res, expected)
 
 	@nt.raises(RootSolverDidNotConverge)
 	def test_N_no_convergence(self):
-		N = Newton(no_root)
+		N = self.solver_class(no_root)
 		res = N.run(0.)
 
-	@nt.raises(RootSolverDidNotConverge)
-	def test_F_no_convergence(self):
-		N = FSolve(no_root)
-		res = N.run(0.)
+	def test_complex(self):
+		def f(a):
+			return a - 1.j
+		expected = array([1.j])
+		N = self.solver_class(f)
+		x0 = 1.+1j
+		res = N.run(x0)
+		npt.assert_almost_equal(res,expected)
+
+
+class Test_Newton(Harness):
+	solver_class = Newton
+	def test_run(self):
+		zr = np.random.rand(self.dim)
+		def f(x):
+			return np.arctan(x - zr)
+		xr = np.zeros(self.dim)
+		n = self.solver_class(f)
+		x = n.run(xr)
+		print n.required_iter
+		npt.assert_array_almost_equal(x,zr)
+
+class Test_FSolve(Harness):
+	solver_class = FSolve
+	def test_complex(self):
+		raise SkipTest("FSolve does not work with complex")
