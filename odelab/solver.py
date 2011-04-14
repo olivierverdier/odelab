@@ -242,8 +242,8 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				data = np.log10(np.abs(data - exact_comp))
 			axis.plot(ats, data, ',-', label=label, **defaults)
 			if compute_exact and not error:
-				axis._get_lines.count -= 1
-				axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label)
+				current_color = axis.lines[-1].get_color() # figure out current colour
+				axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label, color=current_color)
 		axis.set_xlabel('time')
 		axis.legend()
 		if save:
