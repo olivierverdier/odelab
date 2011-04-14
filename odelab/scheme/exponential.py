@@ -35,7 +35,9 @@ class Exponential(Scheme):
 		ts = self.solver.ts[-self.tail_length:]
 		tail = self.solver.us[-self.tail_length:]
 		# this is specific to those Exponential solvers:
+		# warning: this creates a tail using the type of u
 		for i in range(len(tail)-1):
+			# if nonlin returns complex and u is float, type cast is performed:
 			tail[i] = self.h*self.system.nonlin(ts[i], tail[i])
 		self.tail = np.array(list(reversed(tail))).T
 
@@ -44,7 +46,7 @@ class Exponential(Scheme):
 		ua, vb = self.general_linear()
 		nb_stages = len(ua)
 		nb_steps = len(vb)
-		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=u.dtype)
+		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=self.tail.dtype)
 		Y[:,-nb_steps:] = self.tail
 		newtail = np.zeros_like(self.tail) # alternative: work directly on self.tail
 		for s in range(nb_stages):
