@@ -7,12 +7,14 @@ from odelab.scheme.exponential import *
 
 from odelab.system import *
 from odelab.solver import *
+import odelab.newton as rt
 
 import tempfile
 import os
 
 import numpy.testing as npt
 import nose.tools as nt
+from nose.plugins.skip import SkipTest
 
 import pylab as pl
 pl.ioff()
@@ -80,14 +82,19 @@ class Harness_Solver(Harness):
 	def check_const(self, f, u0, expected):
 		"""should solve the f=c exactly"""
 		print type(self).__name__
+		self.check_skip(u0,f)
 		self.set_system(f)
-		self.solver.initialize(u0=1.+0j, time=1.)
+		self.solver.initialize(u0=u0, time=1.)
+		self.solver.scheme.root_solver = rt.Newton
 		self.solver.run()
 		npt.assert_almost_equal(self.solver.final(), expected, 1)
 
+	def check_skip(self,u0,f):
+		return
+
 	def test_const(self):
-		for f,u0,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j), (const_c, 1., 1.+1.j)]:
-			yield self.check_const, f, u0, expected
+		for f,u0_,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j), (const_c, 1., 1.+1.j)]:
+			yield self.check_const, f, u0_, expected
 
 class Test_EEuler(Harness_Solver):
 	def setup_solver(self):
@@ -101,11 +108,17 @@ class Test_RK34(Harness_Solver):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(RungeKutta34(), System(f))
 
-class Test_ode15s(Harness_Solver):
+class Harness_Solver_NoComplex(Harness_Solver):
+
+	def check_skip(self,u0,f):
+		if isinstance(u0,float) and f is const_c:
+			raise SkipTest('Does not work with real initial conditions and complex vector fields')
+
+class Test_ode15s(Harness_Solver_NoComplex):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(ode15s(), System(f))
 
-class Test_LawsonEuler(Harness_Solver):
+class Test_LawsonEuler(Harness_Solver_NoComplex):
 	def set_system(self, f):
 		self.solver.system = NoLinear(f,self.dim)
 	def setup_solver(self):
