@@ -103,8 +103,8 @@ class FSolve(RootSolver):
 	def run(self, x0):
 		guess = self.get_initial(x0)
 		import scipy.optimize
-		full_output = scipy.optimize.fsolve(self.residual, guess, full_output=True, warning=True, xtol = self.xtol)
-		result, info, success, msg = full_output
+		full_output = scipy.optimize.fsolve(self.residual, guess, full_output=True,  xtol = self.xtol)
+		result, self.info, success, msg = full_output
 		if success != 1:
 			raise RootSolverDidNotConverge(msg)
 		return self.get_result(result)
