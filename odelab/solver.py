@@ -190,7 +190,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 	max_plot_res = 500 # max plot resolution
 
-	def plot(self, components=None, plot_exact=True, error=False, save=None, **plot_args):
+	def plot(self, components=None, plot_exact=True, error=False, save=None, time_component=None, **plot_args):
 		"""
 		Plot some components of the solution.
 
@@ -198,6 +198,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param boolean plot_exact: whether to plot the exact solution (if available)
 :param string save: whether to save the plot in a file
 :param boolean error: to plot (the log10 of) the error instead of the value itself
+:param int time_component: component to use as x variable (if None, then time is used)
 		"""
 		# some sampling
 		size = len(self.ts)
@@ -210,6 +211,8 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			components = range(len(self.us[0]))
 		if not np.iterable(components): # makes the code work when plotting a single component
 			components = [components]
+		if time_component is not None:
+			components.insert(0,time_component)
 
 		if plot_exact or error:
 			has_exact = hasattr(self.system, 'exact')
@@ -221,8 +224,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			axis.cla()
 		previous_line = len(axis.lines)
 
+		time_label = 'time'
+
 		ut = np.vstack([aus, ats])
-		for component in components:
+		for component_i, component in enumerate(components):
 			if isinstance(component, str):
 				label = component
 				data = self.system.__getattribute__(component)(ut)
@@ -240,11 +245,17 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 			if error and has_exact:
 				data = np.log10(np.abs(data - exact_comp))
-			axis.plot(ats, data, ',-', label=label, **defaults)
+			if  time_component is not None and not component_i:
+				# at the first step, if time_component is not time, then replace the time vector by the desired component
+				ats = data
+				time_label = label
+				continue
+			else:
+				axis.plot(ats, data, ',-', label=label, **defaults)
 			if compute_exact and not error:
 				current_color = axis.lines[-1].get_color() # figure out current colour
 				axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label, color=current_color)
-		axis.set_xlabel('time')
+		axis.set_xlabel(time_label)
 		axis.legend()
 		if save:
 			PL.savefig(save, format='pdf', **plot_args)
@@ -269,13 +280,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.plot(*args, components=[function], **kwargs)
 
-	def plot2D(self):
+	def plot2D(self, time_component=0, other_component=1, *args, **kwargs):
 		"""
-		Plot ux vs uy
+		Plot components vs another one
 		"""
-		PL.plot(self.aus[:,0],self.aus[:,1], '.-')
-		PL.xlabel('ux')
-		PL.ylabel('uy')
+		self.plot(other_component, time_component=time_component, *args, **kwargs)
 
 	quiver_res = 20
 	def quiver(self):

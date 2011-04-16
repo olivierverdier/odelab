@@ -138,11 +138,16 @@ class DummySystem(System):
 	def __init__(self, f):
 		super(DummySystem,self).__init__(f)
 
+	def label(self, component):
+		return ['x', 'y'][component]
+
 	def output(self, ut):
 		return np.ones(ut.shape[1])
 
 	def exact(self, t, u0):
-		return t*u0.reshape(-1,1)
+		x,y = u0
+		c,s = np.cos(t), np.sin(t)
+		return np.vstack([c*x-s*y, s*x + c*y])
 
 def rotational(t,u):
 	"""
@@ -155,11 +160,21 @@ class Harness_Circle(Harness):
 		self.f = rotational
 		self.make_solver()
 		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
+		self.s.run()
+
+	def test_plot_2D(self):
+		pl.clf()
+		a = self.s.plot(1,time_component=0)
+		nt.assert_true(a.get_xlabel(), 'x')
+		self.s.plot2D()
+		for l in a.get_lines():
+			d = l.get_data()
+			radii = np.abs(np.sqrt(d[0]**2+d[1]**2) - 1)
+			assert np.all(radii < .2) # should roughly be a circle
 
 	def test_plot(self):
-		self.s.run()
-		self.s.plot2D()
-		self.s.plot(plot_exact=False)
+		a = self.s.plot(plot_exact=False)
+		nt.assert_true(a.get_xlabel(), 'time')
 		self.s.plot(plot_exact=True)
 		tmp = tempfile.gettempdir()
 		path = os.path.join(tmp, 'test_fig.pdf')
