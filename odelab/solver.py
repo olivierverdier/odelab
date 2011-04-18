@@ -47,32 +47,33 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param scalar h: time step
 :param scalar time: span of the simulation
 		"""
-		if u0 is not None:
+		if u0 is not None: # initial condition provided
 			if np.isscalar(u0):
 				u0 = [u0]
 			u0 = np.array(u0)
 			u0 = self.system.preprocess(u0)
+			event0 = np.hstack([u0,t0])
 		else: # start from the previous initial conditions
 			try:
-				u0 = self.us[0]
-				t0 = self.ts[0]
+				event0 = self.events[0]
 			except AttributeError:
 				raise self.NotInitialized("You must provide an initial condition.")
-		self.ts = [t0]
-		self.us = [u0]
+		self.events = [event0]
 		if h is not None:
 			self.h = h
 		if time is not None:
 			self.time = time
 
 
-	def generate(self, t, u):
+	def generate(self, event):
 		"""
 		Generates the (t,u) values.
 		"""
+		u,t = event[:-1], event[-1]
 		for i in itertools.count(): # infinite loop
 			t, u = self.step(t, u)
-			yield t, u
+			event = np.hstack([u,t])
+			yield event
 			self.increment_stepsize()
 
 
@@ -102,16 +103,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 	def __enter__(self):
 		# start from the last time we stopped
-		t = t0 = self.ts[-1]
-		u = self.us[-1]
-		generator = self.generate(t, u)
+		event = self.events[-1]
+		generator = self.generate(event)
 		return generator
 
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 	def __exit__(self, ex_type, ex_value, traceback):
-		self.ats = np.array(self.ts)
-		self.aus = np.array(self.us).T
+		self.events_array = np.array(self.events).T
 		if self.auto_save:
 			self.save()
 
@@ -128,26 +127,25 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if time is None:
 			time = self.time
 		try:
-			t0 = self.ts[-1]
+			t0 = self.events[-1][-1]
 		except AttributeError:
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		tf = t0 + time # final time
 		with self as generator:
 			for i in xrange(self.max_iter):
 				try:
-					t,u = next(generator)
+					event = next(generator)
 				except Exception as e:
 					if self.catch_runtime:
 						raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
 					else:
 						raise
 				else:
-					if np.any(np.isnan(u)):
+					if np.any(np.isnan(event)):
 						raise self.Unstable('Unstable after %d steps.' % i)
 
-					self.ts.append(t)
-					self.us.append(u)
-					if t > tf - self.t_tol:
+					self.events.append(event)
+					if event[-1] > tf - self.t_tol:
 						break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
@@ -156,7 +154,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		Guess a name for this session.
 		"""
-		guess = "{system}_{scheme}_T{time}_N{nsteps}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time, nsteps=len(self.us))
+		guess = "{system}_{scheme}_T{time}_N{nsteps}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time, nsteps=len(self.events))
 		sanitized = guess.replace('.','_')
 		return sanitized
 
@@ -174,7 +172,13 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		Return u[index] after post-processing.
 		"""
-		return self.system.postprocess(self.us[index])
+		return self.system.postprocess(self.events[index])
+
+	def get_times(self):
+		return self.events[-1]
+
+	def last_time(self):
+		return self.get_times()[-1]
 
 	def initial(self):
 		"""
@@ -201,14 +205,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param int time_component: component to use as x variable (if None, then time is used)
 		"""
 		# some sampling
-		size = len(self.ts)
+		size = len(self.events)
 		stride = np.ceil(size/self.max_plot_res)
-		ats = self.ats[::stride]
-		aus = self.aus[:,::stride]
+		events = self.events_array[:,::stride]
+		ats = events[-1]
 
 		# components
 		if components is None: # plot all the components by default
-			components = range(len(self.us[0]))
+			components = range(self.events[0].size - 1)
 		if not np.iterable(components): # makes the code work when plotting a single component
 			components = [components]
 		if time_component is not None:
@@ -226,16 +230,15 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		time_label = 'time'
 
-		ut = np.vstack([aus, ats])
 		for component_i, component in enumerate(components):
 			if isinstance(component, str):
 				label = component
-				data = self.system.__getattribute__(component)(ut)
+				data = self.system.__getattribute__(component)(events)
 				if compute_exact:
 					exact_comp = self.system.__getattribute__(component)(np.vstack([exact, ats]))
 			else:
 				label = self.system.label(component)
-				data = aus[component]
+				data = events[component]
 				if compute_exact:
 					exact_comp = exact[component]
 
@@ -309,7 +312,7 @@ class SingleStepSolver(Solver):
 		return self.current_scheme.step(t,u)
 
 	def step(self, t,u):
-		stage = len(self.us)
+		stage = len(self.events)
 		if stage < self.scheme.tail_length: # not enough past values to run main scheme
 			if stage == 1:
 				self.set_scheme(self.single_step_scheme)

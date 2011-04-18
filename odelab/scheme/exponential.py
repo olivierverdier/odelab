@@ -32,13 +32,12 @@ class Exponential(Scheme):
 
 	def initialize(self):
 		super(Exponential, self).initialize()
-		ts = self.solver.ts[-self.tail_length:]
-		tail = self.solver.us[-self.tail_length:]
+		tail = self.solver.events[-self.tail_length:]
 		# this is specific to those Exponential solvers:
 		# warning: this creates a tail using the type of u
 		for i in range(len(tail)-1):
 			# if nonlin returns complex and u is float, type cast is performed:
-			tail[i] = self.h*self.system.nonlin(ts[i], tail[i])
+			tail[i] = self.h*self.system.nonlin(tail[i])
 		self.tail = np.array(list(reversed(tail))).T
 
 	def step(self, t, u):
