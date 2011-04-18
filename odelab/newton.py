@@ -11,10 +11,8 @@ def jacobian(F,x,h=1e-6):
 	"""
 	Numerical Jacobian at x.
 	"""
-	if np.isscalar(x):
-		L = 1
-	else:
-		L = len(x)
+	x = np.array(x)
+	L = x.size
 	vhs = h * np.identity(L)
 	Fs = array([F(x+vh) for vh in vhs])
 	grad = (Fs - F(x))/h

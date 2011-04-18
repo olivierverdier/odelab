@@ -13,6 +13,12 @@ import nose.tools as nt
 def no_root(x):
 	return 2+np.sin(x)
 
+def test_jacobian():
+	def f(x):
+		return np.sin(x)
+	c = jacobian(f,.5,1e-10)
+	nt.assert_almost_equal(c,np.cos(.5),places=6)
+
 class Harness(object):
 
 	dim = 10
