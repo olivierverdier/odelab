@@ -89,26 +89,31 @@ Partitioned Runge-Kutta for index 2 DAEs.
 
 	root_solver = _rt.FSolve
 
-	def __init__(self, nb_stages, c):
+	def __init__(self, tableau):
 		super(RKDAE, self).__init__()
-		self.nb_stages = nb_stages
-		self.c = c
+		self.tableau = tableau
+		self.ts = self.get_ts()
+		nb_stages = len(tableau) - 1
 		self.QT = np.eye(nb_stages+1, nb_stages)
 
+	def get_ts(self):
+		return RungeKutta.time_vector(self.tableau)
+
+	def dynamics(self, YZT):
+		return np.dot(self.system.dynamics(YZT[:,:-1]), self.tableau[:,1:].T)
+
 	def get_residual_function(self, t, u):
-		s = self.nb_stages
 		h = self.h
-		T = t + self.c*h
+		T = t + self.ts*h
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
 		QT = self.QT
 
 		def residual(YZ):
 			YZT = np.vstack([YZ,T])
-			dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
+			dyn = self.dynamics(YZT)
 			Y = self.system.state(YZ)
-			dyn = [np.dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
-			r1 = Y - yc - h*sum(dyn)
+			r1 = Y - yc - h*dyn
 			r2 = np.dot(self.system.constraint(YZT), QT)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
@@ -117,10 +122,10 @@ Partitioned Runge-Kutta for index 2 DAEs.
 		return residual
 
 	def step(self, t, u):
-		s = self.nb_stages
+		s = self.tableau.shape[0]
 		residual = self.get_residual_function(t, u)
 		# pretty bad guess here:
-		guess = np.column_stack([u.copy()]*(s+1))
+		guess = np.column_stack([u.copy()]*s)
 		N = self.root_solver(residual)
 		residual(guess)
 		full_result = N.run(guess) # all the values of Y,Z at all stages
@@ -128,8 +133,15 @@ Partitioned Runge-Kutta for index 2 DAEs.
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
 		return t+self.h, result
 
+class MultiRKDAE(RKDAE):
+	def dynamics(self, YZT):
+		s = self.nb_stages
+		dyn_dict = self.system.multi_dynamics(YZT[:,:-1])
+		dyn = [np.dot(vec, RK_class.tableaux[s][:,1:].T) for RK_class, vec in dyn_dict.items()]
+		return sum(dyn)
 
-class Spark(RKDAE):
+
+class Spark(MultiRKDAE):
 	r"""
 Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
  as presented in [jay03]_.
@@ -173,8 +185,10 @@ References:
 	"""
 
 	def __init__(self, nb_stages):
-		super(Spark, self).__init__(nb_stages, c = RungeKutta.time_vector(LobattoIIIA.tableaux[nb_stages]))
+		self.nb_stages = nb_stages
+		super(Spark, self).__init__(LobattoIIIA.tableaux[nb_stages])
 		self.QT = self.compute_mean_stage_constraint().T
+
 
 	def compute_mean_stage_constraint(self):
 		"""

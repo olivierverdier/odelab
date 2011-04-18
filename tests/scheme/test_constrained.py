@@ -165,7 +165,7 @@ def test_rkdae():
 	sys = GraphSystem(sq)
 	u0 = array([0.,0.,1.])
 	for s in range(1,4):
-		sol = SingleStepSolver(RKDAE(s, RungeKutta.time_vector(RadauIIA.tableaux[s])), sys)
+		sol = SingleStepSolver(RKDAE(RadauIIA.tableaux[s]), sys)
 		sol.initialize(u0=u0, time=1)
 		sol.run()
 		yield compare_exact, sol, u0, 2

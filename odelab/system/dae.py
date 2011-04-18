@@ -78,9 +78,12 @@ class GraphSystem(System):
 	def multi_dynamics(self, ut):
 		x,y = self.state(ut)
 		return {
-			rk.RadauIIA: np.zeros_like(self.state(ut)),
 			rk.RadauIIA: array([np.ones_like(x), self.lag(ut)[0]]),
 			}
+
+	def dynamics(self, ut):
+		x,y = self.state(ut)
+		return array([np.ones_like(x), self.lag(ut)[0]]),
 
 	def constraint(self, ut):
 		x,y = self.state(ut)
