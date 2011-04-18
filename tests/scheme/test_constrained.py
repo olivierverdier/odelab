@@ -58,9 +58,7 @@ class Test_McOsc(Harness_Osc):
 class Test_JayOsc(Harness_Osc):
 	N=5 # bigger time step to make test faster
 	def set_solver(self):
-		self.s = SingleStepSolver(Spark(2), self.sys)
-	def test_z0(self):
-		raise SkipTest('For some reason the root solver does not converge')
+		self.s = SingleStepSolver(Spark(3), self.sys)
 
 class Test_HOsc(Harness_Osc):
 	N=5 # bigger time step to make test faster
