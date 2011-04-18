@@ -272,11 +272,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param string function: name of the method to call on the current system object
 
 		:Example:
-			the code::
-
-				solver.plot_function('energy')
-
-			will call the method ``solver.system.energy`` on the current stored solution points.
+			the code ``solver.plot_function('energy')`` will call the method ``solver.system.energy`` on the current stored solution points.
 		"""
 		return self.plot(*args, components=[function], **kwargs)
 
