@@ -1,42 +1,43 @@
 Exponential Solvers
 ===================
 
+Shifted Exponentials
+**********************
+
+The *shifted exponentials*, usually called *φ-functions*, are defined by the following series:
+
+.. math::
+	φ_{\ell}(z) = ∑_{k=0}^{∞} \frac{z^k}{(\ell+k)!} \qquad \ell \in\NN
+
+Notice in particular that
+
+.. math::
+    φ_0(z) = \ee^z
+
+We observe the following recursion relation
+
+.. math::
+   φ_{\ell}(z) = \frac{1}{\ell!} + z ∑_{k=1}^{∞}\frac{x^{k-1}}{(\ell+k)!} = \frac{1}{\ell!} + z φ_{\ell+1} 
+
+This allows to prove the useful identity, valid for $\ell≥1$:
+
 .. math::
     φ_{\ell}(z) =  \int_0^1 \ee^{z (1-x)} \frac{x^{\ell-1}}{(\ell - 1)!}  \dd x
 
-.. math::
-
-	φ_{\ell}(z) = \frac{1}{\ell!} + z φ_{\ell+1}(z)
+Indeed, by integration by parts, the recursion relation is the same as above, and for $\ell=1$ one has
 
 .. math::
-
 	φ_1(z) = \frac{\ee^z-1}{z}
 
-By induction:
+
+
+Padé Approximations
+*******************
+
+One computes Padé approximations of the form
 
 .. math::
-
-	φ_{\ell} = ∑_{k=0}^{∞} \frac{z^k}{(\ell+k)!}
-
-Indeed:
-
-.. math::
-
-	∑_{k=0}^{∞} \frac{z^k}{(\ell+k)!}  = \frac{1}{\ell!} + z φ_{\ell+1}(z)
-
-.. math::
-
-	\iff ∑_{k=1}^{∞} \frac{z^k}{(\ell+k)!} =  z φ_{\ell+1}(z)
-So:
-
-.. math::
-
-	z\left(φ_{\ell+1}(z) - ∑_{k=0}^{∞} \frac{z^k}{(\ell+1+k)!}\right) = 0
-and clearly:
-
-.. math::
-
-	φ_{\ell+1}(0) = 1
+    φ_{\ell}(z) = \frac{N(z)}{D(z)}
 
 .. math::
 
