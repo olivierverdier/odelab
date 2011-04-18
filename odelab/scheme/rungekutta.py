@@ -96,6 +96,7 @@ class Kutta(ExplicitGeneralLinear):
 		[[1/8,3/8,3/8,1/8,1]])
 	}
 
+
 class AdamsBashforth(ExplicitGeneralLinear):
 
 
@@ -128,6 +129,23 @@ class Butcher(ExplicitGeneralLinear):
 		[[-3/8, -3/8,-3/4,7/4],
 		[-7/8,9/8,-3/4,7/4]])
 	}
+
+class ImplicitEuler(RungeKutta):
+	tableaux = {
+		1: array([[1,1],[1,1]])
+			}
+
+class LDIRK343(RungeKutta):
+	gamma = 0.43586652150846206
+	b1 = -1/4 + gamma*(4 - 3/2*gamma)
+	b2 = 5/4 + gamma*(-5 + 3/2*gamma)
+	tableaux = {
+	3: array([[gamma,gamma, 0, 0],
+		[(1+gamma)/2,(1.-gamma)/2, gamma, 0],
+		[1,b1, b2, gamma],
+		[1.,b1, b2, gamma]],
+		),
+			}
 
 class LobattoIIIA(RungeKutta):
 
