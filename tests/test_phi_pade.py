@@ -14,6 +14,18 @@ def test_poly_exps():
 	nt.assert_array_almost_equal(X[1],x)
 	nt.assert_array_almost_equal(X[0], np.identity(2))
 
+@nt.raises(ValueError)
+def test_poly_exception():
+	p = Polynomial([1.,2])
+	x = np.array([[1.,2.],[3.,1.]])
+	Z = Polynomial.exponents(x,0)
+	p(Z)
+
+def test_poly_constant():
+	p = Polynomial([1.])
+	x = np.random.random_sample([2,2])
+	Z = Polynomial.exponents(x,0)
+	nt.assert_array_almost_equal(p(Z), np.identity(2))
 
 def simple_mul(p, x):
 	"""
@@ -165,5 +177,3 @@ def test_phi_scaled_mat(l=2,d=6):
 		computed = phi(z)[-1]
 		nt.assert_almost_equal(computed/expected, np.ones_like(expected))
 
-if __name__ == '__main__':
-	test_mat_pol()

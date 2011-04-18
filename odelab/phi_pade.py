@@ -85,7 +85,7 @@ Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
 		s = len(Z) - 1
 		if s == 0: # ok only if the polynomial is constant
 			if len(p) > 1:
-				raise Exception("s may only be zero for constant polynomials")
+				raise ValueError("Z must be provided in order to evaluate a non-constant polynomial.")
 			return p[0]*Z[0]
 		r = int(math.ceil(len(p)/s))
 		# assert len(p) <= r*s # this should pass
