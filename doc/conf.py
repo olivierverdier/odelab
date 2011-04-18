@@ -176,7 +176,11 @@ htmlhelp_basename = 'odelabdoc'
 
 latex_elements = {
 'papersize': 'a4paper',
-'preamble': r"""\newcommand{\ee}{\mathrm{e}}""",
+'preamble': r"""
+\newcommand{\ee}{\mathrm{e}}
+\newcommand{\NN}{\mathbf{N}}
+\newcommand{\dd}{\mathrm{d}}
+""",
 'inputenc': r'\usepackage[utf8x]{inputenc}',
 'utf8extra': r'\SetUnicodeOption{mathletters}',
 'fontpkg': r"""\usepackage{savesym}
