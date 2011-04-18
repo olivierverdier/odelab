@@ -179,7 +179,13 @@ latex_elements = {
 'preamble': r"""\newcommand{\ee}{\mathrm{e}}""",
 'inputenc': r'\usepackage[utf8x]{inputenc}',
 'utf8extra': r'\SetUnicodeOption{mathletters}',
-'fontpkg': r'\usepackage{txfonts}',
+'fontpkg': r"""\usepackage{savesym}
+\usepackage{txfonts}
+\savesymbol{iint}
+\savesymbol{iiint}
+\savesymbol{iiiint}
+\savesymbol{idotsint}
+""",
 }
 
 # The paper size ('letter' or 'a4').
