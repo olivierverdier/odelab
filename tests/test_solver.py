@@ -12,6 +12,7 @@ import odelab.newton as rt
 import tempfile
 import os
 
+import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
 from nose.plugins.skip import SkipTest
@@ -61,13 +62,13 @@ class Harness_Solver(Harness):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		nt.assert_true(self.solver.time == Solver.time)
-		nt.assert_true(len(self.solver.ts) == 1)
-		nt.assert_true(len(self.solver.us) == 1)
+		nt.assert_true(len(self.solver.events) == 1)
 
 	def test_initialize_scheme(self):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
-		self.solver.step(self.solver.ts[0], self.solver.initial())
+		e0 = self.solver.initial()
+		self.solver.step(e0[-1], e0[:-1])
 		nt.assert_true(self.solver.scheme.h == h)
 
 	def test_quadratic(self):
@@ -77,7 +78,7 @@ class Harness_Solver(Harness):
 		self.solver.initialize(u0=1., time=1.)
 		self.solver.run()
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
-		nt.assert_almost_equal(self.solver.final(), 3/2, 1)
+		npt.assert_array_almost_equal(self.solver.final(), np.array([3/2,1.]), decimal=1)
 
 	def check_const(self, f, u0, expected):
 		"""should solve the f=c exactly"""
@@ -87,7 +88,8 @@ class Harness_Solver(Harness):
 		self.solver.initialize(u0=u0, time=1.)
 		self.solver.scheme.root_solver = rt.Newton
 		self.solver.run()
-		npt.assert_almost_equal(self.solver.final(), expected, 1)
+		expected_event = np.hstack([expected, 1.])
+		npt.assert_almost_equal(self.solver.final(), expected_event, 1)
 
 	def check_skip(self,u0,f):
 		return
@@ -144,8 +146,8 @@ class DummySystem(System):
 	def output(self, ut):
 		return np.ones(ut.shape[1])
 
-	def exact(self, t, u0):
-		x,y = u0
+	def exact(self, t, e0):
+		x,y,t0 = e0
 		c,s = np.cos(t), np.sin(t)
 		return np.vstack([c*x-s*y, s*x + c*y])
 
@@ -280,7 +282,7 @@ class Test_FinalTimeExceptions(object):
 		try:
 			self.s.run()
 		except Solver.FinalTimeNotReached:
-			npt.assert_equal(len(self.s.ts), self.max_iter + 1)
+			npt.assert_equal(len(self.s.events), self.max_iter + 1)
 		else:
 			raise Exception("FinalTimeNotReached not raised!")
 
@@ -335,16 +337,16 @@ class Test_Simple(object):
 		sol.h = Solver.time/10
 		sol.initialize(u0=0.)
 		sol.run(sol.h)
-		npt.assert_(sol.ts[-1] < Solver.time)
+		npt.assert_(sol.last_time() < Solver.time)
 
 	def test_extra_run(self):
 		"""test that an extra run continues from last time"""
 		sol = self.s
 		sol.initialize(u0=1.)
 		sol.run()
-		npt.assert_almost_equal(sol.ts[-1],Solver.time)
+		npt.assert_almost_equal(sol.last_time(),Solver.time)
 		sol.run()
-		npt.assert_almost_equal(sol.ts[-1],2*Solver.time)
+		npt.assert_almost_equal(sol.last_time(),2*Solver.time)
 
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))

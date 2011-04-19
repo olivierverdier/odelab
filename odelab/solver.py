@@ -168,11 +168,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		print shelf_name
 		scipy.io.save_as_module(self.shelf_name, {shelf_name: self})
 
-	def get_u(self, index):
+	def get_u(self, index, process=True):
 		"""
 		Return u[index] after post-processing.
 		"""
-		return self.system.postprocess(self.events[index])
+		event = self.events[index]
+		if process:
+			event = self.system.postprocess(event)
+		return event
 
 	def get_times(self):
 		return self.events[-1]
@@ -180,17 +183,17 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 	def last_time(self):
 		return self.get_times()[-1]
 
-	def initial(self):
+	def initial(self, process=True):
 		"""
 		Convenience method to obtain the initial condition.
 		"""
-		return self.get_u(0)
+		return self.get_u(0, process)
 
-	def final(self):
+	def final(self, process=True):
 		"""
 		Convenience method to obtain the last computed value.
 		"""
-		return self.get_u(-1)
+		return self.get_u(-1, process)
 
 	max_plot_res = 500 # max plot resolution
 

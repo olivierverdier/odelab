@@ -124,9 +124,10 @@ class ode15s(Scheme):
 		super(ode15s,self).initialize()
 		import scipy.integrate
 		self.integ = scipy.integrate.ode(self.system.f)
-		vodevariant = ['vode', 'zvode'][np.iscomplexobj(self.solver.us[0])]
+		e0 = self.solver.initial(process=False)
+		vodevariant = ['vode', 'zvode'][np.iscomplexobj(e0)]
 		self.integ.set_integrator(vodevariant, method='bdf', order=5, nsteps=3000, **self.integrator_kwargs)
-		self.integ.set_initial_value(self.solver.us[0], self.solver.ts[0])
+		self.integ.set_initial_value(e0[:-1], e0[-1])
 
 	def step(self, t, u):
 		self.integ.integrate(self.integ.t + self.h)
