@@ -51,8 +51,8 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			if np.isscalar(u0):
 				u0 = [u0]
 			u0 = np.array(u0)
-			u0 = self.system.preprocess(u0)
-			event0 = np.hstack([u0,t0])
+			raw_event0 = np.hstack([u0,t0])
+			event0 = self.system.preprocess(raw_event0)
 		else: # start from the previous initial conditions
 			try:
 				event0 = self.events[0]

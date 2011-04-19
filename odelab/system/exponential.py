@@ -45,11 +45,11 @@ class BurgersComplex(Burgers):
 		x = np.linspace(0,1,self.size,endpoint=False)
 		self.points = x - x.mean() # too lazy to compute x.mean manually here...
 
-	def preprocess(self, u0):
-		return np.fft.fft(u0)
+	def preprocess(self, event0):
+		return np.hstack([np.fft.fft(event0[:-1]), event0[-1]])
 
-	def postprocess(self, u1):
-		return np.real(np.fft.ifft(u1))
+	def postprocess(self, event1):
+		return np.hstack([np.real(np.fft.ifft(event1[:-1])),event1[-1]])
 
 	def nonlin(self, t, u):
 		return -0.5j * self.k * np.fft.fft(np.real(np.fft.ifft(u)) ** 2)
