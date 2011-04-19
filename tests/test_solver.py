@@ -62,7 +62,7 @@ class Harness_Solver(Harness):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		nt.assert_true(self.solver.time == Solver.time)
-		nt.assert_true(len(self.solver.events) == 1)
+		nt.assert_true(len(self.solver) == 1)
 
 	def test_initialize_scheme(self):
 		h = 10.
@@ -282,7 +282,7 @@ class Test_FinalTimeExceptions(object):
 		try:
 			self.s.run()
 		except Solver.FinalTimeNotReached:
-			npt.assert_equal(len(self.s.events), self.max_iter + 1)
+			npt.assert_equal(len(self.s), self.max_iter + 1)
 		else:
 			raise Exception("FinalTimeNotReached not raised!")
 

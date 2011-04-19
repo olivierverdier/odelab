@@ -64,6 +64,9 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if time is not None:
 			self.time = time
 
+	def __len__(self):
+		return len(self.events)
+
 	def load_data(self, data):
 		"""
 Initialize the solver from previously saved data.
@@ -321,7 +324,7 @@ class SingleStepSolver(Solver):
 		return self.current_scheme.step(t,u)
 
 	def step(self, t,u):
-		stage = len(self.events)
+		stage = len(self)
 		if stage < self.scheme.tail_length: # not enough past values to run main scheme
 			if stage == 1:
 				self.set_scheme(self.single_step_scheme)
