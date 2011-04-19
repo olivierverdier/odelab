@@ -47,9 +47,9 @@ def test_linear_exponential():
 			s.initialize(u0 = u0, h=h)
 
 			s.run(time=1.)
-			computed = s.final()
+			computed = s.final()[:-1]
 			phi = Phi(0)
-			tf = s.ts[-1]
+			tf = s.last_time()
 			phi_0 = np.dot(phi(tf*L)[0], u0)
 			expected = np.dot(slin.expm(tf*L), u0)
 			yield CompareLinearExponential(scheme), computed, expected, phi_0
@@ -67,9 +67,10 @@ class Harness_ComplexConvection(object):
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
 		print scheme
 		self.s.run()
-		u1 = self.s.final()
-		if np.any(np.isnan(u1)):
-			raise Exception('unstable!')
+		e1 = self.s.final()
+		u1 = e1[:-1]
+		if np.any(np.isnan(e1)):
+			raise Exception('unstable!') # note: this should not be necessary any longer
 		if do_plot:
 			pl.plot(self.B.points, self.u0)
 			pl.plot(self.B.points, u1)

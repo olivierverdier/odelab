@@ -32,21 +32,21 @@ class Exponential(Scheme):
 
 	def initialize(self):
 		super(Exponential, self).initialize()
-		tail = self.solver.events[-self.tail_length:]
+		tail = np.array(self.solver.events[-self.tail_length:]).T
 		# this is specific to those Exponential solvers:
 		# warning: this creates a tail using the type of u
-		for i in range(len(tail)-1):
+		for i in range(tail.shape[1]-1):
 			# if nonlin returns complex and u is float, type cast is performed:
-			tail[i] = self.h*self.system.nonlin(tail[i])
-		self.tail = np.array(list(reversed(tail))).T
+			tail[:-1,i] = self.h*self.system.nonlin(tail[-1,i], tail[:-1,i])
+		self.tail = np.array(tail[:-1,::-1])
 
-	def step(self, t,u): # note: argument is not used here, because it is already in the tail
+	def step(self, t, u):
 		h = self.h
 		ua, vb = self.general_linear()
 		nb_stages = len(ua)
 		nb_steps = len(vb)
-		Y = np.zeros([len(self.tail)-1, nb_stages+nb_steps], dtype=self.tail.dtype)
-		Y[:,-nb_steps:] = self.tail[:-1]
+		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=self.tail.dtype)
+		Y[:,-nb_steps:] = self.tail
 		newtail = np.zeros_like(self.tail) # alternative: work directly on self.tail
 		for s in range(nb_stages):
 			uas = ua[s]
@@ -58,9 +58,9 @@ class Exponential(Scheme):
 			vbr = vb[r]
 			for j, coeff in enumerate(vbr):
 				if coeff is not None:
-					newtail[:-1,r] += np.dot(coeff, Y[:,j])
+					newtail[:,r] += np.dot(coeff, Y[:,j])
 		self.tail = newtail
-		return t + h, self.tail[:-1,0]
+		return t + h, self.tail[:,0]
 
 
 	def general_linear(self):

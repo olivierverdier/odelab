@@ -39,12 +39,11 @@ class ExplicitGeneralLinear(GeneralLinear):
 	def initialize(self):
 		super(ExplicitGeneralLinear, self).initialize()
 		tail_length = self.tail_length
-		ts = self.solver.ts[-tail_length:]
-		tail = self.solver.us[-tail_length:]
+		tail = np.array(self.solver.events[-self.tail_length:]).T
 		if self.scaled_input:
-			for i in range(len(tail)-1):
-				tail[i] = self.h*self.system.f(ts[i], tail[i])
-		self.tail = np.array(list(reversed(tail))).T
+			for i in range(tail.shape[1]-1):
+				tail[:-1,i] = self.h*self.system.f(tail[-1,i], tail[:-1,i])
+		self.tail = np.array(tail[:-1,::-1])
 
 
 	def step(self, t, u):

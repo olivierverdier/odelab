@@ -38,8 +38,8 @@ class Harness_RKDAE(object):
 		for k in ks:
 			sol.initialize(u0=self.u0,time=1,h=pow(2,-k))
 			sol.run()
-			zexact = sol.system.exact(sol.ts[-1],self.u0)[0]
-			lexact = sol.system.exact(sol.ts[-1],self.u0)[2]
+			zexact = sol.system.exact(sol.last_time(),self.u0)[0]
+			lexact = sol.system.exact(sol.last_time(),self.u0)[2]
 			df = sol.final()[0] - zexact
 			logerrz = np.log2(np.abs(df))
 			logerrl = np.log2(np.abs(sol.final()[2] - lexact))
