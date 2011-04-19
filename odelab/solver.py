@@ -64,6 +64,12 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if time is not None:
 			self.time = time
 
+	def load_data(self, data):
+		"""
+Initialize the solver from previously saved data.
+:param array data: event array, with the same format as :py:attr:`events_array`
+		"""
+		self.events = list(data.T)
 
 	def generate(self, event):
 		"""
