@@ -337,16 +337,16 @@ class Test_Simple(object):
 		sol.h = Solver.time/10
 		sol.initialize(u0=0.)
 		sol.run(sol.h)
-		npt.assert_(sol.last_time() < Solver.time)
+		npt.assert_(sol.final_time() < Solver.time)
 
 	def test_extra_run(self):
 		"""test that an extra run continues from last time"""
 		sol = self.s
 		sol.initialize(u0=1.)
 		sol.run()
-		npt.assert_almost_equal(sol.last_time(),Solver.time)
+		npt.assert_almost_equal(sol.final_time(),Solver.time)
 		sol.run()
-		npt.assert_almost_equal(sol.last_time(),2*Solver.time)
+		npt.assert_almost_equal(sol.final_time(),2*Solver.time)
 
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))

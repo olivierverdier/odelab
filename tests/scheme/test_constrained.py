@@ -88,7 +88,7 @@ class Harness_VerticalRollingDisk(object):
 	def test_run(self):
 		self.s.run()
 ## 		self.s.plot(components=[6,7])
-		npt.assert_array_almost_equal(self.s.final()[:-1], self.sys.exact(array([self.s.last_time()]),u0=self.u0)[:,0], decimal=1)
+		npt.assert_array_almost_equal(self.s.final()[:-1], self.sys.exact(array([self.s.final_time()]),u0=self.u0)[:,0], decimal=1)
 
 
 	experiences = {'50': (.01,50), '1000': (.1,1000.)}
@@ -143,18 +143,18 @@ class Test_JayExample(object):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 		self.s.initialize(u0=array([1.,1.,1.]), time=1)
 		self.s.run()
-		print self.s.last_time()
+		print self.s.final_time()
 		print self.s.final()
-		exact = self.sys.exact(self.s.last_time(),array([1.,1.,1.]))
+		exact = self.sys.exact(self.s.final_time(),array([1.,1.,1.]))
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
 # RK DAE
 
 def compare_exact(solver, u0, components, decimal=2):
-	print solver.last_time()
+	print solver.final_time()
 	print solver.final()
-	exact = solver.system.exact(solver.last_time(), u0)
+	exact = solver.system.exact(solver.final_time(), u0)
 	npt.assert_array_almost_equal(solver.final()[:components], exact[:components], decimal=decimal)
 
 def sq(x):

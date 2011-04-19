@@ -49,7 +49,7 @@ def test_linear_exponential():
 			s.run(time=1.)
 			computed = s.final()[:-1]
 			phi = Phi(0)
-			tf = s.last_time()
+			tf = s.final_time()
 			phi_0 = np.dot(phi(tf*L)[0], u0)
 			expected = np.dot(slin.expm(tf*L), u0)
 			yield CompareLinearExponential(scheme), computed, expected, phi_0

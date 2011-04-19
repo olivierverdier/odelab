@@ -189,7 +189,7 @@ Initialize the solver from previously saved data.
 	def get_times(self):
 		return self.events[-1]
 
-	def last_time(self):
+	def final_time(self):
 		return self.get_times()[-1]
 
 	def initial(self, process=True):
