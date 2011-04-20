@@ -73,6 +73,10 @@ Initialize the solver from previously saved data.
 :param array data: event array, with the same format as :py:attr:`events_array`
 		"""
 		self.events = list(data.T)
+		self.update_events_array()
+
+	def update_events_array(self):
+		self.events_array = np.array(self.events).T
 
 	def generate(self, event):
 		"""
@@ -119,7 +123,7 @@ Initialize the solver from previously saved data.
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 	def __exit__(self, ex_type, ex_value, traceback):
-		self.events_array = np.array(self.events).T
+		self.update_events_array()
 		if self.auto_save:
 			self.save()
 
