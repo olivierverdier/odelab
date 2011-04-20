@@ -13,7 +13,7 @@ import numpy.testing as npt
 
 
 Solver.catch_runtime = False
-Solver.auto_save = True
+Solver.auto_save = False
 Solver.shelf_name = 'bank_exponential'
 
 import scipy.linalg as slin

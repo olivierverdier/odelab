@@ -13,7 +13,7 @@ from nose.plugins.skip import SkipTest
 
 
 SingleStepSolver.catch_runtime = False
-SingleStepSolver.auto_save = True
+SingleStepSolver.auto_save = False
 SingleStepSolver.shelf_name = 'bank_constrained'
 
 # Contact oscillator
