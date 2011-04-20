@@ -69,6 +69,9 @@ class GraphSystem(System):
 		y  = f(x)
 	"""
 
+	def label(self, component):
+		return ['x','y',u'λ'][component]
+
 	def state(self, u):
 		return u[:2]
 
@@ -122,6 +125,9 @@ class QuasiGraphSystem(GraphSystem):
 	y = f(x)
 
 	"""
+	def label(self, component):
+		return ['z','y',u'λ'][component]
+
 	def constraint(self,ut):
 		z,y = self.state(ut)
 		x = z/(1+y)
