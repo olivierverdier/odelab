@@ -149,6 +149,26 @@ class Test_JayExample(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
+def test_chaplygin_ML():
+	s = SingleStepSolver(McLachlan(), Chaplygin())
+	s.system.g = 10.
+	u0 = np.array([1.,0,.2,0,0,0,0])
+	s.initialize(u0=u0,time=30,h=0.1)
+	s.run()
+	print s.system.energy(s.final())
+	nt.assert_equal(s.system.energy(s.events_array).shape, (len(s),))
+	return s
+
+
+def test_chaplygin_H():
+	s = SingleStepSolver(NonHolonomicEnergy(), Chaplygin(mass=1., inertia=1., length=1.))
+	s.system.g = 10.
+	u0 = np.array([1.,0,np.pi/2,0,0,0,0])
+	s.initialize(u0=u0,time=30,h=0.1)
+	s.run()
+	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
+	return s
+
 # RK DAE
 
 def compare_exact(solver, u0, components, decimal=2):

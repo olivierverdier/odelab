@@ -201,3 +201,56 @@ class VerticalRollingDisk(NonHolonomic):
 					-m*ohm_phi*R*ohm_theta*np.sin(phi),
 					m*ohm_phi*R*ohm_theta*np.cos(phi),])
 
+class Chaplygin(NonHolonomic):
+	"""
+Models the Chaplygin Sleigh. It has the Lagrangian
+
+.. math::
+
+	L(x,y,θ,ẋ,ẏ,ṫ) = m/2(ẋ^2 + ẏ^2) + Iṫ - mgy
+
+The nonholonomic constraint is given by
+
+.. math::
+
+	\cos(θ)ẋ - \sin(θ)ẏ - a \dot{theta}
+
+	"""
+	def __init__(self, mass=.001, inertia=.01, length=.04, ):
+		self.mass = mass
+		self.inertia = inertia
+		self.length = length
+		#self.ma = mass*length
+		#self.maa = self.ma * length
+		self.mass_matrix = np.diag([self.mass, self.mass, self.inertia])
+
+	g = 0
+
+	def position(self, u):
+		return u[:3]
+
+	def velocity(self, u):
+		return u[3:6]
+
+	def lag(self, u):
+		return u[6:7]
+
+	def momentum(self, u):
+		return np.dot(self.mass_matrix, self.velocity(u))
+
+	def force(self, u):
+		f = np.zeros(3)
+		f[1] = -self.mass*self.g
+		return f
+
+	def codistribution(self, u):
+		theta = self.position(u)[2]
+		return np.hstack([-np.sin(theta), np.cos(theta), -self.length]).reshape([1,-1])
+
+	def energy(self, u):
+		y = self.position(u)[1]
+		return .5*np.sum(self.momentum(u) * self.velocity(u), axis=0) + self.mass*self.g*y
+
+	def average_force(self, u0, u1):
+		return self.force(u0)
+
