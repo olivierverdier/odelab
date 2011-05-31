@@ -40,6 +40,17 @@ class NonHolonomic(System):
 		rk.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(ut) + self.reaction_force(ut)])
 		}
 
+	def average_velocity(self, u0, u1):
+		"""
+		Default value for the average velocity.
+		"""
+		return (self.velocity(u0) + self.velocity(u1))/2
+
+	def assemble(self, q,v,l):
+		"""
+		Default value for the assemble method.
+		"""
+		return np.hstack([q,v,l])
 
 class ContactOscillator(NonHolonomic):
 	"""
@@ -66,17 +77,12 @@ perturbation of the contact oscillator.
 	def velocity(self, u):
 		return u[3:6]
 
-	def average_velocity(self, u0, u1):
-		return (self.velocity(u0) + self.velocity(u1))/2
 
 	def state(self,u):
 		return u[:6]
 
 	def lag(self, u):
 		return u[6:7]
-
-	def assemble(self, q,v,l):
-		return np.hstack([q,v,l])
 
 	def force(self, u):
 		q = self.position(u) # copy?
@@ -143,9 +149,6 @@ class VerticalRollingDisk(NonHolonomic):
 	def velocity(self, u):
 		return u[4:8]
 
-	def average_velocity(self, u0, u1):
-		return (self.velocity(u0) + self.velocity(u1))/2
-
 	def average_force(self, u0, u1):
 		return self.force(u0) # using the fact that the force is zero in this model
 
@@ -165,9 +168,6 @@ class VerticalRollingDisk(NonHolonomic):
 
 	def force(self,u):
 		return np.zeros_like(self.position(u))
-
-	def assemble(self,q,v,l):
-		return np.hstack([q,v,l])
 
 	def qnorm(self, ut):
 		return np.sqrt(ut[0]**2 + ut[1]**2)
