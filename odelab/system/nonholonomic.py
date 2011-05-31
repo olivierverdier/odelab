@@ -112,11 +112,40 @@ perturbation of the contact oscillator.
 		q = self.position(u)
 		return .5*(vel[0]**2 + vel[1]**2 + vel[2]**2 + q[0]**2 + q[1]**2 + q[2]**2 + self.epsilon*q[0]**2*q[2]**2)
 
-	def initial(self, z0, e0=1.5, z0dot=0.):
-		q0 = array([np.sqrt( (2*e0 - 2*z0dot**2 - z0**2 - 1) / (1 + self.epsilon*z0**2) ), 1., z0])
-		p0 = array([-z0dot, 0, z0dot])
+	def radius_cos(self, u, Hy=.5):
+		q = self.position(u)
+		vel = self.velocity(u)
+		t = u[-1]
+		a = np.sqrt(2*Hy)
+		return (q[0]**2 + q[2]**2 + (1+(a*np.cos(t))**2)*vel[2]**2)
+
+	def radius(self, u):
+		q = self.position(u)
+		vel = self.velocity(u)
+		return .5*(q[0]**2 + q[2]**2 + (1+q[1]**2)*vel[2]**2)
+
+
+	def initial_cos(self, z0, H0=1.5, Hy=.5, z0dot=0.):
+		"""
+		Initial condition assuming y(t) = √(2Hy)*cos(t)
+		"""
+		b = np.sqrt(2*Hy)
+		q0 = array([np.sqrt( (2*H0 - 2*z0dot**2 - z0**2 - 1) / (1 + self.epsilon*z0**2) ), b, z0])
+		p0 = array([-b*z0dot, 0, z0dot])
 		v0 = p0
 		l0 = ( q0[0] + q0[1]*q0[2] - p0[1]*p0[2] + self.epsilon*(q0[0]*q0[2]**2 + q0[0]**2*q0[1]*q0[2] ) ) / ( 1 + q0[1]**2 )
+		return np.hstack([q0, v0, l0])
+
+	def initial_sin(self,z0, H0=1.5, Hy=.5, z0dot=0.):
+		"""
+		Initial condition assuming y(t) = √(2Hy)*sin(t)
+		"""
+		x0 = np.sqrt((2*(H0-Hy) - z0**2 - z0dot**2)/(1 + self.epsilon*z0**2))
+		q0 = array([x0, 0, z0])
+		a = np.sqrt(2*Hy)
+		p0 = array([0, a, z0dot])
+		v0 = p0
+		l0 = x0 - a*z0dot + self.epsilon*z0**2
 		return np.hstack([q0, v0, l0])
 
 	def time_step(self, N=40):
