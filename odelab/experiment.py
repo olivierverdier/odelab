@@ -8,6 +8,9 @@ import shelve
 import time
 import datetime
 from datetime import timedelta
+from numpy.lib import format
+
+import StringIO
 
 from pprint import PrettyPrinter
 
@@ -62,22 +65,30 @@ class Experiment(object):
 		parameters = self.parameters
 		path = self.get_path()
 		shelf = shelve.open(path)
-		data = {}
-		data['timestamp'] = self.timestamp
-		data['duration'] = self.duration
-		data['params'] = parameters
-		data['events'] = self.solver.events_array
-		shelf[parameters['name']] = data
+		name = parameters['name']
+		info = {}
+		info['timestamp'] = self.timestamp
+		info['duration'] = self.duration
+		info['params'] = parameters
+		event_string = StringIO.StringIO()
+		events = self.solver.events_array
+		format.write_array(event_string, events)
+		shelf[name+'_info'] = info
+		shelf[name+'_events'] = event_string.getvalue()
 		shelf.close()
 
 	@classmethod
 	def load(self, family, name):
 		shelf = shelve.open(family)
-		data = shelf[name]
-		params = data['params']
+		info = shelf[name+'_info']
+		event_string = shelf[name+'_events']
+		event_file = StringIO.StringIO(event_string)
+		events = format.read_array(event_file)
+
+		params = info['params']
 		experiment = self(params)
 		solver = experiment.get_solver()
-		solver.load_data(data['events'])
+		solver.load_data(events)
 		shelf.close()
 		return solver
 
