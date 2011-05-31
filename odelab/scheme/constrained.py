@@ -15,23 +15,24 @@ class McLachlan(Scheme):
 Solver for the Lagrange-d'Alembert (LDA) equations using the
 algorithm given by equation (4.18) in [mclachlan06]_.
 
- The Lagrangian is assumed to be of the form:
+ The Lagrangian is assumed to be *separable*:
 
 .. math::
 
-    L(q,v) = 0.5 \|v^2\| - V(q)
+    L(q,v) = T(v) - V(q)
 
-where :math:`V(q)` is the potential energy. The constraints are given by :math:`Av=0`,
+where :math:`T(v)` is the kinetic energy and :math:`V(q)` is the potential energy.
+The constraints are given by :math:`Av=0`,
 where :math:`A` is the mxn constraint matrix.
 
 More precisely, the :class:`odelab.system.System` object must implement:
 
 * :meth:`odelab.system.System.velocity`
+* :meth:`odelab.system.System.momentum`
 * :meth:`odelab.system.System.position`
 * :meth:`odelab.system.System.lag`
 * :meth:`odelab.system.System.force`
 * :meth:`odelab.system.System.codistribution`
-* :meth:`odelab.system.System.assemble`
 
 
 :References:
@@ -43,20 +44,21 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 	def step(self, t, u):
 		h = self.h
-		vel = self.system.velocity(u)
-		qh = self.system.position(u) + .5*self.h*vel
+		v0 = self.system.velocity(u)
+		momentum = self.system.momentum
+		p0 = momentum(u)
+		qh = self.system.position(u) + .5*self.h*v0
 		force = self.system.force(qh)
-		codistribution = self.system.codistribution(qh)
-		lag = self.system.lag(u)
-		dof = len(vel)
-		def residual(vl):
-			v,l = vl[:dof], vl[dof:]
-			return np.hstack([v - vel - h * (force + np.dot(codistribution.T, l)), np.dot(self.system.codistribution(qh+.5*h*v), v)])
+		codistribution = self.system.codistribution
+		codistribution_h = codistribution(qh)
+		def residual(u1):
+			q1 = self.system.position(u1)
+			v1 = self.system.velocity(u1)
+			l = self.system.lag(u1)
+			return np.hstack([q1 - qh - .5*h*v1, momentum(u1) - p0 - h * (force + np.dot(codistribution_h.T, l)), np.dot(codistribution(q1), v1)])
 		N = self.root_solver(residual)
-		vl = N.run(np.hstack([vel, lag]))
-		vnew, lnew = vl[:dof], vl[dof:]
-		qnew = qh + .5*h*vnew
-		return t+h, self.system.assemble(qnew,vnew,lnew)
+		unew = N.run(u)
+		return t+h, unew
 
 class NonHolonomicEnergy(Scheme):
 

@@ -40,6 +40,12 @@ class NonHolonomic(System):
 		rk.LobattoIIIB: np.concatenate([np.zeros_like(v), self.force(ut) + self.reaction_force(ut)])
 		}
 
+	def momentum(self, u):
+		"""
+		Default is to have an identity mass matrix.
+		"""
+		return self.velocity(u)
+
 	def average_velocity(self, u0, u1):
 		"""
 		Default value for the average velocity.
