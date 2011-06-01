@@ -236,6 +236,49 @@ class VerticalRollingDisk(NonHolonomic):
 					-m*ohm_phi*R*ohm_theta*np.sin(phi),
 					m*ohm_phi*R*ohm_theta*np.cos(phi),])
 
+
+class Pendulum(NonHolonomic):
+	def __init__(self, constraint=None, codistribution=None):
+		self._constraint = constraint
+		self._codistribution = codistribution
+
+	def position(self, u):
+		return u[:2]
+
+	def velocity(self, u):
+		return u[2:4]
+
+	def lag(self,u):
+		return u[4:5]
+
+	def codistribution(self, u):
+		return self._codistribution(u)
+
+	def force(self, u):
+		return -np.array([0,1])
+
+	def average_force(self,u0,u1):
+		return self.force(u0)
+
+	def constraint(self, u):
+		return self._constraint(u)
+
+class CirclePendulum(Pendulum):
+	def codistribution(self, u):
+		return self.position(u).reshape(1,-1)
+
+	def constraint(self,u):
+		x,y =  u[0], u[1]
+		return np.sqrt(x*x + y*y)
+
+class SinePendulum(Pendulum):
+	def codistribution(self, u):
+		x,y = self.position(u)
+		return np.hstack([np.cos(x), -np.ones_like(y)]).reshape(1,-1)
+
+	def constraint(self, u):
+		x,y = self.position(u)
+		return y - np.sin(x)
 class Chaplygin(NonHolonomic):
 	"""
 Models the Chaplygin Sleigh. It has the Lagrangian
