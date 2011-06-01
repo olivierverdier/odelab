@@ -21,39 +21,37 @@ SingleStepSolver.shelf_name = 'bank_constrained'
 # Contact oscillator
 
 class Harness_Osc(object):
+	epsilon = 0.3
 	def setUp(self):
-		self.sys = ContactOscillator()
+		self.sys = ContactOscillator(epsilon=self.epsilon)
 		self.set_solver()
-		self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
+		#self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
 		self.s.time = 10.
 
-## 	def test_run(self):
-## 		self.s.run()
 
 
-	z0s = np.linspace(-.9,.9,10)
+	z0s = np.linspace(-.9,.9,10)*np.sqrt(2)
 	N = 40
 
 	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
 		h = self.sys.time_step(self.N)
 		time = nb_Poincare_iterations*self.N*h
-		self.s.initialize(u0=self.sys.initial(z0), h=h, time=time)
+		self.s.initialize(u0=self.sys.initial_sin(z0), h=h, time=time)
 		self.s.run()
+		#self.s.plot(['radius'])
 		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=1)
 
-	def plot_qv(self, i=2, skip=None, *args, **kwargs):
-		if skip is None:
-			skip = self.N
-		qs = self.sys.position(self.s.aus)
-		vs = self.sys.velocity(self.s.aus)
-		if not kwargs.get('marker') and not kwargs.get('ls'):
-			kwargs['ls'] = ''
-			kwargs['marker'] = 'o'
-		plot(qs[i,::skip], vs[i,::skip], *args, **kwargs)
+	def run_chaotic(self, nb_Poincare_iterations=10):
+		z0 = -.55
+		h = self.sys.time_step(self.N)
+		time = nb_Poincare_iterations*self.N*h
+		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
+		self.s.run()
 
 
 class Test_McOsc(Harness_Osc):
+	label = 'ML'
 	def set_solver(self):
 		self.s = SingleStepSolver(McLachlan(), self.sys)
 
@@ -63,6 +61,7 @@ class Test_JayOsc(Harness_Osc):
 		self.s = SingleStepSolver(Spark(3), self.sys)
 
 class Test_HOsc(Harness_Osc):
+	label = 'H'
 	N=5 # bigger time step to make test faster
 	def set_solver(self):
 		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
