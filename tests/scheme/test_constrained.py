@@ -8,9 +8,11 @@ from odelab.system import *
 from odelab.solver import *
 
 import numpy.testing as npt
+import pylab as pl
+from pylab import *
 
 from nose.plugins.skip import SkipTest
-
+import nose.tools as nt
 
 SingleStepSolver.catch_runtime = False
 SingleStepSolver.auto_save = False
@@ -149,25 +151,42 @@ class Test_JayExample(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
-def test_chaplygin_ML():
-	s = SingleStepSolver(McLachlan(), Chaplygin())
-	s.system.g = 10.
-	u0 = np.array([1.,0,.2,0,0,0,0])
-	s.initialize(u0=u0,time=30,h=0.1)
 	s.run()
 	print s.system.energy(s.final())
 	nt.assert_equal(s.system.energy(s.events_array).shape, (len(s),))
 	return s
 
 
-def test_chaplygin_H():
-	s = SingleStepSolver(NonHolonomicEnergy(), Chaplygin(mass=1., inertia=1., length=1.))
-	s.system.g = 10.
-	u0 = np.array([1.,0,np.pi/2,0,0,0,0])
-	s.initialize(u0=u0,time=30,h=0.1)
 	s.run()
 	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
 	return s
+class Harness_Chaplygin(object):
+	def setUp(self):
+		self.s = SingleStepSolver(self.solver_class(), Chaplygin(g=.1))
+		#u0 = np.array([1.,0,.2,0,0,0,0])
+		#u0 = np.array([1.,0,.8*np.pi/2,0,0,0,0])
+		u0_Hilsen = np.array([1.,0,0,0,0,0,0])
+		h_Hilsen = 1./300
+		time_Hilsen = 1.
+		u0_Jay = np.array([0,0,0,0,0,1.,0])
+		h_Jay = .1
+		time_Jay = 100
+		self.s.initialize(u0=u0_Jay,time=time_Jay,h=h_Jay)
+		#print self.s.system.energy(s.final())
+		#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
+		#return self.s
+
+	def test_run(self):
+		self.s.run()
+		#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
+
+class Test_Chaplygin_ML(Harness_Chaplygin):
+	solver_class = McLachlan
+
+class Test_Chaplygin_H(Harness_Chaplygin):
+	solver_class = NonHolonomicEnergy
+
+
 
 # RK DAE
 

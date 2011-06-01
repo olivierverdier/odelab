@@ -242,24 +242,30 @@ Models the Chaplygin Sleigh. It has the Lagrangian
 
 .. math::
 
-	L(x,y,θ,ẋ,ẏ,ṫ) = m/2(ẋ^2 + ẏ^2) + Iṫ - mgy
+	L(x,y,θ,\dot{x},\dot{y},\dot{θ}) = \dot{x}^2 + \dot{y}^2 + \dot{θ}^2 - gy
+
+One encounters the following situations in the literature [Bloch]_, [Rheinboldt]_:
+
+:Chaplygin sleigh: g = 0
+:Knife edge, or skate on an inclined plane: a = 0
 
 The nonholonomic constraint is given by
 
 .. math::
 
-	\cos(θ)ẋ - \sin(θ)ẏ - a \dot{theta}
+	\cos(θ)\dot{x} - \sin(θ)\dot{y} - a \dot{θ}
 
+.. [Bloch] Bloch: *Nonholonomic Mechanics and Control*
+.. [Rheinboldt] Rabier, Rheinboldt: *Nonholonomic Motion of Rigid Mechanical Systems from a DAE Viewpoint*
 	"""
-	def __init__(self, mass=.001, inertia=.01, length=.04, ):
-		self.mass = mass
-		self.inertia = inertia
+	def __init__(self, g=1., length=1.):
+		"""
+g is the gravity. In principle it is between -1 and 1.
+length is the distance between the contact point and the centre of gravity
+		"""
+		self.g = g
 		self.length = length
-		#self.ma = mass*length
-		#self.maa = self.ma * length
-		self.mass_matrix = np.diag([self.mass, self.mass, self.inertia])
-
-	g = 0
+		self.mass_matrix = np.identity(3)
 
 	def position(self, u):
 		return u[:3]
@@ -275,7 +281,7 @@ The nonholonomic constraint is given by
 
 	def force(self, u):
 		f = np.zeros(3)
-		f[1] = -self.mass*self.g
+		f[1] = -self.g
 		return f
 
 	def codistribution(self, u):
@@ -284,7 +290,7 @@ The nonholonomic constraint is given by
 
 	def energy(self, u):
 		y = self.position(u)[1]
-		return .5*np.sum(self.momentum(u) * self.velocity(u), axis=0) + self.mass*self.g*y
+		return .5*np.sum(self.momentum(u) * self.velocity(u), axis=0) + self.g*y
 
 	def average_force(self, u0, u1):
 		return self.force(u0)
