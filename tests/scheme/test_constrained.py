@@ -150,11 +150,18 @@ class Test_JayExample(object):
 		print exact
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
+def test_pendulum_ML():
+	s = SingleStepSolver(McLachlan(), CirclePendulum())
+	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
 	print s.system.energy(s.final())
 	nt.assert_equal(s.system.energy(s.events_array).shape, (len(s),))
 	return s
 
+def test_pendulum_NHE():
+	s = SingleStepSolver(NonHolonomicEnergy(), SinePendulum())
+	s.initialize(np.array([1.,0,0,0,0]))
+	s.run()
 
 	s.run()
 	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
