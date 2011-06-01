@@ -279,6 +279,49 @@ class SinePendulum(Pendulum):
 	def constraint(self, u):
 		x,y = self.position(u)
 		return y - np.sin(x)
+
+class ChaoticOscillator(NonHolonomic):
+	def __init__(self, size=3):
+		self.size = size
+
+	def position(self,u):
+		return u[:2*self.size+1]
+
+	def velocity(self, u):
+		q = 2*self.size + 1
+		return u[q:2*q]
+
+	def lag(self, u):
+		q = 2*self.size + 1
+		return u[2*q:2*q+1]
+
+	def force(self, u):
+		q = self.position(u)
+		x = q[0]
+		n = self.size
+		y = q[1:n+1]
+		z = q[n+1:2*n+1]
+		force = q.copy()
+		force[n+1] += z[1]*z[1]*z[0]
+		force[n+2] += z[0]*z[0]*z[1]
+		force[1:n+1] += y*z*z
+		force[n+1:2*n+1] += y*y*z
+		return -force
+
+	def codistribution(self, u):
+		q = self.position(u)
+		n = self.size
+		return np.hstack([1, np.zeros(n), q[n+1:2*n+1]]).reshape(1,-1)
+
+	def energy(self, u):
+		q = self.position(u)
+		v = self.velocity(u)
+		x = q[0]
+		n = self.size
+		y = q[1:n+1]
+		z = q[n+1:2*n+1]
+		return .5*(np.sum(v*v,axis=0) + np.sum(y*y*z*z, axis=0) + z[0]*z[1])
+
 class Chaplygin(NonHolonomic):
 	"""
 Models the Chaplygin Sleigh. It has the Lagrangian
@@ -337,4 +380,45 @@ length is the distance between the contact point and the centre of gravity
 
 	def average_force(self, u0, u1):
 		return self.force(u0)
+
+class Robot(NonHolonomic):
+	def position(self,u):
+		return u[:4]
+
+	def velocity(self, u):
+		return u[4:8]
+
+	def lag(self,u):
+		return u[8:10]
+
+	def codistribution(self, u):
+		q2 = self.position(u)[2]
+		cod = np.zeros([2,4])
+		cod[0,0] = cod[1,1] = 1.
+		cod[0,3] = -np.cos(q2)
+		cod[1,3] = -np.sin(q2)
+		return cod
+
+	def force(self, u):
+		q = self.position(u)
+		f = np.zeros_like(q)
+		f[3] = -10*np.cos(q[3])
+		return f
+
+	def average_force(self, u0, u1):
+		q0 = self.position(u0)
+		t0 = q0[3]
+		t1 = self.position(u1)[3]
+		if np.allclose(t0,t1):
+			f = -10*np.cos(t0)
+		else:
+			f = -10*(np.sin(t1) - np.sin(t0))/(t1-t0) # check this!
+		fvec = np.zeros_like(q0)
+		fvec[3] = f
+		return fvec
+
+	def energy(self, u):
+		q3 = self.position(u)[3]
+		return .5*np.sum(self.momentum(u) * self.velocity(u), axis=0) + 10*np.sin(q3)
+
 

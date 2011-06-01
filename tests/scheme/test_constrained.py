@@ -113,6 +113,32 @@ class Test_VerticalRollingDisk_Spark(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 
+class HarnessRobot(object):
+	def setUp(self):
+		s = SingleStepSolver(self.scheme, Robot())
+		u0 = np.zeros(10)
+		u0[4] = 1.
+		u0[7] = 1.
+		s.initialize(h=.2, time=1, u0 = u0)
+		self.s = s
+
+	def test_run(self):
+		self.s.run()
+
+	def test_energy(self):
+		s = self.s
+		s.run(time=100)
+		nt.assert_almost_equal(s.system.energy(s.final()), s.system.energy(s.initial()), places=4)
+
+class Test_Robot_ML(HarnessRobot):
+	scheme = McLachlan()
+
+	def test_energy(self):
+		pass
+
+class Test_Robot_H(HarnessRobot):
+	scheme = NonHolonomicEnergy()
+
 # Test Spark on simple ODE
 
 def minus_time(tx):
@@ -163,9 +189,14 @@ def test_pendulum_NHE():
 	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
 
+def test_chaoticosc_ML():
+	s = SingleStepSolver(McLachlan(), ChaoticOscillator(3))
+	u0 = np.zeros(15)
+	u0[0] = 1.
+	s.initialize(u0=u0, h=.1, time=10)
 	s.run()
-	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
-	return s
+	print s.system.energy(s.final())
+
 class Harness_Chaplygin(object):
 	def setUp(self):
 		self.s = SingleStepSolver(self.solver_class(), Chaplygin(g=.1))
