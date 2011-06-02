@@ -189,13 +189,38 @@ def test_pendulum_NHE():
 	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
 
-def test_chaoticosc_ML():
-	s = SingleStepSolver(McLachlan(), ChaoticOscillator(3))
-	u0 = np.zeros(15)
-	u0[0] = 1.
-	s.initialize(u0=u0, h=.1, time=10)
-	s.run()
-	print s.system.energy(s.final())
+class Harness_chaoticosc(object):
+	def setUp(self):
+		s = SingleStepSolver(self.scheme, ChaoticOscillator(3))
+		u0 = np.zeros(15)
+		N = 10 - 1
+		n = 2 # j in range(N+1)
+		angle = n*np.pi/2/N
+		u0[:7] = np.array([np.cos(angle),.6,.4,.2,1.,1.,1.])
+		u0[7:9] = np.array([0., np.sin(angle)])
+		s.initialize(u0=u0, h=.05, time=1)
+		self.s = s
+
+	def test_run(self):
+		s = self.s
+		s.run()
+		print s.system.energy(s.final())
+
+	def test_energy(self):
+		self.s.run()
+		H1 = self.s.system.energy(self.s.final())
+		H0 = self.s.system.energy(self.s.initial())
+		print H0
+		print H1
+		npt.assert_almost_equal(H1, H0, decimal=self.energy_tol)
+
+class Test_chaotic_ML(Harness_chaoticosc):
+	scheme = McLachlan()
+	energy_tol = 2
+
+class Test_chaotic_H(Harness_chaoticosc):
+	scheme = NonHolonomicEnergy()
+	energy_tol = 10
 
 class Harness_Chaplygin(object):
 	def setUp(self):

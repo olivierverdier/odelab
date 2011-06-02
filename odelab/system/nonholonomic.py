@@ -280,8 +280,24 @@ class SinePendulum(Pendulum):
 		x,y = self.position(u)
 		return y - np.sin(x)
 
+def average_x_sqsq_force(x0,x1,y0,y1):
+	"""
+	mean force on the x component for the potential -x^2y^2
+	"""
+	return (x0*y0**2 + x1*y1**2)/4 + (2*y0*y1*(x0+x1) + x0*y1**2 + x1*y0**2)/12
+
+def add_average_sqsq_component(f,q0,q1,i,j):
+	"""
+	mean force for a potential - q_i^2 q_j^2
+	"""
+	f[i] += average_x_sqsq_force(q0[i],q1[i],q0[j],q1[j])
+	f[j] += average_x_sqsq_force(q0[j],q1[j],q0[i],q1[i])
+
 class ChaoticOscillator(NonHolonomic):
 	def __init__(self, size=3):
+		"""
+:param size: the unerlying size; the total dimension is 2n+1 + 2n+1 + 1 = 4n+3; that is 15 for the default size n=3
+		"""
 		self.size = size
 
 	def position(self,u):
@@ -308,6 +324,17 @@ class ChaoticOscillator(NonHolonomic):
 		force[n+1:2*n+1] += y*y*z
 		return -force
 
+	def average_force(self, u0, u1):
+		q0 = self.position(u0)
+		q1 = self.position(u1)
+		n = self.size
+		force = (q0 + q1)/2.
+		add_average_sqsq_component(force,q0,q1,n+1,n+2)
+		for i in range(n):
+			add_average_sqsq_component(force,q0,q1,1+i,1+n+i)
+		return -force
+
+
 	def codistribution(self, u):
 		q = self.position(u)
 		n = self.size
@@ -320,7 +347,7 @@ class ChaoticOscillator(NonHolonomic):
 		n = self.size
 		y = q[1:n+1]
 		z = q[n+1:2*n+1]
-		return .5*(np.sum(v*v,axis=0) + np.sum(y*y*z*z, axis=0) + z[0]*z[1])
+		return .5*(np.sum(v*v,axis=0) + np.sum(q*q,axis=0) + np.sum(y*y*z*z, axis=0) + z[0]**2*z[1]**2)
 
 class Chaplygin(NonHolonomic):
 	"""
