@@ -60,6 +60,13 @@ class Experiment(object):
 		path = os.path.join(self.store_prefix, self.parameters['family'])
 		return path
 
+	@classmethod
+	def info_shelf(self, name):
+		return name+'_info'
+
+	@classmethod
+	def event_shelf(self, name):
+		return name+'_events'
 
 	def save(self):
 		parameters = self.parameters
@@ -73,15 +80,15 @@ class Experiment(object):
 		event_string = StringIO.StringIO()
 		events = self.solver.events_array
 		format.write_array(event_string, events)
-		shelf[name+'_info'] = info
-		shelf[name+'_events'] = event_string.getvalue()
+		shelf[self.info_shelf(name)] = info
+		shelf[self.event_shelf(name)] = event_string.getvalue()
 		shelf.close()
 
 	@classmethod
 	def load(self, family, name):
 		shelf = shelve.open(family)
-		info = shelf[name+'_info']
-		event_string = shelf[name+'_events']
+		info = shelf[self.info_shelf(name)]
+		event_string = shelf[self.event_shelf(name)]
 		event_file = StringIO.StringIO(event_string)
 		events = format.read_array(event_file)
 
