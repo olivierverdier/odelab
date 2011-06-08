@@ -220,6 +220,32 @@ Initialize the solver from previously saved data.
 :param boolean error: to plot (the log10 of) the error instead of the value itself
 :param int time_component: component to use as x variable (if None, then time is used)
 		"""
+		# set up plot arguments
+		defaults = {'ls':'-', 'marker':','}
+		defaults.update(plot_args)
+
+		axis = PL.gca()
+		if save: # if this is meant to be saved, clear the previous plot first
+			axis.cla()
+		for pts in self.generate_plot_data(components, plot_exact, error, save, time_component):
+			data = pts['data']
+			ats = pts['x']
+			label = pts['label']
+			axis.plot(ats, data, ',-', label=label,  **defaults)
+			exact = pts.get('exact', None)
+			if exact is not None:
+				current_color = axis.lines[-1].get_color() # figure out current colour
+				axis.plot(ats, exact, ls='-', lw=2, label='{}*'.format(label), color=current_color)
+
+		axis.set_xlabel(pts['time_label'])
+		axis.legend()
+		if save:
+			PL.savefig(save, format='pdf', **plot_args)
+		else:
+			PL.plot() # plot only in interactive mode
+		return axis
+
+	def generate_plot_data(self, components=None, plot_exact=True, error=False, save=None, time_component=None):
 		# some sampling
 		size = len(self.events)
 		stride = np.ceil(size/self.max_plot_res)
@@ -239,9 +265,6 @@ Initialize the solver from previously saved data.
 			if sys_exact:
 				exact = sys_exact(ats, self.initial())
 		compute_exact = (plot_exact or error) and sys_exact
-		axis = PL.gca()
-		if save: # if this is meant to be saved, clear the previous plot first
-			axis.cla()
 
 		time_label = 'time'
 
@@ -258,29 +281,22 @@ Initialize the solver from previously saved data.
 				if compute_exact:
 					exact_comp = exact[component]
 
-			# set up plot arguments
-			defaults = {'ls':'-', 'marker':','}
-			defaults.update(plot_args)
-
 			if error and sys_exact:
 				data = np.log10(np.abs(data - exact_comp))
-			if  time_component is not None and not component_i:
+			if time_component is not None and not component_i:
 				# at the first step, if time_component is not time, then replace the time vector by the desired component
 				ats = data
 				time_label = label
 				continue
 			else:
-				axis.plot(ats, data, ',-', label=label, **defaults)
+				pts = {}
+				pts['x'] = ats
+				pts['time_label'] = time_label
+				pts['data'] = data
+				pts['label'] = label
 				if compute_exact and not error:
-					current_color = axis.lines[-1].get_color() # figure out current colour
-					axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label, color=current_color)
-		axis.set_xlabel(time_label)
-		axis.legend()
-		if save:
-			PL.savefig(save, format='pdf', **plot_args)
-		else:
-			PL.plot() # plot only in interactive mode
-		return axis
+					pts['exact'] = exact_comp
+				yield pts
 
 	def plot_function(self, function, *args, **kwargs):
 		"""
