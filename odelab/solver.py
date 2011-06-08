@@ -235,10 +235,10 @@ Initialize the solver from previously saved data.
 			components.insert(0,time_component)
 
 		if plot_exact or error:
-			has_exact = hasattr(self.system, 'exact')
-			if has_exact:
-				exact = self.system.exact(ats, self.initial())
-		compute_exact = (plot_exact or error) and has_exact
+			sys_exact = getattr(self.system, 'exact', None)
+			if sys_exact:
+				exact = sys_exact(ats, self.initial())
+		compute_exact = (plot_exact or error) and sys_exact
 		axis = PL.gca()
 		if save: # if this is meant to be saved, clear the previous plot first
 			axis.cla()
@@ -249,9 +249,10 @@ Initialize the solver from previously saved data.
 		for component_i, component in enumerate(components):
 			if isinstance(component, str):
 				label = component
-				data = self.system.__getattribute__(component)(events)
+				function = getattr(self.system, component)
+				data = function(events)
 				if compute_exact:
-					exact_comp = self.system.__getattribute__(component)(np.vstack([exact, ats]))
+					exact_comp = function(np.vstack([exact, ats]))
 			else:
 				label = self.system.label(component)
 				data = events[component]
@@ -262,7 +263,7 @@ Initialize the solver from previously saved data.
 			defaults = {'ls':'-', 'marker':','}
 			defaults.update(plot_args)
 
-			if error and has_exact:
+			if error and sys_exact:
 				data = np.log10(np.abs(data - exact_comp))
 			if  time_component is not None and not component_i:
 				# at the first step, if time_component is not time, then replace the time vector by the desired component
