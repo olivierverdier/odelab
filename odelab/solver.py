@@ -271,9 +271,9 @@ Initialize the solver from previously saved data.
 				continue
 			else:
 				axis.plot(ats, data, ',-', label=label, **defaults)
-			if compute_exact and not error:
-				current_color = axis.lines[-1].get_color() # figure out current colour
-				axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label, color=current_color)
+				if compute_exact and not error:
+					current_color = axis.lines[-1].get_color() # figure out current colour
+					axis.plot(ats, exact_comp, ls='-', lw=2, label='%s*' % label, color=current_color)
 		axis.set_xlabel(time_label)
 		axis.legend()
 		if save:
