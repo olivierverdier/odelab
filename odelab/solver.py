@@ -255,7 +255,8 @@ Initialize the solver from previously saved data.
 		# components
 		if components is None: # plot all the components by default
 			components = range(self.events[0].size - 1)
-		if not np.iterable(components): # makes the code work when plotting a single component
+		# makes the code work when plotting a single component (either a string or an index):
+		if isinstance(components, basestring) or not np.iterable(components):
 			components = [components]
 		if time_component is not None:
 			components.insert(0,time_component)

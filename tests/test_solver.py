@@ -184,6 +184,7 @@ class Harness_Circle(Harness):
 		self.s.plot(save=path)
 		a = self.s.plot(components=['output', 0],save=path, plot_exact=False)
 		nt.assert_equal(len(a.lines), 2)
+		a = self.s.plot(components='output', save=path)
 		a = self.s.plot(components=['output', 0],save=path, plot_exact=True)
 		nt.assert_equal(len(a.lines), 4)
 		self.s.plot(components=['output'], error=True)
