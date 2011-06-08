@@ -242,7 +242,6 @@ Initialize the solver from previously saved data.
 		axis = PL.gca()
 		if save: # if this is meant to be saved, clear the previous plot first
 			axis.cla()
-		previous_line = len(axis.lines)
 
 		time_label = 'time'
 
