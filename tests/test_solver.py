@@ -167,7 +167,7 @@ class Harness_Circle(Harness):
 	def test_plot_2D(self):
 		pl.clf()
 		a = self.s.plot(1,time_component=0)
-		nt.assert_true(a.get_xlabel(), 'x')
+		nt.assert_equal(a.get_xlabel(), 'x')
 		self.s.plot2D()
 		for l in a.get_lines():
 			d = l.get_data()
@@ -176,7 +176,7 @@ class Harness_Circle(Harness):
 
 	def test_plot(self):
 		a = self.s.plot(plot_exact=False)
-		nt.assert_true(a.get_xlabel(), 'time')
+		nt.assert_equal(a.get_xlabel(), 'time')
 		self.s.plot(plot_exact=True)
 		tmp = tempfile.gettempdir()
 		path = os.path.join(tmp, 'test_fig.pdf')
