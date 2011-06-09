@@ -61,15 +61,15 @@ class Harness_Solver(Harness):
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
-		nt.assert_true(self.solver.time == Solver.time)
-		nt.assert_true(len(self.solver) == 1)
+		nt.assert_equal(self.solver.time, Solver.time)
+		nt.assert_equal(len(self.solver), 1)
 
 	def test_initialize_scheme(self):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
 		e0 = self.solver.initial()
 		self.solver.step(e0[-1], e0[:-1])
-		nt.assert_true(self.solver.scheme.h == h)
+		nt.assert_equal(self.solver.scheme.h, h)
 
 	def test_quadratic(self):
 		"""should solve f(t) = t pretty well"""
