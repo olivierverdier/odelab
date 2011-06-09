@@ -32,7 +32,7 @@ class Exponential(Scheme):
 
 	def initialize(self):
 		super(Exponential, self).initialize()
-		tail = np.array(self.solver.events[-self.tail_length:]).T
+		tail = np.array(self.solver.events[:,-self.tail_length:])
 		# this is specific to those Exponential solvers:
 		# warning: this creates a tail using the type of u
 		for i in range(tail.shape[1]-1):

@@ -17,7 +17,7 @@ class Plotter(object):
 		# some sampling
 		size = len(self.solver)
 		stride = np.ceil(size/self.max_plot_res)
-		self.events = self.solver.events_array[:,::stride]
+		self.events = self.solver.events[:,::stride]
 
 	def components(self, components, time_component):
 		# components

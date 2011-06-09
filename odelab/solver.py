@@ -22,6 +22,8 @@ import itertools
 
 from odelab.plotter import Plotter
 
+import tables
+
 class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
@@ -33,6 +35,10 @@ class Solver (object):
 
 	def __init__(self, system=None):
 		self.system = system
+		import tempfile
+		f = tempfile.NamedTemporaryFile(delete=True)
+		self.name = f.name
+		self.file = tables.openFile(self.name, mode='w')
 
 
 	# default values for the total time
@@ -58,25 +64,32 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				event0 = self.events[0]
 			except AttributeError:
 				raise self.NotInitialized("You must provide an initial condition.")
-		self.events = [event0]
+
+		# first remove the events node if they exist
+		try:
+			events = self.file.getNode('/events')
+		except tables.NoSuchNodeError:
+			pass
+		else:
+			events.remove()
+
+		self.events = self.file.createEArray(self.file.root, 'events', tables.Atom.from_dtype(event0.dtype), shape=(len(event0),0))
+		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
 		if h is not None:
 			self.h = h
 		if time is not None:
 			self.time = time
 
 	def __len__(self):
-		return len(self.events)
+		return self.events.nrows
 
 	def load_data(self, data):
 		"""
 Initialize the solver from previously saved data.
+
 :param array data: event array, with the same format as :py:attr:`events_array`
 		"""
 		self.events = list(data.T)
-		self.update_events_array()
-
-	def update_events_array(self):
-		self.events_array = np.array(self.events).T
 
 	def generate(self, event):
 		"""
@@ -116,14 +129,13 @@ Initialize the solver from previously saved data.
 
 	def __enter__(self):
 		# start from the last time we stopped
-		event = self.events[-1]
+		event = self.events[:,-1]
 		generator = self.generate(event)
 		return generator
 
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 	def __exit__(self, ex_type, ex_value, traceback):
-		self.update_events_array()
 		if self.auto_save:
 			self.save()
 
@@ -140,7 +152,7 @@ Initialize the solver from previously saved data.
 		if time is None:
 			time = self.time
 		try:
-			t0 = self.events[-1][-1]
+			t0 = self.events[-1,-1]
 		except AttributeError:
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		tf = t0 + time # final time
@@ -157,7 +169,7 @@ Initialize the solver from previously saved data.
 					if np.any(np.isnan(event)):
 						raise self.Unstable('Unstable after %d steps.' % i)
 
-					self.events.append(event)
+					self.events.append(event.reshape(-1,1))
 					if event[-1] > tf - self.t_tol:
 						break
 			else:
@@ -185,7 +197,7 @@ Initialize the solver from previously saved data.
 		"""
 		Return u[index] after post-processing.
 		"""
-		event = self.events[index]
+		event = self.events[:,index]
 		if process:
 			event = self.system.postprocess(event)
 		return event

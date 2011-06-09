@@ -64,6 +64,11 @@ class Harness_Solver(Harness):
 		nt.assert_equal(self.solver.time, Solver.time)
 		nt.assert_equal(len(self.solver), 1)
 
+	def test_initialize_twice(self):
+		u0 = np.random.rand(self.dim)
+		self.solver.initialize(u0=u0)
+		self.solver.initialize(u0=u0)
+
 	def test_initialize_scheme(self):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
@@ -95,7 +100,7 @@ class Harness_Solver(Harness):
 		return
 
 	def test_const(self):
-		for f,u0_,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j), (const_c, 1., 1.+1.j)]:
+		for f,u0_,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j),]:
 			yield self.check_const, f, u0_, expected
 
 class Test_EEuler(Harness_Solver):
