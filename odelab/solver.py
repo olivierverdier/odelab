@@ -81,7 +81,13 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		else:
 			self.events.remove()
 
-		self.events = self.file.createEArray(self.file.root, self.name, tables.Atom.from_dtype(event0.dtype), shape=(len(event0),0))
+		compression = tables.Filters(complevel=1, complib='blosc', fletcher32=True)
+		self.events = self.file.createEArray(
+				where=self.file.root,
+				name=self.name,
+				atom=tables.Atom.from_dtype(event0.dtype),
+				shape=(len(event0),0),
+				filters=compression)
 		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
 
 		if h is not None:
