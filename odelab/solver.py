@@ -33,16 +33,24 @@ class Solver (object):
 			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses. The system may also be specified later, although before any simulation of course.
 	"""
 
-	def __init__(self, system=None):
+	def __init__(self, system=None, file=None, name=None):
 		self.system = system
-		import tempfile
-		f = tempfile.NamedTemporaryFile(delete=True)
-		self.name = f.name
-		self.file = tables.openFile(self.name, mode='w')
+		if file is None:
+			import tempfile
+			f = tempfile.NamedTemporaryFile(delete=True)
+			self.file = tables.openFile(f.name, mode='a')
+			# the following is to avoid PyTables to keep a reference on the open file
+			# http://thread.gmane.org/gmane.comp.python.pytables.user/1100/focus=1107
+			# it is unsatisfactory: perhaps the best way is to use __enter__ and __exit__ appropriately
+			del tables.file._open_files[f.name]
+		else:
+			self.file = file
+		self.name = name or 'events'
 
 
 	# default values for the total time
 	time = 1.
+
 
 	def initialize(self, u0=None, t0=0, h=None, time=None):
 		"""
@@ -67,14 +75,15 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		# first remove the events node if they exist
 		try:
-			events = self.file.getNode('/events')
+			self.load_data()
 		except tables.NoSuchNodeError:
 			pass
 		else:
-			events.remove()
+			self.events.remove()
 
-		self.events = self.file.createEArray(self.file.root, 'events', tables.Atom.from_dtype(event0.dtype), shape=(len(event0),0))
+		self.events = self.file.createEArray(self.file.root, self.name, tables.Atom.from_dtype(event0.dtype), shape=(len(event0),0))
 		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
+
 		if h is not None:
 			self.h = h
 		if time is not None:
@@ -83,13 +92,10 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 	def __len__(self):
 		return self.events.nrows
 
-	def load_data(self, data):
+	def load_data(self):
 		"""
-Initialize the solver from previously saved data.
-
-:param array data: event array, with the same format as :py:attr:`events_array`
 		"""
-		self.events = list(data.T)
+		self.events = self.file.getNode('/'+self.name)
 
 	def generate(self, event):
 		"""
@@ -103,7 +109,7 @@ Initialize the solver from previously saved data.
 			self.increment_stepsize()
 
 
-	max_iter = 100000
+	max_iter = 1000000
 	class FinalTimeNotReached(Exception):
 		"""
 		Raised when the final time was not reached within the given ``max_iter`` number of iterations.
@@ -136,6 +142,7 @@ Initialize the solver from previously saved data.
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 	def __exit__(self, ex_type, ex_value, traceback):
+		self.file.flush()
 		if self.auto_save:
 			self.save()
 
@@ -254,8 +261,8 @@ Initialize the solver from previously saved data.
 		PL.quiver(X,Y,vals[0], vals[1])
 
 class SingleStepSolver(Solver):
-	def __init__(self, scheme, system=None):
-		super(SingleStepSolver, self).__init__(system)
+	def __init__(self, scheme, *args, **kwargs):
+		super(SingleStepSolver, self).__init__(*args, **kwargs)
 		self.scheme = scheme
 
 	def __repr__(self):
@@ -284,8 +291,8 @@ class SingleStepSolver(Solver):
 class MultiStepSolver(SingleStepSolver):
 ## 	default_single_step_scheme = HochOst4()
 
-	def __init__(self, scheme, system, single_step_scheme=None):
-		super(MultiStepSolver, self).__init__(scheme, system)
+	def __init__(self, scheme, single_step_scheme=None, *args, **kwargs):
+		super(MultiStepSolver, self).__init__(scheme, *args, **kwargs)
 		if single_step_scheme is None:
 			from odelab.scheme.exponential import HochOst4
 			single_step_scheme = HochOst4() # hard coded for the moment

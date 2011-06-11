@@ -4,35 +4,49 @@ from __future__ import division
 
 import os
 
-import shelve
+import tables
+
 import time
 import datetime
 from datetime import timedelta
-from numpy.lib import format
 
-import StringIO
 
 from pprint import PrettyPrinter
 
 pprinter = PrettyPrinter()
 
 class Experiment(object):
-	def __init__(self, parameters, store_prefix=''):
+	def __init__(self, parameters, store_prefix=None):
 		self.parameters = parameters
+		if store_prefix is None:
+			store_prefix = self.default_prefix()
 		self.store_prefix = store_prefix
+
+	def default_prefix(self):
+		"""
+Default prefix from the command line.
+		"""
+		import sys
+		try:
+			prefix = sys.argv[1]
+		except IndexError:
+			prefix = ''
+		return prefix
 
 	def get_system(self):
 		sys_class = self.parameters['system']
 		sys = sys_class(**self.parameters.get('system_params', {}))
 		return sys
 
-	def get_solver(self):
+	def get_solver(self, file=None):
 		parameters = self.parameters
 		sys = self.get_system()
 		scheme_class = parameters['scheme']
 		scheme = scheme_class(**parameters.get('scheme_params', {}))
 		solver_class = parameters['solver']
-		solver = solver_class(scheme, sys)
+		if file is None:
+			file = tables.openFile(self.get_path(), mode='a')
+		solver = solver_class(scheme, sys, file=file, name=parameters['name'])
 		return solver
 
 	def run(self, save=True):
@@ -60,43 +74,24 @@ class Experiment(object):
 		path = os.path.join(self.store_prefix, self.parameters['family'])
 		return path
 
-	@classmethod
-	def info_shelf(self, name):
-		return name+'_info'
-
-	@classmethod
-	def event_shelf(self, name):
-		return name+'_events'
-
 	def save(self):
 		parameters = self.parameters
-		path = self.get_path()
-		shelf = shelve.open(path)
-		name = parameters['name']
 		info = {}
 		info['timestamp'] = self.timestamp
 		info['duration'] = self.duration
 		info['params'] = parameters
-		event_string = StringIO.StringIO()
-		events = self.solver.events_array
-		format.write_array(event_string, events)
-		shelf[self.info_shelf(name)] = info
-		shelf[self.event_shelf(name)] = event_string.getvalue()
-		shelf.close()
+		self.solver.events.attrs['info'] = info
 
 	@classmethod
-	def load(self, family, name):
-		shelf = shelve.open(family)
-		info = shelf[self.info_shelf(name)]
-		event_string = shelf[self.event_shelf(name)]
-		event_file = StringIO.StringIO(event_string)
-		events = format.read_array(event_file)
+	def load(self, path, name):
+		hdfile = tables.openFile(path, mode='a')
+		events = hdfile.getNode('/'+name)
+		info = events.attrs['info']
 
 		params = info['params']
-		experiment = self(params)
-		solver = experiment.get_solver()
-		solver.load_data(events)
-		shelf.close()
+		experiment = self(params, store_prefix='')
+		solver = experiment.get_solver(file=hdfile)
+		solver.load_data()
 		return solver
 
 
