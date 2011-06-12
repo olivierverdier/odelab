@@ -28,6 +28,17 @@ class Scheme(object):
 	def system(self):
 		return self.solver.system
 
+	def __getstate__(self):
+		"""
+		Make sure that the solver attribute is never pickled.
+		"""
+		d = self.__dict__.copy()
+		try:
+			del d['solver']
+		except KeyError:
+			pass
+		return d
+
 	def increment_stepsize(self):
 		"""
 		Change the step size based on error estimation.

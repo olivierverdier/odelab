@@ -39,7 +39,7 @@ def test_solver_autosave():
 	solver = SingleStepSolver(ExplicitEuler(), System(f))
 	solver.initialize(u0=1.)
 	solver.run()
-	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1_0_N101')
+	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1.0')
 
 from functools import partial
 const_r = partial(const_f, 1.)
@@ -65,6 +65,7 @@ class Harness_Solver(Harness):
 		nt.assert_equal(len(self.solver), 1)
 
 	def test_initialize_twice(self):
+		raise SkipTest('double initialization is deactivated')
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		self.solver.initialize(u0=u0)

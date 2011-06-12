@@ -19,6 +19,7 @@ import scipy.io # used for saving in shelves
 import numpy as np
 
 import itertools
+import warnings
 
 from odelab.plotter import Plotter
 
@@ -28,31 +29,48 @@ class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
 
-	:Parameters:
-		system : :class:`odelab.system.System`
-			Object describing the system. The requirement on that class may vary. See the documentation of the various solver subclasses. The system may also be specified later, although before any simulation of course.
 	"""
 
-	def __init__(self, system=None, file=None, name=None):
+	def __init__(self, scheme, system, path=None):
+		"""
+:Parameters:
+	system : :class:`odelab.system.System`
+		Object describing the system. The requirement on that class may vary depending on the scheme.
+	scheme : :class:`odelab.scheme.Scheme`
+		Scheme to be used to perform the actual simulation.
+	path : :string:
+		Path to the file where to save the produced data (if None, a tempfile is created).
+		"""
 		self.system = system
-		if file is None:
+		self.scheme = scheme
+		solver_info = {
+				'system': system,
+				'scheme': scheme,
+				'solver_class': type(self),
+				}
+		if path is None: # file does not exist
 			import tempfile
 			f = tempfile.NamedTemporaryFile(delete=True)
-			self.file = tables.openFile(f.name, mode='a')
-			# the following is to avoid PyTables to keep a reference on the open file
-			# http://thread.gmane.org/gmane.comp.python.pytables.user/1100/focus=1107
-			# it is unsatisfactory: perhaps the best way is to use __enter__ and __exit__ appropriately
-			del tables.file._open_files[f.name]
+			self.path = f.name
 		else:
-			self.file = file
-		self.name = name or 'events'
+			self.path = path
+
+		# open the file
+		self.file = tables.openFile(self.path, mode='a')
+		self.file.root._v_attrs['solver_info'] = solver_info # possibly overwrite existing solver_info...
+
+		# the following is to prevent PyTables from keeping a reference on the open file
+		# http://thread.gmane.org/gmane.comp.python.pytables.user/1100/focus=1107
+		# it is unsatisfactory: perhaps the best way is to use __enter__ and __exit__ appropriately
+		del tables.file._open_files[self.path]
 
 
 	# default values for the total time
 	time = 1.
 
 
-	def initialize(self, u0=None, t0=0, h=None, time=None):
+
+	def initialize(self, u0=None, t0=0, h=None, time=None, name=None):
 		"""
 Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
@@ -60,48 +78,62 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param scalar t0: initial time
 :param scalar h: time step
 :param scalar time: span of the simulation
+:param string name: name of this simulation
 		"""
-		if u0 is not None: # initial condition provided
-			if np.isscalar(u0):
-				u0 = [u0]
-			u0 = np.array(u0)
-			raw_event0 = np.hstack([u0,t0])
-			event0 = self.system.preprocess(raw_event0)
-		else: # start from the previous initial conditions
-			try:
-				event0 = self.events[0]
-			except AttributeError:
-				raise self.NotInitialized("You must provide an initial condition.")
-
-		# first remove the events node if they exist
-		try:
-			self.load_data()
-		except tables.NoSuchNodeError:
-			pass
-		else:
-			self.events.remove()
-
-		compression = tables.Filters(complevel=1, complib='blosc', fletcher32=True)
-		self.events = self.file.createEArray(
-				where=self.file.root,
-				name=self.name,
-				atom=tables.Atom.from_dtype(event0.dtype),
-				shape=(len(event0),0),
-				filters=compression)
-		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
+		if u0 is None: # initial condition not provided
+			raise self.NotInitialized("You must provide an initial condition.")
+		if np.isscalar(u0):
+			u0 = [u0] # todo: test if this is necessary
+		u0 = np.array(u0)
+		raw_event0 = np.hstack([u0,t0])
+		event0 = self.system.preprocess(raw_event0)
 
 		if h is not None:
 			self.h = h
 		if time is not None:
 			self.time = time
 
+		self.set_name(name=name)
+
+		# first remove the events node if they exist
+		#try:
+			#self.load_data()
+		#except tables.NoSuchNodeError:
+			#pass
+		#else:
+			#self.events.remove()
+
+		# create a new extensible array node
+		compression = tables.Filters(complevel=1, complib='zlib', fletcher32=True)
+		with warnings.catch_warnings():
+			warnings.simplefilter('ignore')
+			self.events = self.file.createEArray(
+				where=self.file.root,
+				name=self.name,
+				atom=tables.Atom.from_dtype(event0.dtype),
+				shape=(len(event0),0),
+				filters=compression)
+
+		# store the metadata
+		info = {
+				'u0':u0,
+				't0':t0,
+				'h':h,
+				'time':time,
+				}
+		self.events.attrs['init_params'] = info
+
+		# append the initial condition:
+		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
+
+
 	def __len__(self):
 		return self.events.nrows
 
-	def load_data(self):
+	def load_data(self, name):
 		"""
 		"""
-		self.events = self.file.getNode('/'+self.name)
+		self.events = self.file.getNode('/'+name)
 
 	def generate(self, event):
 		"""
@@ -188,23 +220,18 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
 
+	def set_name(self, name=None):
+		"""
+		Set or guess a name for this session.
+		"""
+		if name is not None:
+			self.name = name
+		else:
+			guess = self.guess_name()
+			self.name = guess
+
 	def guess_name(self):
-		"""
-		Guess a name for this session.
-		"""
-		guess = "{system}_{scheme}_T{time}_N{nsteps}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time, nsteps=len(self.events))
-		sanitized = guess.replace('.','_')
-		return sanitized
-
-	shelf_name = 'bank' # default shelf name
-
-	def save(self, name=None):
-		"""
-		Save the current results in a scipy shelf.
-		"""
-		shelf_name = name or self.guess_name()
-		print shelf_name
-		scipy.io.save_as_module(self.shelf_name, {shelf_name: self})
+		return "{system}_{scheme}_T{time}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time,)
 
 	def get_u(self, index, process=True):
 		"""
@@ -267,9 +294,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		PL.quiver(X,Y,vals[0], vals[1])
 
 class SingleStepSolver(Solver):
-	def __init__(self, scheme, *args, **kwargs):
-		super(SingleStepSolver, self).__init__(*args, **kwargs)
-		self.scheme = scheme
 
 	def __repr__(self):
 		return '<%s: %s>' % ('Solver', str(self.scheme))
@@ -308,6 +332,15 @@ class MultiStepSolver(SingleStepSolver):
 
 
 
-
-
-
+def load_solver(path, name):
+	"""
+Create a solver object from a path to an hdf5 file.
+	"""
+	with tables.openFile(path) as f:
+		info = f.root._v_attrs.solver_info
+		system = info['system']
+		scheme = info['scheme']
+		solver_class = info['solver_class']
+	solver = solver_class(system=system, scheme=scheme, path=path)
+	solver.load_data(name)
+	return solver

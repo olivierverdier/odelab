@@ -2,12 +2,13 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.solver import SingleStepSolver
+from odelab.solver import SingleStepSolver, MultiStepSolver, load_solver
 from odelab.system import System
 from odelab.experiment import Experiment
 
 import numpy as np
 import nose.tools as nt
+from nose.plugins.skip import SkipTest
 
 import tempfile
 import os
@@ -15,7 +16,12 @@ import os
 def f(t,u):
 	return -u
 
-class Test_Experiment(object):
+class BigSystem(System):
+	def __init__(self, *args, **kwargs):
+		super(BigSystem, self).__init__(*args, **kwargs)
+		self.data = np.zeros([32,32], dtype=complex)
+
+class Harness_Experiment(object):
 	name = 'tmpexp'
 	def setUp(self):
 		self.file = tempfile.NamedTemporaryFile()
@@ -24,9 +30,11 @@ class Test_Experiment(object):
 		self.prefix = os.path.dirname(self.path)
 		self.file.close()
 		from odelab.scheme import ExplicitEuler
+		s = self.solver_class(system=System(f), scheme=ExplicitEuler(), path=self.path)
+		s.catch_runtime = False
+
 		params = {
 			'family': self.family,
-			'name': self.name,
 			'system': System,
 			'system_params': {'f': f},
 			'solver': SingleStepSolver,
@@ -36,22 +44,29 @@ class Test_Experiment(object):
 				'u0' : np.array([1.]),
 				'time': 1.,
 				'h': .1,
+				'name': self.name,
 				},
 			}
-		exp = Experiment(params, store_prefix=self.prefix)
-		exp.run()
-		exp.solver.file.close()
+		s.initialize(**params['initialize'])
+		s.run()
+		#exp = Experiment(params, store_prefix=self.prefix)
+		#exp.run()
+		#exp.solver.file.close()
 
 	def test_load(self):
-		s = Experiment.load(self.path, self.name)
+		s = load_solver(self.path, self.name)
+		#s = Experiment.load(self.path, self.name)
 		nt.assert_true(isinstance(s, SingleStepSolver))
 		nt.assert_equal(s.scheme.__class__.__name__, 'ExplicitEuler')
 		nt.assert_equal(len(s), 11)
-	
-	#def tearDown(self):
-		#import os
-		#os.remove()
 
-if __name__ == '__main__':
-	t = Test_Experiment()
-	t.setUp()
+	def test_load_run(self):
+		raise SkipTest('Not possible to restart a stored simulation')
+		s = load_solver(self.path, self.name)
+		s.run()
+
+class Test_Single(Harness_Experiment):
+	solver_class = SingleStepSolver
+
+class Test_Multi(Harness_Experiment):
+	solver_class = MultiStepSolver
