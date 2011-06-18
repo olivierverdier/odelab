@@ -167,7 +167,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		Raised when the solver is not properly initialized.
 		"""
 
-	class Runtime(Exception):
+	class RuntimeError(Exception):
 		"""
 		Raised to relay an exception occurred while running the solver.
 		"""
@@ -216,7 +216,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 					event = next(generator)
 				except Exception as e:
 					if self.catch_runtime:
-						raise self.Runtime('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
+						raise self.RuntimeError('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
 					else:
 						raise
 				else:

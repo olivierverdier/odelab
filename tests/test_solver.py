@@ -304,7 +304,7 @@ class Test_FinalTimeExceptions(object):
 		else:
 			raise Exception("FinalTimeNotReached not raised!")
 
-	@nt.raises(Solver.Runtime)
+	@nt.raises(Solver.RuntimeError)
 	def test_sys_exception(self):
 		self.s.run()
 
@@ -331,7 +331,7 @@ class Test_Exceptions(object):
 		self.s = SingleStepSolver(ExplicitEuler(), Linear(np.array([[float('inf')]])))
 		self.s.initialize(u0=np.array([0]))
 		self.s.run()
-	@nt.raises(Solver.Runtime)
+	@nt.raises(Solver.RuntimeError)
 	def test_runtime_exception(self):
 		self.s = SingleStepSolver(ExplicitEuler(), System(faulty_function))
 		self.s.catch_runtime = True
