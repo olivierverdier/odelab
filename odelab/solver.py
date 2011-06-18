@@ -63,7 +63,10 @@ class Solver (object):
 		# the following is to prevent PyTables from keeping a reference on the open file
 		# http://thread.gmane.org/gmane.comp.python.pytables.user/1100/focus=1107
 		# it is unsatisfactory: perhaps the best way is to use __enter__ and __exit__ appropriately
-		del tables.file._open_files[self.path]
+		try:
+			del tables.file._open_files[self.path]
+		except KeyError:
+			pass
 
 
 	# default values for the total time
