@@ -269,9 +269,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.get_u(-1, process)
 
-	def plot(self, components=None, plot_exact=True, error=False, save=None, time_component=None, **plot_args):
+	def plot(self, components=None, plot_exact=True, error=False, time_component=None, **plot_args):
 		plotter = Plotter(self)
-		return plotter.plot(components, plot_exact, error, save, time_component, **plot_args)
+		plotter.setup(plot_exact, error)
+		plotter.components = components
+		plotter.time_component = time_component
+		plotter.plot_args = plot_args
+		plotter.plot()
+		return plotter
 
 	def plot_function(self, function, *args, **kwargs):
 		"""
@@ -290,7 +295,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		Plot components vs another one
 		"""
-		self.plot(other_component, time_component=time_component, *args, **kwargs)
+		return self.plot(other_component, time_component=time_component, *args, **kwargs)
 
 	quiver_res = 20
 	def quiver(self):

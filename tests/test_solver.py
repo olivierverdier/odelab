@@ -153,74 +153,6 @@ def test_unstable():
 	s.initialize(u0 = 1., time = 100, h = 10)
 	s.run()
 
-class DummySystem(System):
-	def __init__(self, f):
-		super(DummySystem,self).__init__(f)
-
-	def label(self, component):
-		return ['x', 'y'][component]
-
-	def output(self, ut):
-		return np.ones(ut.shape[1])
-
-	def exact(self, t, e0):
-		x,y,t0 = e0
-		c,s = np.cos(t), np.sin(t)
-		return np.vstack([c*x-s*y, s*x + c*y])
-
-def rotational(t,u):
-	"""
-	Rotational vector field
-	"""
-	return array([-u[1], u[0]])
-
-class Harness_Circle(Harness):
-	def setUp(self):
-		self.f = rotational
-		self.make_solver()
-		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
-		self.s.run()
-
-	def test_plot_2D(self):
-		pl.clf()
-		a = self.s.plot(1,time_component=0)
-		nt.assert_equal(a.get_xlabel(), 'x')
-		self.s.plot2D()
-		for l in a.get_lines():
-			d = l.get_data()
-			radii = np.abs(np.sqrt(d[0]**2+d[1]**2) - 1)
-			assert np.all(radii < .2) # should roughly be a circle
-
-	def test_plot(self):
-		a = self.s.plot(plot_exact=False)
-		nt.assert_equal(a.get_xlabel(), 'time')
-		self.s.plot(plot_exact=True)
-		tmp = tempfile.gettempdir()
-		path = os.path.join(tmp, 'test_fig.pdf')
-		print path
-		self.s.plot(save=path)
-		a = self.s.plot(components=['output', 0],save=path, plot_exact=False)
-		nt.assert_equal(len(a.lines), 2)
-		a = self.s.plot(components='output', save=path)
-		a = self.s.plot(components=['output', 0],save=path, plot_exact=True)
-		nt.assert_equal(len(a.lines), 4)
-		self.s.plot(components=['output'], error=True)
-		self.s.plot_function('output')
-		self.s.plot(components=['output',0], save=path)
-
-class Test_Circle_EEuler(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(ExplicitEuler(), DummySystem(self.f))
-
-class Test_Circle_IEuler(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(ImplicitEuler(), DummySystem(self.f))
-
-
-class Test_Circle_RK34(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(RungeKutta34(), DummySystem(self.f))
-
 def make_lin(A):
 	if np.isscalar(A):
 		def lin(t,u):
@@ -370,17 +302,17 @@ class Test_Simple(object):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
 		pl.clf()
-		lines = self.s.plot(0,lw=5).lines
+		lines = self.s.plot(0,lw=5).axis.lines
 		npt.assert_equal(len(lines),1)
 		pl.clf()
-		lines = self.s.plot(lw=5).lines
+		lines = self.s.plot(lw=5).axis.lines
 		npt.assert_equal(len(lines),3)
 		npt.assert_equal(lines[-1].get_linewidth(),5)
 
 	def test_plot_function(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
-		lines = self.s.plot_function('total', lw=4).lines
+		lines = self.s.plot_function('total', lw=4).axis.lines
 		npt.assert_equal(lines[-1].get_linewidth(), 4)
 
 

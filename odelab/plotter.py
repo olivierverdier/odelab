@@ -12,36 +12,47 @@ class Plotter(object):
 		self.solver = solver
 		self.system = self.solver.system
 
-	def sample(self, plot_res=None):
+	def get_sample(self, plot_res=None):
 		plot_res = plot_res or self.max_plot_res
 		# some sampling
 		size = len(self.solver)
 		stride = np.ceil(size/self.max_plot_res)
-		self.events = self.solver.events[:,::stride]
+		return self.solver.events[:,::stride]
 
-	def components(self, components, time_component):
+	def get_components(self):
 		# components
-		if components is None: # plot all the components by default
+		if self.components is None: # plot all the components by default
 			components = range(self.solver.initial().size - 1)
 		# makes the code work when plotting a single component (either a string or an index):
-		if isinstance(components, basestring) or not np.iterable(components):
-			components = [components]
-		if time_component is not None:
-			components.insert(0,time_component)
+		elif isinstance(self.components, basestring) or not np.iterable(self.components):
+			components = [self.components]
+		else: # assuming components is already an iterable
+			components = self.components
+		if self.time_component is not None:
+			components.insert(0,self.time_component)
 		return components
 
-	def generate_plot_data(self, components=None, plot_exact=True, error=False, save=None, time_component=None):
-		self.sample()
-		events = self.events
+	components = None
+	time_component = None
+	plot_exact = True
+	error = False
+	plot_args = {}
+
+	def setup(self, plot_exact=True, error=False):
+		self.plot_exact = plot_exact
+		self.error = error
+
+	def generate_plot_data(self):
+		events = self.get_sample()
 		ats = events[-1]
 
-		components = self.components(components, time_component)
+		components = self.get_components()
 
-		if plot_exact or error:
+		if self.plot_exact or self.error:
 			sys_exact = getattr(self.system, 'exact', None)
 			if sys_exact:
 				exact = sys_exact(ats, self.solver.initial())
-		compute_exact = (plot_exact or error) and sys_exact
+		compute_exact = (self.plot_exact or self.error) and sys_exact
 
 		time_label = 'time'
 
@@ -58,9 +69,9 @@ class Plotter(object):
 				if compute_exact:
 					exact_comp = exact[component]
 
-			if error and sys_exact:
+			if self.error and sys_exact:
 				data = np.log10(np.abs(data - exact_comp))
-			if time_component is not None and not component_i:
+			if self.time_component is not None and not component_i:
 				# at the first step, if time_component is not time, then replace the time vector by the desired component
 				ats = data
 				time_label = label
@@ -71,11 +82,11 @@ class Plotter(object):
 				pts['time_label'] = time_label
 				pts['data'] = data
 				pts['label'] = label
-				if compute_exact and not error:
+				if compute_exact and not self.error:
 					pts['exact'] = exact_comp
 				yield pts
 
-	def plot(self, components=None, plot_exact=True, error=False, save=None, time_component=None, **plot_args):
+	def axis_plot(self):
 		"""
 		Plot some components of the solution.
 
@@ -87,12 +98,10 @@ class Plotter(object):
 		"""
 		# set up plot arguments
 		defaults = {'ls':'-', 'marker':','}
-		defaults.update(plot_args)
+		defaults.update(self.plot_args)
 
 		axis = PL.gca()
-		if save: # if this is meant to be saved, clear the previous plot first
-			axis.cla()
-		for pts in self.generate_plot_data(components, plot_exact, error, save, time_component):
+		for pts in self.generate_plot_data():
 			data = pts['data']
 			ats = pts['x']
 			label = pts['label']
@@ -104,9 +113,15 @@ class Plotter(object):
 
 		axis.set_xlabel(pts['time_label'])
 		axis.legend()
-		if save:
-			PL.savefig(save, format='pdf', **plot_args)
-		else:
-			PL.plot() # plot only in interactive mode
-		return axis
+		self.axis = axis
+
+	def plot(self):
+		self.axis_plot()
+		return PL.plot()
+
+
+	def savefig(self, name):
+		PL.gca().cla()
+		self.axis_plot()
+		return PL.savefig(name, format='pdf')
 
