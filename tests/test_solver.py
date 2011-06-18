@@ -41,6 +41,17 @@ def test_solver_autosave():
 	solver.run()
 	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1.0')
 
+def test_duration():
+	"""Duration are added from run to run"""
+	solver = SingleStepSolver(ExplicitEuler(), System(f))
+	solver.initialize(u0=1.,time=1.)
+	solver.run()
+	d1 = solver.events.attrs['duration']
+	solver.run(time=.1)
+	d2 = solver.events.attrs['duration']
+	nt.assert_greater(d2, d1)
+
+
 from functools import partial
 const_r = partial(const_f, 1.)
 const_c = partial(const_f, 1.j)

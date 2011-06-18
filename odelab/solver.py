@@ -20,6 +20,7 @@ import numpy as np
 
 import itertools
 import warnings
+import time
 
 from odelab.plotter import Plotter
 
@@ -123,6 +124,9 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				}
 		self.events.attrs['init_params'] = info
 
+		# duration counter:
+		self.events.attrs['duration'] = 0.
+
 		# append the initial condition:
 		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
 
@@ -175,11 +179,16 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		# start from the last time we stopped
 		event = self.events[:,-1]
 		generator = self.generate(event)
+		self._start_time = time.time()
 		return generator
 
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 	def __exit__(self, ex_type, ex_value, traceback):
+		end_time = time.time()
+		duration = end_time - self._start_time
+		self.events.attrs['duration'] += duration
+
 		self.file.flush()
 		if self.auto_save:
 			self.save()
