@@ -83,7 +83,3 @@ class Test_Gauss(Harness_RKDAE):
 	def set_solver(self):
 		self.solver = SingleStepSolver(RKDAE(RK.ImplicitEuler.tableaux[1]), self.system)
 
-if __name__ == '__main__':
-	t = Test_LDIRK243()
-	t.setUp()
-	t.test_quasigraph()

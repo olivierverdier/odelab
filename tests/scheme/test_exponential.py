@@ -62,15 +62,10 @@ class Harness_ComplexConvection(object):
 		scheme = self.scheme
 		h = self.time/self.N
 		self.s = MultiStepSolver(scheme, system=self.B)
-		if isinstance(self.scheme, ode15s):
-			self.s.auto_save = False
 		self.s.initialize(u0=self.u0, time=self.time, h=h)
-		print scheme
 		self.s.run()
 		e1 = self.s.final()
 		u1 = e1[:-1]
-		if np.any(np.isnan(e1)):
-			raise Exception('unstable!') # note: this should not be necessary any longer
 		if do_plot:
 			pl.plot(self.B.points, self.u0)
 			pl.plot(self.B.points, u1)

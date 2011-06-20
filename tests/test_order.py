@@ -21,6 +21,3 @@ class Order_Burgers(object):
 		print self.o.orders()
 		self.o.plot()
 
-if __name__ == '__main__':
-	t = Test_Burgers()
-	t.test_run()
