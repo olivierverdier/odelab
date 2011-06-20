@@ -180,9 +180,6 @@ def test_pendulum_ML():
 	s = SingleStepSolver(McLachlan(), CirclePendulum())
 	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
-	print s.system.energy(s.final())
-	nt.assert_equal(s.system.energy(s.events_array).shape, (len(s),))
-	return s
 
 def test_pendulum_NHE():
 	s = SingleStepSolver(NonHolonomicEnergy(), SinePendulum())
