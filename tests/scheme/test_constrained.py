@@ -168,7 +168,7 @@ class Test_JayExample(object):
 
 	def test_spark(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
-		self.s.initialize(u0=array([1.,1.,1.]), time=1)
+		self.s.initialize(u0=array([1.,1.,1.]), time=1, h=.05)
 		self.s.run()
 		print self.s.final_time()
 		print self.s.final()
