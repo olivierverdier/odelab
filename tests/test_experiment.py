@@ -9,6 +9,7 @@ from odelab.experiment import Experiment
 import numpy as np
 import nose.tools as nt
 from nose.plugins.skip import SkipTest
+import numpy.testing as npt
 
 import tempfile
 import os
@@ -59,6 +60,9 @@ class Harness_Experiment(object):
 		nt.assert_true(isinstance(s, SingleStepSolver))
 		nt.assert_equal(s.scheme.__class__.__name__, 'ExplicitEuler')
 		nt.assert_equal(len(s), 11)
+		with s.open_store() as events:
+			nt.assert_equal(len(events), 11)
+			npt.assert_array_almost_equal(events[-1], np.linspace(0,1,11))
 
 	def test_load_run(self):
 		raise SkipTest('Not possible to restart a stored simulation')

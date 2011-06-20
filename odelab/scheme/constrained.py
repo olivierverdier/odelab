@@ -42,12 +42,11 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 	root_solver = _rt.Newton
 
-	def step(self, t, u):
-		h = self.h
+	def step(self, t, u, h):
 		v0 = self.system.velocity(u)
 		momentum = self.system.momentum
 		p0 = momentum(u)
-		qh = self.system.position(u) + .5*self.h*v0
+		qh = self.system.position(u) + .5*h*v0
 		force = self.system.force(qh)
 		codistribution = self.system.codistribution
 		codistribution_h = codistribution(qh)
@@ -64,8 +63,7 @@ class NonHolonomicEnergy(Scheme):
 
 	root_solver = _rt.Newton
 
-	def step(self, t, u):
-		h = self.h
+	def step(self, t, u, h):
 		v0 = self.system.velocity(u)
 		q0 = self.system.position(u)
 		#qh = q + .5*self.h*vel
@@ -104,8 +102,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 	def dynamics(self, YZT):
 		return np.dot(self.system.dynamics(YZT[:,:-1]), self.tableau[:,1:].T)
 
-	def get_residual_function(self, t, u):
-		h = self.h
+	def get_residual_function(self, t, u, h):
 		T = t + self.ts*h
 		y = self.system.state(u).copy()
 		yc = y.reshape(-1,1) # "column" vector
@@ -123,9 +120,9 @@ Partitioned Runge-Kutta for index 2 DAEs.
 
 		return residual
 
-	def step(self, t, u):
+	def step(self, t, u, h):
 		s = self.tableau.shape[0]
-		residual = self.get_residual_function(t, u)
+		residual = self.get_residual_function(t, u, h)
 		# pretty bad guess here:
 		guess = np.column_stack([u.copy()]*s)
 		N = self.root_solver(residual)
@@ -133,7 +130,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 		full_result = N.run(guess) # all the values of Y,Z at all stages
 		# we keep the last Z value:
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+self.h, result
+		return t+h, result
 
 class MultiRKDAE(RKDAE):
 	def dynamics(self, YZT):

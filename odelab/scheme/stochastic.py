@@ -8,8 +8,7 @@ from odelab.scheme import Scheme
 from odelab.newton import FSolve, Newton
 
 class EulerMaruyama(Scheme):
-	def step(self,t,u):
-		h = self.h
+	def step(self,t,u,h):
 		system = self.system
 		noise = np.random.normal(size=[len(system.noise(t,u).T)])
 		def residual(v):

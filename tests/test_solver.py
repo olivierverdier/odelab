@@ -44,11 +44,11 @@ def test_solver_autosave():
 def test_duration():
 	"""Duration are added from run to run"""
 	solver = SingleStepSolver(ExplicitEuler(), System(f))
-	solver.initialize(u0=1.,time=1.)
+	solver.initialize(u0=1.,time=1.,h=.1)
 	solver.run()
-	d1 = solver.events.attrs['duration']
+	d1 = solver.get_attrs('duration')
 	solver.run(time=.1)
-	d2 = solver.events.attrs['duration']
+	d2 = solver.get_attrs('duration')
 	nt.assert_greater(d2, d1)
 
 
@@ -71,7 +71,7 @@ class Harness_Solver(Harness):
 
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
-		self.solver.initialize(u0=u0)
+		self.solver.initialize(u0=u0,h=.1)
 		nt.assert_equal(self.solver.time, Solver.time)
 		nt.assert_equal(len(self.solver), 1)
 
@@ -85,14 +85,15 @@ class Harness_Solver(Harness):
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),h=h)
 		e0 = self.solver.initial()
-		self.solver.step(e0[-1], e0[:-1])
+		with self.solver.open_store() as events:
+			self.solver.set_scheme(self.solver.scheme, events)
+		self.solver.step(e0[-1], e0[:-1],h)
 		nt.assert_equal(self.solver.scheme.h, h)
 
 	def test_quadratic(self):
-		"""should solve f(t) = t pretty well"""
 		print type(self).__name__
 		self.set_system(time_f)
-		self.solver.initialize(u0=1., time=1.)
+		self.solver.initialize(u0=1., time=1.,h=.1)
 		self.solver.run()
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
 		npt.assert_array_almost_equal(self.solver.final(), np.array([3/2,1.]), decimal=1)
@@ -102,7 +103,7 @@ class Harness_Solver(Harness):
 		print type(self).__name__
 		self.check_skip(u0,f)
 		self.set_system(f)
-		self.solver.initialize(u0=u0, time=1.)
+		self.solver.initialize(u0=u0, time=1.,h=.1)
 		self.solver.scheme.root_solver = rt.Newton
 		self.solver.run()
 		expected_event = np.hstack([expected, 1.])
@@ -224,7 +225,7 @@ class Test_FinalTimeExceptions(object):
 		self.sys = LimitedSys(self.limit)
 		self.s = SingleStepSolver(ExplicitEuler(),self.sys)
 		self.s.catch_runtime = True
-		self.s.initialize(u0=0)
+		self.s.initialize(u0=0, time=10, h=.1)
 
 	def test_max_iter(self):
 		self.max_iter = 1
@@ -317,3 +318,4 @@ class Test_Simple(object):
 
 
 pl.ion()
+

@@ -56,7 +56,7 @@ class Scheme(object):
 		self._h_dirty = True
 	h = property(get_h, set_h)
 
-	def initialize(self):
+	def initialize(self, events):
 		try:
 			self.h = self.solver.h
 		except AttributeError:
@@ -70,12 +70,11 @@ class Scheme(object):
 		raise NotImplementedError()
 
 class ExplicitEuler (Scheme):
-	def step(self, t, u):
-		return t + self.h, u + self.h*self.system.f(t, u)
+	def step(self, t, u, h):
+		return t + h, u + self.h*self.system.f(t, u)
 
 class ImplicitEuler (Scheme):
-	def step(self, t, u):
-		h = self.h
+	def step(self, t, u, h):
 		def residual(u1):
 			return u1 - u - h*self.system.f(t+h,u1)
 		N = self.root_solver(residual)
@@ -87,9 +86,8 @@ class RungeKutta4 (Scheme):
 	"""
 	Runge-Kutta of order 4.
 	"""
-	def step(self, t, u):
+	def step(self, t, u, h):
 		f = self.system.f
-		h = self.h
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
 		Y3 = f(t + h/2., u + h*Y2/2.)
@@ -110,9 +108,8 @@ class RungeKutta34 (Scheme):
 		else:
 			self.h = 1.
 
-	def step(self, t, u):
+	def step(self, t, u, h):
 		f = self.system.f
-		h = self.h
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
 		Y3 = f(t + h/2, u + h*Y2/2)
@@ -131,17 +128,17 @@ class ode15s(Scheme):
 	def __init__(self, **kwargs):
 		self.integrator_kwargs = kwargs
 
-	def initialize(self): # the system must be defined before this is called!
-		super(ode15s,self).initialize()
+	def initialize(self, events): # the system must be defined before this is called!
+		super(ode15s,self).initialize(events)
 		import scipy.integrate
 		self.integ = scipy.integrate.ode(self.system.f)
-		e0 = self.solver.initial(process=False)
+		e0 = events[:,-1] # duplicate code with Solver.final
 		vodevariant = ['vode', 'zvode'][np.iscomplexobj(e0)]
 		self.integ.set_integrator(vodevariant, method='bdf', order=5, nsteps=3000, **self.integrator_kwargs)
 		self.integ.set_initial_value(e0[:-1], e0[-1])
 
-	def step(self, t, u):
-		self.integ.integrate(self.integ.t + self.h)
+	def step(self, t, u, h):
+		self.integ.integrate(self.integ.t + h)
 		if not self.integ.successful():
 			print("vode error")
 		return self.integ.t, self.integ.y

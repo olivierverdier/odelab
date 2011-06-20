@@ -26,6 +26,8 @@ from odelab.plotter import Plotter
 
 import tables
 
+from contextlib import contextmanager
+
 class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
@@ -44,11 +46,6 @@ class Solver (object):
 		"""
 		self.system = system
 		self.scheme = scheme
-		solver_info = {
-				'system': system,
-				'scheme': scheme,
-				'solver_class': type(self),
-				}
 		if path is None: # file does not exist
 			import tempfile
 			f = tempfile.NamedTemporaryFile(delete=True)
@@ -56,21 +53,11 @@ class Solver (object):
 		else:
 			self.path = path
 
-		# open the file
-		self.file = tables.openFile(self.path, mode='a')
-		self.file.root._v_attrs['solver_info'] = solver_info # possibly overwrite existing solver_info...
-
-		# the following is to prevent PyTables from keeping a reference on the open file
-		# http://thread.gmane.org/gmane.comp.python.pytables.user/1100/focus=1107
-		# it is unsatisfactory: perhaps the best way is to use __enter__ and __exit__ appropriately
-		try:
-			del tables.file._open_files[self.path]
-		except KeyError:
-			pass
-
-
 	# default values for the total time
 	time = 1.
+
+	# default time step
+	h = .1
 
 
 
@@ -107,40 +94,60 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		#else:
 			#self.events.remove()
 
-		# create a new extensible array node
+		# compression algorithm
 		compression = tables.Filters(complevel=1, complib='zlib', fletcher32=True)
-		with warnings.catch_warnings():
-			warnings.simplefilter('ignore')
-			self.events = self.file.createEArray(
-				where=self.file.root,
-				name=self.name,
-				atom=tables.Atom.from_dtype(event0.dtype),
-				shape=(len(event0),0),
-				filters=compression)
 
-		# store the metadata
-		info = {
-				'u0':u0,
-				't0':t0,
-				'h':h,
-				'time':time,
+		with tables.openFile(self.path, 'a') as store:
+			# create a new extensible array node
+			with warnings.catch_warnings():
+				warnings.simplefilter('ignore')
+				events = store.createEArray(
+					where=store.root,
+					name=self.name,
+					atom=tables.Atom.from_dtype(event0.dtype),
+					shape=(len(event0),0),
+					filters=compression)
+
+			# store the metadata
+			info = {
+					'u0':u0,
+					't0':t0,
+					'h':h,
+					'time':time,
+					}
+			events.attrs['init_params'] = info
+
+			# save system and scheme information; temporary solution only
+			solver_info = {
+				'system': self.system,
+				'scheme': self.scheme,
+				'solver_class': type(self),
 				}
-		self.events.attrs['init_params'] = info
+			events.attrs['solver_info'] = solver_info
 
-		# duration counter:
-		self.events.attrs['duration'] = 0.
+			# duration counter:
+			events.attrs['duration'] = 0.
 
-		# append the initial condition:
-		self.events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
+			# append the initial condition:
+			events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
 
+
+	@contextmanager
+	def open_store(self, read=True):
+		mode = ['a','r'][read]
+		with tables.openFile(self.path, mode) as f:
+			node = f.getNode('/'+self.name)
+			yield node
 
 	def __len__(self):
-		return self.events.nrows
+		with self.open_store(read=True) as events:
+			size = events.nrows
+		return size
 
-	def load_data(self, name):
-		"""
-		"""
-		self.events = self.file.getNode('/'+name)
+	def get_attrs(self, key):
+		with self.open_store() as events:
+			attr = events.attrs[key]
+		return attr
 
 	def generate(self, event):
 		"""
@@ -148,7 +155,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		u,t = event[:-1], event[-1]
 		for i in itertools.count(): # infinite loop
-			t, u = self.step(t, u)
+			t, u = self.step(t, u, self.h)
 			event = np.hstack([u,t])
 			yield event
 			self.increment_stepsize()
@@ -175,26 +182,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		Raised to relay an exception occurred while running the solver.
 		"""
 
+	@contextmanager
 	def simulating(self):
-		return self
+		with self.open_store(read=False) as events:
 
-	def __enter__(self):
-		# start from the last time we stopped
-		event = self.events[:,-1]
-		generator = self.generate(event)
-		self._start_time = time.time()
-		return generator
+			# only for single step schemes:
+			self.set_scheme(self.scheme, events)
+
+			self._start_time = time.time()
+			yield events
+			end_time = time.time()
+			duration = end_time - self._start_time
+			events.attrs['duration'] += duration
 
 	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
-	def __exit__(self, ex_type, ex_value, traceback):
-		end_time = time.time()
-		duration = end_time - self._start_time
-		self.events.attrs['duration'] += duration
-
-		self.file.flush()
-		if self.auto_save:
-			self.save()
 
 	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)
 
@@ -206,14 +208,16 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 :param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
 		"""
+		if not hasattr(self,'name'):
+			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		if time is None:
 			time = self.time
-		try:
-			t0 = self.events[-1,-1]
-		except AttributeError:
-			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
-		tf = t0 + time # final time
-		with self as generator:
+		with self.simulating() as events:
+			# start from the last time we stopped
+			last_event = events[:,-1]
+			generator = self.generate(last_event)
+			t0 = last_event[-1]
+			tf = t0 + time # final time
 			for i in xrange(self.max_iter):
 				try:
 					event = next(generator)
@@ -226,7 +230,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 					if np.any(np.isnan(event)):
 						raise self.Unstable('Unstable after %d steps.' % i)
 
-					self.events.append(event.reshape(-1,1))
+					events.append(event.reshape(-1,1))
 					if event[-1] > tf - self.t_tol:
 						break
 			else:
@@ -249,16 +253,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		Return u[index] after post-processing.
 		"""
-		event = self.events[:,index]
+		with self.open_store(read=True) as events:
+			event = events[:,index]
 		if process:
 			event = self.system.postprocess(event)
 		return event
 
 	def get_times(self):
-		return self.events[-1]
+		with self.open_store(read=True) as events:
+			times = events[-1]
+		return times
 
 	def final_time(self):
-		return self.get_times()[-1]
+		with self.open_store(read=True) as events:
+			final = events[-1,-1]
+		return final
 
 	def initial(self, process=True):
 		"""
@@ -313,12 +322,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 class SingleStepSolver(Solver):
 
 	def __repr__(self):
-		return '<%s: %s>' % ('Solver', str(self.scheme))
+		return '<{0}: {1} {2}>'.format(type(self).__name__, str(self.scheme), str(self.system))
 
-	def set_scheme(self, scheme):
+	def set_scheme(self, scheme, events):
 		self.current_scheme = scheme
 		self.current_scheme.solver = self
-		self.current_scheme.initialize()
+		self.current_scheme.initialize(events)
+
+	def step(self, t,u, h):
+		return self.current_scheme.step(t,u,h)
+
+	def increment_stepsize(self):
+		self.current_scheme.increment_stepsize()
+
+class MultiStepSolver(SingleStepSolver):
+## 	default_single_step_scheme = HochOst4()
 
 	def step_current(self, t,u):
 		return self.current_scheme.step(t,u)
@@ -331,12 +349,6 @@ class SingleStepSolver(Solver):
 		if stage == self.scheme.tail_length: # main scheme kicks in
 			self.set_scheme(self.scheme)
 		return self.step_current(t,u)
-
-	def increment_stepsize(self):
-		self.current_scheme.increment_stepsize()
-
-class MultiStepSolver(SingleStepSolver):
-## 	default_single_step_scheme = HochOst4()
 
 	def __init__(self, scheme, single_step_scheme=None, *args, **kwargs):
 		super(MultiStepSolver, self).__init__(scheme, *args, **kwargs)
@@ -353,11 +365,12 @@ def load_solver(path, name):
 	"""
 Create a solver object from a path to an hdf5 file.
 	"""
-	with tables.openFile(path) as f:
-		info = f.root._v_attrs.solver_info
+	with tables.openFile(path, 'r') as f:
+		events = f.getNode('/'+name)
+		info = events.attrs['solver_info']
 		system = info['system']
 		scheme = info['scheme']
 		solver_class = info['solver_class']
 	solver = solver_class(system=system, scheme=scheme, path=path)
-	solver.load_data(name)
+	solver.name = name
 	return solver
