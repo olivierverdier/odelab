@@ -232,7 +232,6 @@ class LobattoIIID(RungeKutta):
 class RadauIIA(RungeKutta):
 	ss = sqrt(6)
 	tableaux = {
-1: array([[1.,1.],[1.,1.]]),
 2: array([[1/3, 5/12, -1/12],[1., 3/4, 1/4],[1.,3/4,1/4]]),
 3: array([	[(4-ss)/10, (88-7*ss)/360, (296 - 169*ss)/1800, (-2+3*ss)/225],
 			[(4+ss)/10, (296+169*ss)/1800, (88+7*ss)/360, (-2-3*ss)/225],
