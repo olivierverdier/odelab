@@ -65,26 +65,34 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 class NonHolonomicEnergy(Scheme):
 
-	root_solver = _rt.Newton
+	root_solver = _rt.FSolve
 
 	def step(self, t, u, h):
 		v0 = self.system.velocity(u)
 		q0 = self.system.position(u)
-		#qh = q + .5*self.h*vel
-		#force = self.system.force(qh)
 		codistribution = self.system.codistribution
-		def residual(x):
-			q1,v1,l = self.system.position(x), self.system.velocity(x), self.system.lag(x)
-			cod = codistribution((q0+q1)/2)
+		def residual(u1):
+			q1,v1,l = self.system.position(u1), self.system.velocity(u1), self.system.lag(u1)
+			cod = codistribution(self.codistribution_q(u,u1,h))
 			return np.hstack([
-				q1 - q0 - h*self.system.average_velocity(u,x),
-				v1 - v0 - h * (self.system.average_force(u,x) + np.dot(cod.T, l)),
-				np.dot(cod, self.system.average_velocity(u,x)),
+				q1 - q0 - h*self.system.average_velocity(u,u1),
+				v1 - v0 - h * (self.system.average_force(u,u1) + np.dot(cod.T, l)),
+				np.dot(cod, self.system.average_velocity(u,u1)),
 				])
 		N = self.root_solver(residual)
 		y = N.run(u)
 		qnew, vnew, lnew = self.system.position(y), self.system.velocity(y), self.system.lag(y)
 		return t+h, self.system.assemble(qnew,vnew,lnew)
+
+	def codistribution_q(self, u0, u1, h):
+		return (self.system.position(u0)+self.system.position(u1))/2
+
+class NonHolonomicEnergyEMP(NonHolonomicEnergy):
+	"""
+	Non Holonomic Energy preserving scheme with codistribution at the "explicit mid-point" q0 + h/2 v0
+	"""
+	def codistribution_q(self, u0, u1, h):
+		return self.system.position(u0) + h/2*self.system.velocity(u0)
 
 class RKDAE(Scheme):
 	"""

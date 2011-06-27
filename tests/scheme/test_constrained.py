@@ -109,6 +109,10 @@ class Test_VerticalRollingDisk_H(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
 
+class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk):
+	def setup_solver(self):
+		self.s = SingleStepSolver(NonHolonomicEnergyEMP(), self.sys)
+
 class Test_VerticalRollingDisk_Spark(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
