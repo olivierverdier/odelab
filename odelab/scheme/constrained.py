@@ -40,7 +40,7 @@ More precisely, the :class:`odelab.system.System` object must implement:
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
 	"""
 
-	root_solver = _rt.Newton
+	root_solver = _rt.Newton # FSolve does not always converge...
 
 	def step(self, t, u, h):
 		v0 = self.system.velocity(u)
@@ -54,7 +54,11 @@ More precisely, the :class:`odelab.system.System` object must implement:
 			q1 = self.system.position(u1)
 			v1 = self.system.velocity(u1)
 			l = self.system.lag(u1)
-			return np.hstack([q1 - qh - .5*h*v1, momentum(u1) - p0 - h * (force + np.dot(codistribution_h.T, l)), np.dot(codistribution(q1), v1)])
+			return np.hstack([
+				q1 - qh - .5*h*v1,
+				momentum(u1) - p0 - h * (force + np.dot(codistribution_h.T, l)),
+				np.dot(codistribution(q1), v1),
+				])
 		N = self.root_solver(residual)
 		unew = N.run(u)
 		return t+h, unew
