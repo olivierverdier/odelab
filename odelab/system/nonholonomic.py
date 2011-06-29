@@ -128,9 +128,13 @@ perturbation of the contact oscillator.
 		return (q[0]**2 + q[2]**2 + (1+(a*np.cos(t))**2)*vel[2]**2)
 
 	def radius(self, u):
+		"""
+		Conserved quantity equal to H - Hy.
+		"""
 		q = self.position(u)
 		vel = self.velocity(u)
-		return .5*(q[0]**2 + q[2]**2 + (1+q[1]**2)*vel[2]**2)
+		x2 = q[0]**2
+		return .5*(x2 + (1+self.epsilon*x2)*q[2]**2 + (1+q[1]**2)*vel[2]**2)
 
 
 	def initial_cos(self, z0, H0=1.5, Hy=.5, z0dot=0.):
