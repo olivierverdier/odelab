@@ -20,7 +20,7 @@ class NonHolonomic(System):
 		return constraint
 
 	def reaction_force(self, u):
-		 # a nxsxs tensor, where n is the degrees of freedom of the position:
+		# a nxsxs tensor, where n is the degrees of freedom of the position:
 		reaction_force = np.tensordot(self.codistribution(u), self.lag(u), [0,0])
 		reaction_force = tensordiag(reaction_force)
 		return reaction_force
@@ -110,7 +110,15 @@ perturbation of the contact oscillator.
 	def energy(self, u):
 		vel = self.velocity(u)
 		q = self.position(u)
-		return .5*(vel[0]**2 + vel[1]**2 + vel[2]**2 + q[0]**2 + q[1]**2 + q[2]**2 + self.epsilon*q[0]**2*q[2]**2)
+		v2 = np.square(vel)
+		q2 = np.square(q)
+		return (v2[0] + v2[1] + v2[2] + q2[0] + q2[1] + q2[2] + self.epsilon*q2[0]*q2[2])/2
+
+	def energy_y(self,u):
+		"""
+		Return Hy = (y**2 + vy**2)/2
+		"""
+		return (u[1]**2 + u[4]**2)/2
 
 	def radius_cos(self, u, Hy=.5):
 		q = self.position(u)
