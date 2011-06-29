@@ -11,21 +11,22 @@ from odelab.scheme.rungekutta import *
 import odelab.newton as _rt
 
 class McLachlan(Scheme):
-	"""
+	ur"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the
 algorithm given by equation (4.18) in [mclachlan06]_.
 
- The Lagrangian is assumed to be *separable*:
+The scheme will work for any system as long as the necessary methods are implemented.
+The adapted scheme reads as follows:
 
 .. math::
+	q_{1/2} &= q_0 + \frac{h}{2}H_p(q_0,p_0) \\
+	p_1 &= p_0 + h\frac{H_q(q_{1/2},p_0) + H_q(q_{1/2},p_1)}{2} + h ∑_i λ_i α^i(q_{1/2})\\
+	q_1 &= q_{1/2} + \frac{h}{2}H_p(q_1,p_1)\\
+	&\bracket{θ(q_1)}{H_p(q_1,p_1)} = 0
 
-    L(q,v) = T(v) - V(q)
 
-where :math:`T(v)` is the kinetic energy and :math:`V(q)` is the potential energy.
-The constraints are given by :math:`Av=0`,
-where :math:`A` is the mxn constraint matrix.
 
-More precisely, the :class:`odelab.system.System` object must implement:
+The :class:`odelab.system.System` object must implement:
 
 * :meth:`odelab.system.System.velocity`
 * :meth:`odelab.system.System.momentum`
@@ -47,7 +48,7 @@ More precisely, the :class:`odelab.system.System` object must implement:
 		momentum = self.system.momentum
 		p0 = momentum(u0)
 		qh = self.system.position(u0) + .5*h*v0
-		force = self.system.force(qh)
+		qhp0 = np.hstack([qh,p0])
 		codistribution = self.system.codistribution
 		codistribution_h = codistribution(qh)
 		def residual(du):
@@ -55,9 +56,12 @@ More precisely, the :class:`odelab.system.System` object must implement:
 			q1 = self.system.position(u1)
 			v1 = self.system.velocity(u1)
 			l = self.system.lag(u1)
+			p1 = momentum(u1)
+			qhp1 = np.hstack([qh,p1])
+			force = (self.system.force(qhp0) + self.system.force(qhp1))/2
 			return np.hstack([
 				q1 - qh - .5*h*v1,
-				momentum(u1) - p0 - h * (force + np.dot(codistribution_h.T, l)),
+				p1 - p0 - h * (force + np.dot(codistribution_h.T, l)),
 				np.dot(codistribution(q1), v1),
 				])
 		N = self.root_solver(residual)
