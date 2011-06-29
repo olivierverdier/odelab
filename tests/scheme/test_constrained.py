@@ -132,6 +132,10 @@ class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(SymplecticEuler(), self.sys)
 
+class Test_VerticalRollingDisk_LF(Harness_VerticalRollingDisk):
+	def setup_solver(self):
+		self.s = SingleStepSolver(NonHolonomicLeapFrog(), self.sys)
+
 class HarnessRobot(object):
 	def setUp(self):
 		s = SingleStepSolver(self.scheme, Robot())

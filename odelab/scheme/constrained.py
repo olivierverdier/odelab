@@ -131,6 +131,36 @@ class SymplecticEuler(Scheme):
 		u1 = np.hstack([q1,vl1])
 		return t+h, u1
 
+class NonHolonomicLeapFrog(Scheme):
+	ur"""
+Non-holonomic Leap Frog:
+
+.. math::
+	q_{i+1} &= q_i + h v_{i+1}\\
+	v_{i+1} &= v_i + h (F(q_i) + A(q_i)^{T} λ_i)\\
+	&A(q_i)(v_i+v_{i+1}) = 0
+
+	"""
+	root_solver = _rt.Newton
+
+	def step(self, t, u0, h):
+		q0 = self.system.position(u0)
+		v0 = self.system.velocity(u0)
+		force = self.system.force(q0)
+		cod = self.system.codistribution(q0)
+		def residual(vl1):
+			u01 = np.hstack([q0,vl1])
+			v1 = self.system.velocity(u01)
+			l1 = self.system.lag(u01)
+			return np.hstack([v1 - v0 - h*(force + np.dot(cod.T, l1)), np.dot(cod, v0+v1)])
+		N = self.root_solver(residual)
+		l0 = self.system.lag(u0)
+		vl1 = N.run(np.hstack([v0,l0]))
+		u01 = np.hstack([q0,vl1])
+		v1 = self.system.velocity(u01)
+		q1 = q0 + h*v1
+		u1 = np.hstack([q1,vl1])
+		return t+h, u1
 class RKDAE(Scheme):
 	"""
 Partitioned Runge-Kutta for index 2 DAEs.
