@@ -42,15 +42,16 @@ More precisely, the :class:`odelab.system.System` object must implement:
 
 	root_solver = _rt.Newton # FSolve does not always converge...
 
-	def step(self, t, u, h):
-		v0 = self.system.velocity(u)
+	def step(self, t, u0, h):
+		v0 = self.system.velocity(u0)
 		momentum = self.system.momentum
-		p0 = momentum(u)
-		qh = self.system.position(u) + .5*h*v0
+		p0 = momentum(u0)
+		qh = self.system.position(u0) + .5*h*v0
 		force = self.system.force(qh)
 		codistribution = self.system.codistribution
 		codistribution_h = codistribution(qh)
-		def residual(u1):
+		def residual(du):
+			u1 = u0+du
 			q1 = self.system.position(u1)
 			v1 = self.system.velocity(u1)
 			l = self.system.lag(u1)
@@ -60,29 +61,33 @@ More precisely, the :class:`odelab.system.System` object must implement:
 				np.dot(codistribution(q1), v1),
 				])
 		N = self.root_solver(residual)
-		unew = N.run(u)
-		return t+h, unew
+		du = N.run(np.zeros_like(u0))
+		return t+h, u0+du
+
 
 class NonHolonomicEnergy(Scheme):
 
 	root_solver = _rt.FSolve
 
-	def step(self, t, u, h):
-		v0 = self.system.velocity(u)
-		q0 = self.system.position(u)
+	def step(self, t, u0, h):
+		v0 = self.system.velocity(u0)
+		q0 = self.system.position(u0)
 		codistribution = self.system.codistribution
-		def residual(u1):
-			q1,v1,l = self.system.position(u1), self.system.velocity(u1), self.system.lag(u1)
-			cod = codistribution(self.codistribution_q(u,u1,h))
+		l0 = self.system.lag(u0)
+		def vector(du):
+			u1 = u0 + du
+			l1 = self.system.lag(u1)
+			cod = codistribution(self.codistribution_q(u0,u1,h))
 			return np.hstack([
-				q1 - q0 - h*self.system.average_velocity(u,u1),
-				v1 - v0 - h * (self.system.average_force(u,u1) + np.dot(cod.T, l)),
-				np.dot(cod, self.system.average_velocity(u,u1)),
-				])
+				h*self.system.average_velocity(u0,u1),
+				h*(self.system.average_force(u0,u1) + np.dot(cod.T,l1)),
+				l1-l0 + h*np.dot(cod, self.system.average_velocity(u0,u1))])
+		def residual(du):
+			return du - vector(du)
 		N = self.root_solver(residual)
-		y = N.run(u)
-		qnew, vnew, lnew = self.system.position(y), self.system.velocity(y), self.system.lag(y)
-		return t+h, self.system.assemble(qnew,vnew,lnew)
+		du = N.run(np.zeros_like(u0))
+		u1 = u0+du
+		return t+h, u1
 
 	def codistribution_q(self, u0, u1, h):
 		return (self.system.position(u0)+self.system.position(u1))/2
