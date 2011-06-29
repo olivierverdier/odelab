@@ -61,13 +61,18 @@ class Scheme(object):
 			self.h = self.solver.h
 		except AttributeError:
 			self.h = self.h_default
+		self.roundoff = 0.
 
-	def step(self, t, u):
+	def step(self, t,u0,h):
 		"""
-		Compute one step of the solution. The stepsize is not given because it might be computed inside this functions.
-		For simple schemes, one uses the value of the property :attr:`odelab.scheme.Scheme.h`.
+Implementation of the Compensated Summation algorithm as described in _[HaLuWa2006].
 		"""
-		raise NotImplementedError()
+		t1, du = self.delta(t,u0,h)
+		self.roundoff += du
+		u1 = u0 + self.roundoff
+		self.roundoff += u0 - u1
+		return t1, u1
+
 
 class ExplicitEuler (Scheme):
 	def step(self, t, u, h):

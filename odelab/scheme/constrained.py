@@ -43,7 +43,7 @@ The :class:`odelab.system.System` object must implement:
 
 	root_solver = _rt.Newton # FSolve does not always converge...
 
-	def step(self, t, u0, h):
+	def delta(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		momentum = self.system.momentum
 		p0 = momentum(u0)
@@ -66,14 +66,14 @@ The :class:`odelab.system.System` object must implement:
 				])
 		N = self.root_solver(residual)
 		du = N.run(np.zeros_like(u0))
-		return t+h, u0+du
+		return t+h, du
 
 
 class NonHolonomicEnergy(Scheme):
 
 	root_solver = _rt.FSolve
 
-	def step(self, t, u0, h):
+	def delta(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		q0 = self.system.position(u0)
 		codistribution = self.system.codistribution
@@ -90,8 +90,7 @@ class NonHolonomicEnergy(Scheme):
 			return du - vector(du)
 		N = self.root_solver(residual)
 		du = N.run(np.zeros_like(u0))
-		u1 = u0+du
-		return t+h, u1
+		return t+h, du
 
 	def codistribution_q(self, u0, u1, h):
 		return (self.system.position(u0)+self.system.position(u1))/2
@@ -161,6 +160,7 @@ Non-holonomic Leap Frog:
 		q1 = q0 + h*v1
 		u1 = np.hstack([q1,vl1])
 		return t+h, u1
+
 class RKDAE(Scheme):
 	"""
 Partitioned Runge-Kutta for index 2 DAEs.
