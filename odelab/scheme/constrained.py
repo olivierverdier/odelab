@@ -103,6 +103,13 @@ class NonHolonomicEnergyEMP(NonHolonomicEnergy):
 	def codistribution_q(self, u0, u1, h):
 		return self.system.position(u0) + h/2*self.system.velocity(u0)
 
+class NonHolonomicEnergy0(NonHolonomicEnergy):
+	"""
+	Non Holonomic Energy preserving scheme with codistribution at the starting point q0
+	"""
+	def codistribution_q(self, u0, u1, h):
+		return self.system.position(u0)
+
 class SymplecticEuler(Scheme):
 	root_solver = _rt.Newton
 
