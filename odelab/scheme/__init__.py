@@ -94,6 +94,13 @@ class RungeKutta4 (Scheme):
 		Y4 = f(t + h, u + h*Y3)
 		return t+h, u + h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
 
+class ExplicitTrapezoidal(Scheme):
+	def step(self,t,u,h):
+		f = self.system.f
+		u1 = u + h*f(t,u)
+		res = u + h*.5*(f(t,u) + f(t+h,u1))
+		return t+h, res
+
 class RungeKutta34 (Scheme):
 	"""
 	Adaptive Runge-Kutta of order four.

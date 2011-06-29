@@ -120,6 +120,10 @@ class Test_EEuler(Harness_Solver):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(ExplicitEuler(), System(f))
 
+class Test_ETrapezoidal(Harness_Solver):
+	def setup_solver(self):
+		self.solver = SingleStepSolver(ExplicitTrapezoidal(), System(f))
+
 class Test_RK4(Harness_Solver):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(RungeKutta4(), System(f))
