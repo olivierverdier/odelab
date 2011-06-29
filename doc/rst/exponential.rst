@@ -19,12 +19,12 @@ We observe the following recursion relation
 .. math::
    φ_{\ell}(z) = \frac{1}{\ell!} + z ∑_{k=1}^{∞}\frac{x^{k-1}}{(\ell+k)!} = \frac{1}{\ell!} + z φ_{\ell+1} 
 
-This allows to prove the useful identity, valid for $\ell≥1$:
+This allows to prove the useful identity, valid for :math:`\ell≥1`:
 
 .. math::
     φ_{\ell}(z) =  \int_0^1 \ee^{z (1-x)} \frac{x^{\ell-1}}{(\ell - 1)!}  \dd x
 
-Indeed, by integration by parts, the recursion relation is the same as above, and for $\ell=1$ one has
+Indeed, by integration by parts, the recursion relation is the same as above, and for :math:`\ell=1` one has
 
 .. math::
 	φ_1(z) = \frac{\ee^z-1}{z}
