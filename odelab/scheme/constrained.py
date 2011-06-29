@@ -94,6 +94,27 @@ class NonHolonomicEnergyEMP(NonHolonomicEnergy):
 	def codistribution_q(self, u0, u1, h):
 		return self.system.position(u0) + h/2*self.system.velocity(u0)
 
+class SymplecticEuler(Scheme):
+	root_solver = _rt.Newton
+
+	def step(self, t, u0, h):
+		v0 = self.system.velocity(u0)
+		q1 = self.system.position(u0) + h*v0
+		p0 = self.system.momentum(u0)
+		force = self.system.force(q1)
+		def residual(vl1):
+			u1 = np.hstack([q1, vl1])
+			v1 = self.system.velocity(u1)
+			p1 = self.system.momentum(u1)
+			l = self.system.lag(u1)
+			codistribution = self.system.codistribution(q1)
+			return np.hstack([p1 - p0 - h*(force + np.dot(codistribution.T, l)), np.dot(codistribution, v1)])
+		N = self.root_solver(residual)
+		l0 = self.system.lag(u0)
+		vl1 = N.run(np.hstack([v0,l0]))
+		u1 = np.hstack([q1,vl1])
+		return t+h, u1
+
 class RKDAE(Scheme):
 	"""
 Partitioned Runge-Kutta for index 2 DAEs.

@@ -117,6 +117,10 @@ class Test_VerticalRollingDisk_Spark(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
 
+class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
+	def setup_solver(self):
+		self.s = SingleStepSolver(SymplecticEuler(), self.sys)
+
 class HarnessRobot(object):
 	def setUp(self):
 		s = SingleStepSolver(self.scheme, Robot())
