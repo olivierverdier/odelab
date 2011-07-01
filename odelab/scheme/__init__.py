@@ -63,6 +63,15 @@ class Scheme(object):
 			self.h = self.h_default
 		self.roundoff = 0.
 
+	def delta(self, t,u0,h):
+		"""
+Compute the difference between current and next state.
+		"""
+		residual = self.delta_residual(t,u0,h)
+		N = self.root_solver(residual)
+		du = N.run(np.zeros_like(u0))
+		return t+h, du
+
 	def step(self, t,u0,h):
 		"""
 Implementation of the Compensated Summation algorithm as described in _[HaLuWa2006].

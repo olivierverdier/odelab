@@ -43,7 +43,7 @@ The :class:`odelab.system.System` object must implement:
 
 	root_solver = _rt.Newton # FSolve does not always converge...
 
-	def delta(self, t, u0, h):
+	def delta_residual(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		momentum = self.system.momentum
 		p0 = momentum(u0)
@@ -64,9 +64,7 @@ The :class:`odelab.system.System` object must implement:
 				p1 - p0 - h * (force + np.dot(codistribution_h.T, l)),
 				np.dot(codistribution(q1), v1),
 				])
-		N = self.root_solver(residual)
-		du = N.run(np.zeros_like(u0))
-		return t+h, du
+		return residual
 
 
 class NonHolonomicEnergy(Scheme):
