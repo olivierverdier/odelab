@@ -44,10 +44,10 @@ class RootSolver(object):
 	def get_result(self, x):
 		return x.reshape(self.shape)
 
-class RootSolverDidNotConverge(Exception):
-	"""
-	Exception raised when the non linear solver does not converge.
-	"""
+	class DidNotConverge(Exception):
+		"""
+		Exception raised when the non linear solver does not converge.
+		"""
 
 class Newton(RootSolver):
 	"""
@@ -85,7 +85,7 @@ class Newton(RootSolver):
 ##			if self.is_zero(x):
 ##				break
 		else:
-			raise RootSolverDidNotConverge(u"Newton algorithm did not converge after %d iterations. Dx=%.2e" % (i, norm(incr)))
+			raise self.DidNotConverge(u"Newton algorithm did not converge after %d iterations. Dx=%.2e" % (i, norm(incr)))
 		self.required_iter = i
 		return self.get_result(x)
 
@@ -101,8 +101,8 @@ class FSolve(RootSolver):
 	def run(self, x0):
 		guess = self.get_initial(x0)
 		import scipy.optimize
-		full_output = scipy.optimize.fsolve(self.residual, guess, full_output=True,  xtol = self.xtol)
+		full_output = scipy.optimize.fsolve(self.residual, guess, full_output=True,  xtol = self.xtol, )
 		result, self.info, success, msg = full_output
 		if success != 1:
-			raise RootSolverDidNotConverge(msg)
+			raise self.DidNotConverge(msg)
 		return self.get_result(result)

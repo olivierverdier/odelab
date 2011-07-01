@@ -52,7 +52,7 @@ class Harness(object):
 		res = N.run(x0)
 		npt.assert_almost_equal(res, expected)
 
-	@nt.raises(RootSolverDidNotConverge)
+	@nt.raises(RootSolver.DidNotConverge)
 	def test_N_no_convergence(self):
 		N = self.solver_class(no_root)
 		res = N.run(0.)

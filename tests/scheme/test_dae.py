@@ -55,7 +55,7 @@ class SimpleDiff(System):
 
 
 class Test(object):
-	@nt.raises(RootSolverDidNotConverge)
+	@nt.raises(RootSolver.DidNotConverge)
 	def test_run(self):
 		sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
 		self.s = SingleStepSolver(EulerMaruyama(), sys)
