@@ -8,6 +8,8 @@ Collection of schemes. The main function of a :class:`odelab.scheme.Scheme` clas
 import numpy as np
 import numpy.linalg
 
+import logging
+
 import odelab.newton as _rt
 
 class Scheme(object):
@@ -68,8 +70,13 @@ class Scheme(object):
 Compute the difference between current and next state.
 		"""
 		residual = self.delta_residual(t,u0,h)
-		N = self.root_solver(residual)
-		du = N.run(np.zeros_like(u0))
+		fsolve = _rt.FSolve(residual)
+		newton = _rt.Newton(residual)
+		try:
+			du = fsolve.run(np.zeros_like(u0))
+		except fsolve.DidNotConverge:
+			logging.info("Switch nonlinear solver")
+			du = newton.run(np.zeros_like(u0))
 		return t+h, du
 
 	def step(self, t,u0,h):
