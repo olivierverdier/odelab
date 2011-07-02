@@ -43,7 +43,7 @@ The :class:`odelab.system.System` object must implement:
 
 	root_solver = _rt.Newton # FSolve does not always converge...
 
-	def delta_residual(self, t, u0, h):
+	def get_residual(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		momentum = self.system.momentum
 		p0 = momentum(u0)

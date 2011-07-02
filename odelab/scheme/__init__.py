@@ -69,15 +69,29 @@ class Scheme(object):
 		"""
 Compute the difference between current and next state.
 		"""
-		residual = self.delta_residual(t,u0,h)
+		residual = self.get_residual(t,u0,h)
+		guess = self.get_guess(t,u0,h)
 		fsolve = _rt.FSolve(residual)
 		newton = _rt.Newton(residual)
 		try:
-			du = fsolve.run(np.zeros_like(u0))
+			root = fsolve.run(guess)
 		except fsolve.DidNotConverge:
 			logging.info("Switch nonlinear solver")
-			du = newton.run(np.zeros_like(u0))
+			root = newton.run(guess)
+		du = self.reconstruct(root)
 		return t+h, du
+
+	def get_guess(self,t,u0,h):
+		"""
+Default guess for the Newton iterations, assuming that the residual has the same size as u.
+		"""
+		return np.zeros_like(u0)
+
+	def reconstruct(self, root):
+		"""
+Default reconstruction function. It assumes that the root is already delta u.
+		"""
+		return root
 
 	def step(self, t,u0,h):
 		"""
