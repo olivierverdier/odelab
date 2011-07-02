@@ -67,9 +67,7 @@ The :class:`odelab.system.System` object must implement:
 
 class NonHolonomicEnergy(Scheme):
 
-	root_solver = _rt.FSolve
-
-	def delta(self, t, u0, h):
+	def get_residual(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		q0 = self.system.position(u0)
 		codistribution = self.system.codistribution
@@ -84,9 +82,7 @@ class NonHolonomicEnergy(Scheme):
 				l1-l0 + h*np.dot(cod, self.system.average_velocity(u0,u1))])
 		def residual(du):
 			return du - vector(du)
-		N = self.root_solver(residual)
-		du = N.run(np.zeros_like(u0))
-		return t+h, du
+		return residual
 
 	def codistribution_q(self, u0, u1, h):
 		return (self.system.position(u0)+self.system.position(u1))/2
