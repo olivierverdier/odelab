@@ -41,8 +41,6 @@ The :class:`odelab.system.System` object must implement:
 .. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
 	"""
 
-	root_solver = _rt.Newton # FSolve does not always converge...
-
 	def get_residual(self, t, u0, h):
 		v0 = self.system.velocity(u0)
 		momentum = self.system.momentum
