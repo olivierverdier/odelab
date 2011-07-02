@@ -95,7 +95,9 @@ Default reconstruction function. It assumes that the root is already delta u.
 
 	def step(self, t,u0,h):
 		"""
-Implementation of the Compensated Summation algorithm as described in _[HaLuWa2006].
+Implementation of the Compensated Summation algorithm as described in _[HaLuWa2006] §VIII.5.
+
+.. [HaLuWa2006] Hairer, Lubich, Wanner *Geometric Numerical Integration*, Springer, 2006.
 		"""
 		t1, du = self.delta(t,u0,h)
 		self.roundoff += du
