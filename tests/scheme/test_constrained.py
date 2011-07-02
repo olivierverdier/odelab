@@ -55,7 +55,12 @@ class Test_McOsc(Harness_Osc):
 	def set_solver(self):
 		self.s = SingleStepSolver(McLachlan(), self.sys)
 
-class Test_JayOsc(Harness_Osc):
+class Test_JayOsc2(Harness_Osc):
+	N=10 # bigger time step to make test faster
+	def set_solver(self):
+		self.s = SingleStepSolver(Spark(2), self.sys)
+
+class Test_JayOsc3(Harness_Osc):
 	N=5 # bigger time step to make test faster
 	def set_solver(self):
 		self.s = SingleStepSolver(Spark(3), self.sys)
@@ -124,9 +129,17 @@ class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(NonHolonomicEnergyEMP(), self.sys)
 
-class Test_VerticalRollingDisk_Spark(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk):
 	def setup_solver(self):
 		self.s = SingleStepSolver(Spark(2), self.sys)
+
+class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk):
+	def setup_solver(self):
+		self.s = SingleStepSolver(Spark(3), self.sys)
+
+class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk):
+	def setup_solver(self):
+		self.s = SingleStepSolver(Spark(4), self.sys)
 
 class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
 	def setup_solver(self):

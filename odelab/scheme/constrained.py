@@ -164,8 +164,6 @@ class RKDAE(Scheme):
 Partitioned Runge-Kutta for index 2 DAEs.
 	"""
 
-	root_solver = _rt.FSolve
-
 	def __init__(self, tableau):
 		super(RKDAE, self).__init__()
 		self.tableau = tableau
@@ -179,17 +177,17 @@ Partitioned Runge-Kutta for index 2 DAEs.
 	def dynamics(self, YZT):
 		return np.dot(self.system.dynamics(YZT[:,:-1]), self.tableau[:,1:].T)
 
-	def get_residual_function(self, t, u, h):
+	def get_residual(self, t, u, h):
 		T = t + self.ts*h
-		y = self.system.state(u).copy()
-		yc = y.reshape(-1,1) # "column" vector
 		QT = self.QT
 
-		def residual(YZ):
+		def residual(DYZ):
+			YZ = u.reshape(-1,1) + DYZ
 			YZT = np.vstack([YZ,T])
 			dyn = self.dynamics(YZT)
+			DY = self.system.state(DYZ)
 			Y = self.system.state(YZ)
-			r1 = Y - yc - h*dyn
+			r1 = DY - h*dyn
 			r2 = np.dot(self.system.constraint(YZT), QT)
 			# unused final versions of z
 			r3 = self.system.lag(YZ[:,-1])
@@ -197,17 +195,16 @@ Partitioned Runge-Kutta for index 2 DAEs.
 
 		return residual
 
-	def step(self, t, u, h):
+	def get_guess(self, t, u, h):
 		s = self.tableau.shape[0]
-		residual = self.get_residual_function(t, u, h)
 		# pretty bad guess here:
-		guess = np.column_stack([u.copy()]*s)
-		N = self.root_solver(residual)
-		residual(guess)
-		full_result = N.run(guess) # all the values of Y,Z at all stages
+		guess = np.column_stack([np.zeros_like(u)]*s)
+		return guess
+
+	def reconstruct(self, full_result):
 		# we keep the last Z value:
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return t+h, result
+		return  result
 
 class MultiRKDAE(RKDAE):
 	def dynamics(self, YZT):
@@ -244,7 +241,6 @@ tspan = [t0, tfinal] using constant stepsize h. The initial condition is
 given by ``(y,z) = (y0,z0)`` and the number of stages in the Lobatto III RK
 methods used is given by ``s``.
 
-The set of nonlinear SPARK equations are solved using the solver in :attr:`root_solver`.
 
 The corresponding :class:`odelab.system.System` object must implement a *tensor* version the following methods:
 
