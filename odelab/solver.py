@@ -57,7 +57,7 @@ class Solver (object):
 	time = 1.
 
 
-	def initialize(self, u0=None, t0=0, h=None, time=None, name=None):
+	def initialize(self, u0=None, t0=0, time=None, name=None):
 		"""
 Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
@@ -105,7 +105,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			info = {
 					'u0':u0,
 					't0':t0,
-					'h':h,
 					'time':time,
 					}
 			events.attrs['init_params'] = info

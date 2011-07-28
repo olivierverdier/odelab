@@ -46,7 +46,8 @@ def test_linear_exponential():
 			s = MultiStepSolver(scheme, system=sys)
 			u0 = np.array([1.,0.])
 			h = .1
-			s.initialize(u0 = u0, h=h)
+			scheme.h = h
+			s.initialize(u0 = u0)
 
 			s.run(time=1.)
 			computed = s.final()[:-1]
@@ -63,8 +64,9 @@ class Harness_ComplexConvection(object):
 	def check_convection(self, do_plot):
 		scheme = self.scheme
 		h = self.time/self.N
+		scheme.h = h
 		self.s = MultiStepSolver(scheme, system=self.B)
-		self.s.initialize(u0=self.u0, time=self.time, h=h)
+		self.s.initialize(u0=self.u0, time=self.time)
 		self.s.run()
 		e1 = self.s.final()
 		u1 = e1[:-1]
