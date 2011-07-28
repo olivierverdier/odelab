@@ -4,8 +4,6 @@ from __future__ import division
 import numpy as np
 from numpy import array, dot
 from numpy.linalg import norm, inv
-import pylab as PL
-from pylab import plot, legend
 
 def jacobian(F,x,h=1e-6):
 	"""
