@@ -147,13 +147,12 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			attr = events.attrs[key]
 		return attr
 
-	# todo: do not separate t,u at this level
 	def generate(self, events):
 		"""
 		Generates the (t,u) values.
 		"""
 		last_event = events[:,-1]
-		u,t = last_event[:-1], last_event[-1]
+		event = last_event
 		init_stage = len(events)
 		for stage in itertools.count(init_stage): # infinite loop
 			if stage < self.scheme.tail_length: # not enough past values to run main scheme
@@ -161,8 +160,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 					self.set_scheme(self.init_scheme, events)
 			if stage == self.scheme.tail_length: # main scheme kicks in
 				self.set_scheme(self.scheme, events)
-			t, u = self.step(t, u)
-			event = np.hstack([u,t])
+			event = self.step(event)
 			yield event
 			self.increment_stepsize()
 
@@ -326,8 +324,8 @@ class SingleStepSolver(Solver):
 		self.current_scheme.system = self.system
 		self.current_scheme.initialize(events)
 
-	def step(self, t,u,):
-		return self.current_scheme.do_step(t,u,)
+	def step(self, event):
+		return self.current_scheme.do_step(event)
 
 	def increment_stepsize(self):
 		self.current_scheme.increment_stepsize()

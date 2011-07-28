@@ -84,8 +84,10 @@ Implementation of the Compensated Summation algorithm as described in _[HaLuWa20
 		self.roundoff += u0 - u1
 		return t1, u1
 
-	def do_step(self, t,u):
-		return self.step(t,u,self.h)
+	def do_step(self, event):
+		u,t = event[:-1], event[-1]
+		new_t, new_u = self.step(t,u,self.h)
+		return np.hstack([new_u, new_t])
 
 
 class ExplicitEuler (Scheme):
