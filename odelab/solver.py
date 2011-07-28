@@ -314,7 +314,14 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		PL.quiver(X,Y,vals[0], vals[1])
 
 	def __repr__(self):
-		return '<{0}: {1} {2}>'.format(type(self).__name__, str(self.scheme), str(self.system))
+		solver = type(self).__name__
+		scheme = repr(self.scheme)
+		if self.init_scheme is not None:
+			init_scheme = '({})'.format(repr(self.init_scheme))
+		else:
+			init_scheme = ''
+		system = repr(self.system)
+		return '<{solver}: {scheme}{init_scheme} {system}>'.format(solver=solver, scheme=scheme, init_scheme=init_scheme, system=system)
 
 	def set_scheme(self, scheme, events):
 		self.current_scheme = scheme

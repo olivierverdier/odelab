@@ -117,6 +117,14 @@ class Harness_Solver(Harness):
 		for f,u0_,expected in [(const_r, 1., 2.), (const_c, 1.+0j, 1.+1.j),]:
 			yield self.check_const, f, u0_, expected
 
+	def test_repr(self):
+		expected = '<Solver: {}'.format(repr(self.solver.scheme))
+		r = repr(self.solver)
+		nt.assert_true(r.startswith(expected))
+		if self.solver.init_scheme is not None:
+			nt.assert_regexp_matches(r, repr(self.solver.init_scheme))
+
+
 class Test_EEuler(Harness_Solver):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(ExplicitEuler(h=.1), System(f))
