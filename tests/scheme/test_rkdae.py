@@ -23,7 +23,8 @@ class Harness_RKDAE(object):
 		self.system = dsys.QuasiGraphSystem(fsin)
 		#self.system = GraphSystem(fsin)
 		self.u0 = np.array([0.,0.,1])
-		self.set_solver()
+		self.set_scheme()
+		self.solver = SingleStepSolver(self.scheme, self.system)
 		self.solver.auto_save = False
 		#compare_exact(sol, u0, 2)
 
@@ -36,7 +37,8 @@ class Harness_RKDAE(object):
 		errl = []
 		ks = np.arange(1,5)
 		for k in ks:
-			sol.initialize(u0=self.u0,time=1,h=pow(2,-k), name='{}_{}'.format(type(self).__name__, k))
+			self.scheme.h = pow(2,-k)
+			sol.initialize(u0=self.u0,time=1, name='{}_{}'.format(type(self).__name__, k))
 			sol.run()
 			zexact = sol.system.exact(sol.final_time(),self.u0)[0]
 			lexact = sol.system.exact(sol.final_time(),self.u0)[2]
@@ -64,22 +66,22 @@ class Harness_RKDAE(object):
 
 class Test_LDIRK243(Harness_RKDAE):
 	expected_orders = 1,2
-	def set_solver(self):
-		self.solver = SingleStepSolver(RKDAE(RK.LDIRK343.tableaux[3]), self.system)
+	def set_scheme(self):
+		self.scheme = RKDAE(RK.LDIRK343.tableaux[3])
 class Test_RadauIIA2(Harness_RKDAE):
 	expected_orders = 2,3
-	def set_solver(self):
-		self.solver = SingleStepSolver(RKDAE(RK.RadauIIA.tableaux[2]), self.system)
+	def set_scheme(self):
+		self.scheme = RKDAE(RK.RadauIIA.tableaux[2])
 class Test_RadauIIA3(Harness_RKDAE):
 	expected_orders = 3,5
-	def set_solver(self):
-		self.solver = SingleStepSolver(RKDAE(RK.RadauIIA.tableaux[3]),self.system)
+	def set_scheme(self):
+		self.scheme = RKDAE(RK.RadauIIA.tableaux[3])
 class Test_ImplicitEuler(Harness_RKDAE):
 	expected_orders = 1,1
-	def set_solver(self):
-		self.solver = SingleStepSolver(RKDAE(RK.ImplicitEuler.tableaux[1]), self.system)
+	def set_scheme(self):
+		self.scheme = RKDAE(RK.ImplicitEuler.tableaux[1])
 class Test_Gauss(Harness_RKDAE):
 	expected_orders = 1,1
-	def set_solver(self):
-		self.solver = SingleStepSolver(RKDAE(RK.ImplicitEuler.tableaux[1]), self.system)
+	def set_scheme(self):
+		self.scheme = RKDAE(RK.ImplicitEuler.tableaux[1])
 

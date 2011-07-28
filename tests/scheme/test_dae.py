@@ -58,7 +58,7 @@ class Test(object):
 	@nt.raises(RootSolver.DidNotConverge)
 	def test_run(self):
 		sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
-		self.s = SingleStepSolver(EulerMaruyama(), sys)
-		self.s.initialize(u0=np.array([0.,0]),h=2.5e-11,time=2.5e-8)
+		self.s = SingleStepSolver(EulerMaruyama(h=2.5e-11,), sys)
+		self.s.initialize(u0=np.array([0.,0]),time=2.5e-8)
 		self.s.run()
 

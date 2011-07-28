@@ -51,8 +51,10 @@ def quick_setup(plotter, **kwargs):
 class Harness_Circle(object):
 	def setUp(self):
 		self.f = rotational
-		self.make_solver()
-		self.s.initialize(u0 = array([1.,0.]), h=.01, time = 10.)
+		self.set_scheme()
+		self.s = SingleStepSolver(self.scheme, DummySystem(self.f))
+		self.scheme.h = .01
+		self.s.initialize(u0 = array([1.,0.]),  time = 10.)
 		self.s.run()
 
 	def test_plot_2D(self):
@@ -87,14 +89,14 @@ class Harness_Circle(object):
 		self.s.plot_function('output')
 
 class Test_Circle_EEuler(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(ExplicitEuler(), DummySystem(self.f))
+	def set_scheme(self):
+		self.scheme = ExplicitEuler()
 
 class Test_Circle_IEuler(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(ImplicitEuler(), DummySystem(self.f))
+	def set_scheme(self):
+		self.scheme = ImplicitEuler()
 
 
 class Test_Circle_RK34(Harness_Circle):
-	def make_solver(self):
-		self.s = SingleStepSolver(RungeKutta34(), DummySystem(self.f))
+	def set_scheme(self):
+		self.scheme = RungeKutta34()

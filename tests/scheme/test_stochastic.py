@@ -14,8 +14,10 @@ import numpy as np
 class Test_OU(object):
 	def test_run(self):
 		sys = OrnsteinUhlenbeck()
-		self.s = SingleStepSolver(EulerMaruyama(), sys)
-		self.s.initialize(u0=np.array([1.]), h=.01, time=1.)
+		scheme = EulerMaruyama()
+		scheme.h = .01
+		self.s = SingleStepSolver(scheme, sys)
+		self.s.initialize(u0=np.array([1.]),  time=1.)
 		self.s.run()
 
 class Test_Differentiator(object):
@@ -24,8 +26,10 @@ class Test_Differentiator(object):
 	def test_run(self):
 		sys = Differentiator(LinBumpSignal(self.V0,self.t0))
 ## 		sys.kT = 0. # no noise
-		self.s = SingleStepSolver(EulerMaruyama(), sys)
-		self.s.initialize(u0 = np.array([0,0,0,0,0.]), h=2.5e-11, time=5*self.t0)
+		scheme = EulerMaruyama()
+		scheme.h = 2.5e-11
+		self.s = SingleStepSolver(scheme, sys)
+		self.s.initialize(u0 = np.array([0,0,0,0,0.]),  time=5*self.t0)
 		self.s.run()
 
 

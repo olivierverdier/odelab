@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
+
 from odelab.scheme import *
 from odelab.scheme.constrained import *
 
@@ -18,13 +19,15 @@ SingleStepSolver.catch_runtime = False
 SingleStepSolver.auto_save = False
 SingleStepSolver.shelf_name = 'bank_constrained'
 
+
 # Contact oscillator
 
 class Harness_Osc(object):
 	epsilon = 0.3
 	def setUp(self):
 		self.sys = ContactOscillator(epsilon=self.epsilon)
-		self.set_solver()
+		self.set_scheme()
+		self.s = SingleStepSolver(self.scheme, self.sys)
 		#self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
 		self.s.time = 10.
 
@@ -36,8 +39,9 @@ class Harness_Osc(object):
 	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
 		h = self.sys.time_step(self.N)
+		self.scheme.h = h
 		time = nb_Poincare_iterations*self.N*h
-		self.s.initialize(u0=self.sys.initial_sin(z0), h=h, time=time)
+		self.s.initialize(u0=self.sys.initial_sin(z0), time=time)
 		self.s.run()
 		#self.s.plot(['radius'])
 		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=1)
@@ -45,6 +49,7 @@ class Harness_Osc(object):
 	def run_chaotic(self, nb_Poincare_iterations=10):
 		z0 = -.55
 		h = self.sys.time_step(self.N)
+		self.scheme.h = h
 		time = nb_Poincare_iterations*self.N*h
 		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
 		self.s.run()
@@ -52,24 +57,25 @@ class Harness_Osc(object):
 
 class Test_McOsc(Harness_Osc):
 	label = 'ML'
-	def set_solver(self):
-		self.s = SingleStepSolver(McLachlan(), self.sys)
+	def set_scheme(self):
+		self.scheme = McLachlan()
 
 class Test_JayOsc2(Harness_Osc):
 	N=10 # bigger time step to make test faster
-	def set_solver(self):
-		self.s = SingleStepSolver(Spark(2), self.sys)
+	def set_scheme(self):
+		self.scheme = Spark(2)
 
 class Test_JayOsc3(Harness_Osc):
 	N=5 # bigger time step to make test faster
-	def set_solver(self):
-		self.s = SingleStepSolver(Spark(3), self.sys)
+	def set_scheme(self):
+		self.scheme = Spark(3)
 
 class Test_HOsc(Harness_Osc):
 	label = 'H'
 	N=5 # bigger time step to make test faster
-	def set_solver(self):
-		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
+	def set_scheme(self):
+		self.scheme = NonHolonomicEnergy()
+
 
 # Vertical Rolling Disk
 
@@ -77,7 +83,7 @@ class Harness_VerticalRollingDisk(object):
 	h = .01
 	def setUp(self):
 		self.sys = VerticalRollingDisk()
-		self.setup_solver()
+		self.setup_scheme()
 		ohm_phi = 2.
 		ohm_theta = 1.
 		phi_0 = 0
@@ -89,7 +95,9 @@ class Harness_VerticalRollingDisk(object):
 		vy = self.u0[5] = R*ohm_theta*np.sin(phi_0)
 		# lagrange multipliers: used only used as a guess in RK methods
 		self.u0[8], self.u0[9] = -m*ohm_phi*R*ohm_theta*np.sin(phi_0), m*ohm_phi*R*ohm_theta*np.cos(phi_0)
-		self.s.initialize(self.u0,h=self.h)
+		self.scheme.h = self.h
+		self.s = SingleStepSolver(self.scheme, self.sys)
+		self.s.initialize(self.u0,)
 		self.s.time = 1.
 
 	def test_run(self):
@@ -114,40 +122,40 @@ class Harness_VerticalRollingDisk(object):
 
 
 class Test_VerticalRollingDisk_ML(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(McLachlan(), self.sys)
+	def setup_scheme(self):
+		self.scheme = McLachlan()
 
 class Test_VerticalRollingDisk_H(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(NonHolonomicEnergy(), self.sys)
+	def setup_scheme(self):
+		self.scheme = NonHolonomicEnergy()
 
 class Test_VerticalRollingDisk_H0(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(NonHolonomicEnergy0(),self.sys,)
+	def setup_scheme(self):
+		self.scheme = NonHolonomicEnergy0()
 
 class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(NonHolonomicEnergyEMP(), self.sys)
+	def setup_scheme(self):
+		self.scheme = NonHolonomicEnergyEMP()
 
 class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(Spark(2), self.sys)
+	def setup_scheme(self):
+		self.scheme = Spark(2)
 
 class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(Spark(3), self.sys)
+	def setup_scheme(self):
+		self.scheme = Spark(3)
 
 class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(Spark(4), self.sys)
+	def setup_scheme(self):
+		self.scheme = Spark(4)
 
 class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(SymplecticEuler(), self.sys)
+	def setup_scheme(self):
+		self.scheme = SymplecticEuler()
 
 class Test_VerticalRollingDisk_LF(Harness_VerticalRollingDisk):
-	def setup_solver(self):
-		self.s = SingleStepSolver(NonHolonomicLeapFrog(), self.sys)
+	def setup_scheme(self):
+		self.scheme = NonHolonomicLeapFrog()
 
 class HarnessRobot(object):
 	def setUp(self):
@@ -155,7 +163,8 @@ class HarnessRobot(object):
 		u0 = np.zeros(10)
 		u0[4] = 1.
 		u0[7] = 1.
-		s.initialize(h=.2, time=1, u0 = u0)
+		self.scheme.h = .2
+		s.initialize(time=1, u0 = u0)
 		self.s = s
 
 	def test_run(self):
@@ -183,7 +192,9 @@ def minus_time(tx):
 class Test_SparkODE(object):
 	def setUp(self):
 		self.sys = ODESystem(minus_time)
-		self.s = SingleStepSolver(Spark(4), self.sys)
+		scheme = Spark(4)
+		scheme.h = .1
+		self.s = SingleStepSolver(scheme, self.sys)
 		self.s.initialize(array([1.]))
 
 	def test_run(self):
@@ -203,8 +214,10 @@ class Test_JayExample(object):
 ## 		self.s.initialize(array([1.]))
 
 	def test_spark(self):
-		self.s = SingleStepSolver(Spark(2), self.sys)
-		self.s.initialize(u0=array([1.,1.,1.]), time=1, h=.05)
+		scheme = Spark(2)
+		scheme.h = .05
+		self.s = SingleStepSolver(scheme, self.sys)
+		self.s.initialize(u0=array([1.,1.,1.]), time=1,)
 		self.s.run()
 		print self.s.final_time()
 		print self.s.final()
@@ -213,17 +226,18 @@ class Test_JayExample(object):
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
 def test_pendulum_ML():
-	s = SingleStepSolver(McLachlan(), CirclePendulum())
+	s = SingleStepSolver(McLachlan(h=.1), CirclePendulum())
 	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
 
 def test_pendulum_NHE():
-	s = SingleStepSolver(NonHolonomicEnergy(), SinePendulum())
+	s = SingleStepSolver(NonHolonomicEnergy(h=.1), SinePendulum())
 	s.initialize(np.array([1.,0,0,0,0]))
 	s.run()
 
 class Harness_chaoticosc(object):
 	def setUp(self):
+		self.scheme.h = .05
 		s = SingleStepSolver(self.scheme, ChaoticOscillator(3))
 		u0 = np.zeros(15)
 		N = 10 - 1
@@ -231,7 +245,7 @@ class Harness_chaoticosc(object):
 		angle = n*np.pi/2/N
 		u0[:7] = np.array([np.cos(angle),.6,.4,.2,1.,1.,1.])
 		u0[7:9] = np.array([0., np.sin(angle)])
-		s.initialize(u0=u0, h=.05, time=1)
+		s.initialize(u0=u0,  time=1)
 		self.s = s
 
 	def test_run(self):
@@ -257,7 +271,7 @@ class Test_chaotic_H(Harness_chaoticosc):
 
 class Harness_Chaplygin(object):
 	def setUp(self):
-		self.s = SingleStepSolver(self.solver_class(), Chaplygin(g=.1))
+		self.s = SingleStepSolver(self.scheme, Chaplygin(g=.1))
 		#u0 = np.array([1.,0,.2,0,0,0,0])
 		#u0 = np.array([1.,0,.8*np.pi/2,0,0,0,0])
 		u0_Hilsen = np.array([1.,0,0,0,0,0,0])
@@ -266,7 +280,8 @@ class Harness_Chaplygin(object):
 		u0_Jay = np.array([0,0,0,0,0,1.,0])
 		h_Jay = .1
 		time_Jay = 100
-		self.s.initialize(u0=u0_Jay,time=time_Jay,h=h_Jay)
+		self.scheme.h = h_Jay
+		self.s.initialize(u0=u0_Jay,time=time_Jay,)
 		#print self.s.system.energy(s.final())
 		#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
 		#return self.s
@@ -276,10 +291,10 @@ class Harness_Chaplygin(object):
 		#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
 
 class Test_Chaplygin_ML(Harness_Chaplygin):
-	solver_class = McLachlan
+	scheme = McLachlan()
 
 class Test_Chaplygin_H(Harness_Chaplygin):
-	solver_class = NonHolonomicEnergy
+	scheme = NonHolonomicEnergy()
 
 
 
@@ -309,10 +324,15 @@ def test_rkdae():
 	sys = GraphSystem(sq)
 	u0 = array([0.,0.,1.])
 	for s in range(2,4):
-		sol = SingleStepSolver(RKDAE(RadauIIA.tableaux[s]), sys)
+		scheme = RKDAE(RadauIIA.tableaux[s])
+		scheme.h = .1
+		sol = SingleStepSolver(scheme, sys)
 		sol.initialize(u0=u0, time=1)
 		yield CompareExact('RadauIIA-{}'.format(s)), sol, u0, 2
 
 
 
-
+if __name__ == '__main__':
+	t = Test_NROsc()
+	t.setUp()
+	t.test_z0()

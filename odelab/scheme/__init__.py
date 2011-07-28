@@ -12,7 +12,11 @@ import logging
 
 import odelab.newton as _rt
 
+
 class Scheme(object):
+	def __init__(self, h=None):
+		if h is not None:
+			self.h = h
 
 	root_solver = _rt.FSolve
 
@@ -26,21 +30,6 @@ class Scheme(object):
 
 	tail_length = 1
 
-	@property
-	def system(self):
-		return self.solver.system
-
-	def __getstate__(self):
-		"""
-		Make sure that the solver attribute is never pickled.
-		"""
-		d = self.__dict__.copy()
-		try:
-			del d['solver']
-		except KeyError:
-			pass
-		return d
-
 	def increment_stepsize(self):
 		"""
 		Change the step size based on error estimation.
@@ -48,21 +37,11 @@ class Scheme(object):
 		"""
 		pass
 
-	h_default = .01
-
-	# to be removed; use a signal instead
-	def get_h(self):
-		return self._h
-	def set_h(self, h):
-		self._h = h
-		self._h_dirty = True
-	h = property(get_h, set_h)
 
 	def initialize(self, events):
-		try:
-			self.h = self.solver.h
-		except AttributeError:
-			self.h = self.h_default
+		"""
+Called the first time the scheme is used during a simulation.
+		"""
 		self.roundoff = 0.
 
 	def delta(self, t,u0,h):
@@ -104,6 +83,9 @@ Implementation of the Compensated Summation algorithm as described in _[HaLuWa20
 		u1 = u0 + self.roundoff
 		self.roundoff += u0 - u1
 		return t1, u1
+
+	def do_step(self, t,u):
+		return self.step(t,u,self.h)
 
 
 class ExplicitEuler (Scheme):
@@ -170,6 +152,11 @@ class ode15s(Scheme):
 
 
 	def __init__(self, **kwargs):
+		super(ode15s,self).__init__(kwargs.get('h'))
+		try:
+			kwargs.pop('h')
+		except KeyError:
+			pass
 		self.integrator_kwargs = kwargs
 
 	def initialize(self, events): # the system must be defined before this is called!

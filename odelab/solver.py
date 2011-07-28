@@ -56,10 +56,6 @@ class Solver (object):
 	# default values for the total time
 	time = 1.
 
-	# default time step
-	h = .1
-
-
 
 	def initialize(self, u0=None, t0=0, h=None, time=None, name=None):
 		"""
@@ -67,7 +63,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 :param array u0: initial condition; if it is not provided, it is set to the previous initial condition.
 :param scalar t0: initial time
-:param scalar h: time step
 :param scalar time: span of the simulation
 :param string name: name of this simulation
 		"""
@@ -79,8 +74,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		raw_event0 = np.hstack([u0,t0])
 		event0 = self.system.preprocess(raw_event0)
 
-		if h is not None:
-			self.h = h
 		if time is not None:
 			self.time = time
 
@@ -155,7 +148,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		u,t = event[:-1], event[-1]
 		for i in itertools.count(): # infinite loop
-			t, u = self.step(t, u, self.h)
+			t, u = self.step(t, u, )
 			event = np.hstack([u,t])
 			yield event
 			self.increment_stepsize()
@@ -326,11 +319,11 @@ class SingleStepSolver(Solver):
 
 	def set_scheme(self, scheme, events):
 		self.current_scheme = scheme
-		self.current_scheme.solver = self
+		self.current_scheme.system = self.system
 		self.current_scheme.initialize(events)
 
-	def step(self, t,u, h):
-		return self.current_scheme.step(t,u,h)
+	def step(self, t,u,):
+		return self.current_scheme.do_step(t,u,)
 
 	def increment_stepsize(self):
 		self.current_scheme.increment_stepsize()

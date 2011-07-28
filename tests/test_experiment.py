@@ -31,7 +31,7 @@ class Harness_Experiment(object):
 		self.prefix = os.path.dirname(self.path)
 		self.file.close()
 		from odelab.scheme import ExplicitEuler
-		s = self.solver_class(system=System(f), scheme=ExplicitEuler(), path=self.path)
+		s = self.solver_class(system=System(f), scheme=ExplicitEuler(h=.1), path=self.path)
 		s.catch_runtime = False
 
 		params = {
@@ -44,7 +44,6 @@ class Harness_Experiment(object):
 			'initialize': {
 				'u0' : np.array([1.]),
 				'time': 1.,
-				'h': .1,
 				'name': self.name,
 				},
 			}
