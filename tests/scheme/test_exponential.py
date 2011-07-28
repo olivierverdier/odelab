@@ -40,11 +40,11 @@ def test_linear_exponential():
 			ABNorset4(),
 			GenLawson45(),
 		]:
-			sys = Linear(L)
-			s = MultiStepSolver(scheme, system=sys)
-			u0 = np.array([1.,0.])
 			h = .1
 			scheme.h = h
+			sys = Linear(L)
+			s = SingleStepSolver(scheme, system=sys, init_scheme=HochOst4(h=h))
+			u0 = np.array([1.,0.])
 			s.initialize(u0 = u0)
 
 			s.run(time=1.)
@@ -63,7 +63,7 @@ class Harness_ComplexConvection(object):
 		scheme = self.scheme
 		h = self.time/self.N
 		scheme.h = h
-		self.s = MultiStepSolver(scheme, system=self.B)
+		self.s = SingleStepSolver(scheme, system=self.B, init_scheme=HochOst4(h=h))
 		self.s.initialize(u0=self.u0, time=self.time)
 		self.s.run()
 		e1 = self.s.final()

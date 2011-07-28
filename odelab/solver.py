@@ -33,7 +33,7 @@ class Solver (object):
 
 	"""
 
-	def __init__(self, scheme, system, path=None):
+	def __init__(self, scheme, system, path=None, init_scheme=None):
 		"""
 :Parameters:
 	system : :class:`odelab.system.System`
@@ -45,6 +45,7 @@ class Solver (object):
 		"""
 		self.system = system
 		self.scheme = scheme
+		self.init_scheme = init_scheme
 		if path is None: # file does not exist
 			import tempfile
 			f = tempfile.NamedTemporaryFile(delete=True)
@@ -112,6 +113,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			solver_info = {
 				'system': self.system,
 				'scheme': self.scheme,
+				'init_scheme': self.init_scheme,
 				'solver_class': type(self),
 				}
 			events.attrs['solver_info'] = solver_info
@@ -140,13 +142,21 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			attr = events.attrs[key]
 		return attr
 
-	def generate(self, event):
+	# todo: do not separate t,u at this level
+	def generate(self, events):
 		"""
 		Generates the (t,u) values.
 		"""
-		u,t = event[:-1], event[-1]
-		for i in itertools.count(): # infinite loop
-			t, u = self.step(t, u, )
+		last_event = events[:,-1]
+		u,t = last_event[:-1], last_event[-1]
+		init_stage = len(events)
+		for stage in itertools.count(init_stage): # infinite loop
+			if stage < self.scheme.tail_length: # not enough past values to run main scheme
+				if stage == 1:
+					self.set_scheme(self.init_scheme, events)
+			if stage == self.scheme.tail_length: # main scheme kicks in
+				self.set_scheme(self.scheme, events)
+			t, u = self.step(t, u)
 			event = np.hstack([u,t])
 			yield event
 			self.increment_stepsize()
@@ -176,16 +186,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 	@contextmanager
 	def simulating(self):
 		with self.open_store(read=False) as events:
-
-			# only for single step schemes:
-			self.set_scheme(self.scheme, events)
-
 			self._start_time = time.time()
 			yield events
 			end_time = time.time()
 			duration = end_time - self._start_time
 			events.attrs['duration'] += duration
-
 
 	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)
 
@@ -203,9 +208,8 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			time = self.time
 		with self.simulating() as events:
 			# start from the last time we stopped
-			last_event = events[:,-1]
-			generator = self.generate(last_event)
-			t0 = last_event[-1]
+			generator = self.generate(events)
+			t0 = events[-1,-1]
 			tf = t0 + time # final time
 			for i in xrange(self.max_iter):
 				try:
@@ -324,28 +328,6 @@ class SingleStepSolver(Solver):
 	def increment_stepsize(self):
 		self.current_scheme.increment_stepsize()
 
-class MultiStepSolver(SingleStepSolver):
-## 	default_single_step_scheme = HochOst4()
-
-	def step_current(self, t,u):
-		return self.current_scheme.step(t,u)
-
-	def step(self, t,u):
-		stage = len(self)
-		if stage < self.scheme.tail_length: # not enough past values to run main scheme
-			if stage == 1:
-				self.set_scheme(self.single_step_scheme)
-		if stage == self.scheme.tail_length: # main scheme kicks in
-			self.set_scheme(self.scheme)
-		return self.step_current(t,u)
-
-	def __init__(self, scheme, single_step_scheme=None, *args, **kwargs):
-		super(MultiStepSolver, self).__init__(scheme, *args, **kwargs)
-		if single_step_scheme is None:
-			from odelab.scheme.exponential import HochOst4
-			single_step_scheme = HochOst4() # hard coded for the moment
-		self.single_step_scheme = single_step_scheme
-		self.single_step_scheme.solver = self
 
 
 

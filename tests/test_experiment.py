@@ -2,7 +2,7 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.solver import SingleStepSolver, MultiStepSolver, load_solver
+from odelab.solver import SingleStepSolver, load_solver
 from odelab.system import System
 from odelab.experiment import Experiment
 
@@ -74,4 +74,4 @@ class Test_Single(Harness_Experiment):
 class Test_Multi(Harness_Experiment):
 	def setUp(self):
 		raise SkipTest("Multistep solvers do not work")
-	solver_class = MultiStepSolver
+	#solver_class = MultiStepSolver

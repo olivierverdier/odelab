@@ -36,18 +36,17 @@ class ExplicitGeneralLinear(GeneralLinear):
 	def tail_length(self):
 		return len(self.tableaux[self.nb_stages][1])
 
-	def initialize(self):
-		super(ExplicitGeneralLinear, self).initialize()
+	def initialize(self,events):
+		super(ExplicitGeneralLinear, self).initialize(events)
 		tail_length = self.tail_length
-		tail = np.array(self.solver.events[:,-self.tail_length:])
+		tail = np.array(events[:,-self.tail_length:])
 		if self.scaled_input:
 			for i in range(tail.shape[1]-1):
 				tail[:-1,i] = self.h*self.system.f(tail[-1,i], tail[:-1,i])
 		self.tail = np.array(tail[:-1,::-1])
 
 
-	def step(self, t, u):
-		h = self.h
+	def step(self, t, u, h):
 		f = self.system.f
 		ua, vb = self.tableaux[self.nb_stages]
 		nb_stages = len(ua)

@@ -20,7 +20,6 @@ from odelab.scheme import Scheme
 
 from odelab.phi_pade import Phi, Polynomial
 
-from nose.plugins.skip import SkipTest
 
 class Exponential(Scheme):
 	"""
@@ -33,15 +32,15 @@ class Exponential(Scheme):
 	phi_degree = 6
 
 	def initialize(self, events):
-		raise SkipTest('Exponential Solvers are broken')
-		super(Exponential, self).initialize()
-		tail = np.array(self.solver.events[:,-self.tail_length:])
+		super(Exponential, self).initialize(events)
+		tail = np.array(events[:,-self.tail_length:])
 		# this is specific to those Exponential solvers:
 		# warning: this creates a tail using the type of u
 		for i in range(tail.shape[1]-1):
 			# if nonlin returns complex and u is float, type cast is performed:
 			tail[:-1,i] = self.h*self.system.nonlin(tail[-1,i], tail[:-1,i])
 		self.tail = np.array(tail[:-1,::-1])
+		self._compute_coefficients()
 
 	def step(self, t, u, h):
 		ua, vb = self.general_linear()
@@ -64,15 +63,18 @@ class Exponential(Scheme):
 		self.tail = newtail
 		return t + h, self.tail[:,0]
 
+	def _compute_coefficients(self):
+		"""
+Compute the coefficients of the method. Depends on h, so it must be called every time h changes.
+		"""
+		z = self.h * self.system.linear()
+		self._general_linear = self.general_linear_z(z)
+		self._h_dirty = False
 
 	def general_linear(self):
 		"""
 		Currently returns a cached version of the coefficients of the method.
 		"""
-		if self._h_dirty: # recompute the coefficients if h had changed
-			z = self.h * self.system.linear()
-			self._general_linear = self.general_linear_z(z)
-			self._h_dirty = False
 		return self._general_linear
 
 class LawsonEuler(Exponential):

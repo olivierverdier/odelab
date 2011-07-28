@@ -2,6 +2,7 @@
 from __future__ import division
 
 
+from odelab.scheme.rungekutta import *
 from odelab.scheme import *
 from odelab.scheme.exponential import *
 
@@ -131,6 +132,12 @@ class Test_RK4(Harness_Solver):
 class Test_RK34(Harness_Solver):
 	def setup_solver(self):
 		self.solver = SingleStepSolver(RungeKutta34(h=.1), System(f))
+
+class Test_AB(Harness_Solver):
+	def setup_solver(self):
+		multi_scheme = AdamsBashforth(2)
+		multi_scheme.h = .1
+		self.solver = SingleStepSolver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
 class Harness_Solver_NoComplex(Harness_Solver):
 
