@@ -25,7 +25,6 @@ class Harness_RKDAE(object):
 		self.u0 = np.array([0.,0.,1])
 		self.set_scheme()
 		self.solver = SingleStepSolver(self.scheme, self.system)
-		self.solver.auto_save = False
 		#compare_exact(sol, u0, 2)
 
 	tol = .2 # tolerance when measuring the orders

@@ -15,8 +15,6 @@ from nose.plugins.skip import SkipTest
 
 
 Solver.catch_runtime = False
-Solver.auto_save = False
-Solver.shelf_name = 'bank_exponential'
 
 import scipy.linalg as slin
 

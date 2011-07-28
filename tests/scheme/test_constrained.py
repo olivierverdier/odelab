@@ -16,8 +16,6 @@ from nose.plugins.skip import SkipTest
 import nose.tools as nt
 
 SingleStepSolver.catch_runtime = False
-SingleStepSolver.auto_save = False
-SingleStepSolver.shelf_name = 'bank_constrained'
 
 
 # Contact oscillator
@@ -115,7 +113,6 @@ class Harness_VerticalRollingDisk(object):
 	experiences = {'50': (.01,50), '1000': (.1,1000.)}
 
 	def run_experience(self, exp_name):
-		self.s.shelf_name = 'bank_vr'
 		h,time = self.experiences[exp_name]
 		self.s.initialize(h=h,time=time)
 		self.s.run()

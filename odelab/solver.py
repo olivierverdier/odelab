@@ -15,7 +15,6 @@ The higher level class is :class:`Solver`, which is initialized with an instance
 """
 from __future__ import division
 
-import scipy.io # used for saving in shelves
 import numpy as np
 
 import itertools
@@ -186,8 +185,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			end_time = time.time()
 			duration = end_time - self._start_time
 			events.attrs['duration'] += duration
-
-	auto_save = False # whether to automatically save the session after a run; especially useful for tests
 
 
 	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)

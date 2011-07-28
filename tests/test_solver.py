@@ -59,7 +59,6 @@ const_c = partial(const_f, 1.j)
 class Harness_Solver(Harness):
 	def setUp(self):
 		self.setup_solver()
-		self.solver.auto_save = False
 
 	dim = 1
 	def set_system(self, f):
@@ -257,7 +256,6 @@ def faulty_function(t,u):
 class Test_Exceptions(object):
 	def setUp(self):
 		self.s = SingleStepSolver(ExplicitEuler(h=.1), Linear(np.array([[1]])))
-		self.s.auto_save = False
 	@nt.raises(Solver.NotInitialized)
 	def test_no_u0(self):
 		self.s.initialize()
