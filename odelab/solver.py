@@ -56,6 +56,8 @@ class Solver (object):
 	# default values for the total time
 	time = 1.
 
+	# max_iter = max_iter_factor * (time/h)
+	max_iter_factor = 100
 
 	def initialize(self, u0=None, t0=0, time=None, name=None):
 		"""
@@ -76,6 +78,9 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		if time is not None:
 			self.time = time
+
+		# generous estimation of the maximum number of iterations
+		self.max_iter = int(self.time/self.scheme.h * self.max_iter_factor)
 
 		self.set_name(name=name)
 
@@ -162,7 +167,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			self.increment_stepsize()
 
 
-	max_iter = 1000000
 	class FinalTimeNotReached(Exception):
 		"""
 		Raised when the final time was not reached within the given ``max_iter`` number of iterations.

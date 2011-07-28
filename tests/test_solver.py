@@ -234,19 +234,18 @@ class Test_FinalTimeExceptions(object):
 	limit = 20
 	def setUp(self):
 		self.sys = LimitedSys(self.limit)
-		self.s = SingleStepSolver(ExplicitEuler(h=.1),self.sys)
+		self.scheme = ExplicitEuler(h=.1)
+		self.s = SingleStepSolver(self.scheme, self.sys)
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0, time=10, )
 
+	@nt.raises(Solver.FinalTimeNotReached)
+	def test_final_time_not_reached(self):
+		self.s.max_iter = 1
+		self.s.run()
+
 	def test_max_iter(self):
-		self.max_iter = 1
-		self.s.max_iter = self.max_iter
-		try:
-			self.s.run()
-		except Solver.FinalTimeNotReached:
-			npt.assert_equal(len(self.s), self.max_iter + 1)
-		else:
-			raise Exception("FinalTimeNotReached not raised!")
+		nt.assert_greater_equal(self.s.max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
 
 	@nt.raises(Solver.RuntimeError)
 	def test_sys_exception(self):
