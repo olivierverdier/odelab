@@ -162,7 +162,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				self.set_scheme(self.scheme, events)
 			event = self.step(event)
 			yield event
-			self.increment_stepsize()
 
 
 	class FinalTimeNotReached(Exception):
@@ -326,9 +325,6 @@ class SingleStepSolver(Solver):
 
 	def step(self, event):
 		return self.current_scheme.do_step(event)
-
-	def increment_stepsize(self):
-		self.current_scheme.increment_stepsize()
 
 
 
