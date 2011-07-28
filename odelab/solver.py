@@ -303,16 +303,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		return self.plot(other_component, time_component=time_component, *args, **kwargs)
 
-	quiver_res = 20
-	def quiver(self):
-		mins = self.aus.min(axis=0)
-		maxs = self.aus.max(axis=0)
-		X,Y = np.meshgrid(linspace(mins[0], maxs[0], self.quiver_res),
-								linspace(mins[1], maxs[1], self.quiver_res))
-		Z = np.dstack([X,Y])
-		vals = self.f(0,Z.transpose(2,0,1))
-		PL.quiver(X,Y,vals[0], vals[1])
-
 	def __repr__(self):
 		solver = type(self).__name__
 		scheme = repr(self.scheme)
