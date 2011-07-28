@@ -313,8 +313,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		vals = self.f(0,Z.transpose(2,0,1))
 		PL.quiver(X,Y,vals[0], vals[1])
 
-class SingleStepSolver(Solver):
-
 	def __repr__(self):
 		return '<{0}: {1} {2}>'.format(type(self).__name__, str(self.scheme), str(self.system))
 
@@ -326,7 +324,7 @@ class SingleStepSolver(Solver):
 	def step(self, event):
 		return self.current_scheme.do_step(event)
 
-
+SingleStepSolver = Solver
 
 
 
