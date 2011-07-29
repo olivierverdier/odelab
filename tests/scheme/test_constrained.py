@@ -43,6 +43,8 @@ class Harness_Osc(object):
 		self.s.run()
 		#self.s.plot(['radius'])
 		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=1)
+		with self.s.open_store() as events:
+			energy = self.s.system.energy(events)
 
 	def run_chaotic(self, nb_Poincare_iterations=10):
 		z0 = -.55
@@ -73,6 +75,14 @@ class Test_HOsc(Harness_Osc):
 	N=5 # bigger time step to make test faster
 	def set_scheme(self):
 		self.scheme = NonHolonomicEnergy()
+
+class Test_NROsc(Test_McOsc):
+	epsilon = 0.
+	def setUp(self):
+		self.sys = NonReversibleContactOscillator()
+		self.set_scheme()
+		self.s = SingleStepSolver(self.scheme, self.sys)
+		self.s.time = 10.
 
 
 # Vertical Rolling Disk

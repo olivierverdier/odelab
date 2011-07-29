@@ -163,6 +163,57 @@ perturbation of the contact oscillator.
 	def time_step(self, N=40):
 		return 2*np.sin(np.pi/N)
 
+class NonReversibleContactOscillator(ContactOscillator):
+	ur"""
+Non Reversible contact oscillator. The new Hamiltonian is obtained from that of the Contact Oscillator by
+
+.. math::
+
+	H(q,p) = \frac{1}{2}\bigl(\|q\|^2 + \|p+\grad S\|^2\bigr)
+
+The perturbation is $\grad S$, where :math:`S` depends only on :math:`q`.
+The new variables :math:`Q`, :math:`P` are obtained with the transformation:
+
+.. math::
+
+	Q = q
+	P = p + \grad S
+
+	"""
+	perturbation_size = .2
+	def perturbation(self, q):
+		"""
+Gradient of the generating function S = cos(z).
+		"""
+		pert = np.zeros_like(q)
+		z = q[2]
+		pert[-1] = -np.sin(z)
+		return pert
+
+	def perturbation_jacobian(self, q):
+		"""
+Hessian of the generating function S.
+		"""
+		hess = np.zeros([3,3])
+		z = q[2]
+		hess [-1,-1] = -np.cos(z)
+		return hess
+
+	def velocity(self, u):
+		return super(NonReversibleContactOscillator, self).velocity(u) + self.perturbation(self.position(u))
+
+	def momentum(self,u):
+		return u[3:6]
+
+	def force(self,u):
+		orig_force = super(NonReversibleContactOscillator,self).force(u) # works because force depends only on position
+		q = self.position(u)
+		return orig_force - np.dot(self.perturbation_jacobian(q),self.velocity(u))
+
+
+
+
+
 
 
 class VerticalRollingDisk(NonHolonomic):
