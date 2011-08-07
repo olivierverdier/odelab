@@ -76,8 +76,8 @@ class Harness_Solver(Harness):
 		nt.assert_equal(self.solver.time, Solver.time)
 		nt.assert_equal(len(self.solver), 1)
 
+	@nt.raises(Solver.AlreadyInitialized)
 	def test_initialize_twice(self):
-		raise SkipTest('double initialization is deactivated')
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		self.solver.initialize(u0=u0)

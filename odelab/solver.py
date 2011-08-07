@@ -96,12 +96,15 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			# create a new extensible array node
 			with warnings.catch_warnings():
 				warnings.simplefilter('ignore')
-				events = store.createEArray(
-					where=store.root,
-					name=self.name,
-					atom=tables.Atom.from_dtype(event0.dtype),
-					shape=(len(event0),0),
-					filters=compression)
+				try:
+					events = store.createEArray(
+						where=store.root,
+						name=self.name,
+						atom=tables.Atom.from_dtype(event0.dtype),
+						shape=(len(event0),0),
+						filters=compression)
+				except tables.NodeError:
+					raise self.AlreadyInitialized('Results with the name "{0}" already exist in that store.'.format(self.name))
 
 			# store the metadata
 			info = {
@@ -181,6 +184,11 @@ Method to open the data store. Any access to the events must make use of this me
 	class NotInitialized(Exception):
 		"""
 		Raised when the solver is not properly initialized.
+		"""
+
+	class AlreadyInitialized(Exception):
+		"""
+		Raised when a solver is already initialized.
 		"""
 
 	class RuntimeError(Exception):
