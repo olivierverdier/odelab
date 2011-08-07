@@ -79,9 +79,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if time is not None:
 			self.time = time
 
-		# generous estimation of the maximum number of iterations
-		self.max_iter = int(self.time/self.scheme.h * self.max_iter_factor)
-
 		self.set_name(name=name)
 
 		# first remove the events node if they exist
@@ -203,22 +200,29 @@ Method to open the data store. Any access to the events must make use of this me
 
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
 
-	def run(self, time=None):
+	def run(self, time=None, max_iter=None):
 		"""
 		Run the simulation for a given time.
 
 :param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
+:param max_iter: the maximum number of iterations; if None, an estimate is computed base on the time step and time span
 		"""
 		if not hasattr(self,'name'):
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
 		if time is None:
 			time = self.time
+
+		self._max_iter = max_iter
+		if self._max_iter is None:
+			# generous estimation of the maximum number of iterations
+			self._max_iter = int(time/self.scheme.h * self.max_iter_factor)
+
 		with self.simulating() as events:
 			# start from the last time we stopped
 			generator = self.generate(events)
 			t0 = events[-1,-1]
 			tf = t0 + time # final time
-			for i in xrange(self.max_iter):
+			for i in xrange(self._max_iter): # todo: use enumerate
 				try:
 					event = next(generator)
 				except Exception as e:
@@ -234,7 +238,7 @@ Method to open the data store. Any access to the events must make use of this me
 					if event[-1] > tf - self.t_tol:
 						break
 			else:
-				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self.max_iter))
+				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self._max_iter))
 
 	def set_name(self, name=None):
 		"""

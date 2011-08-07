@@ -249,11 +249,20 @@ class Test_FinalTimeExceptions(object):
 
 	@nt.raises(Solver.FinalTimeNotReached)
 	def test_final_time_not_reached(self):
-		self.s.max_iter = 1
-		self.s.run()
+		self.s.run(max_iter = 1)
 
 	def test_max_iter(self):
-		nt.assert_greater_equal(self.s.max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
+		try:
+			self.s.run()
+		except self.s.RuntimeError:
+			pass
+		nt.assert_greater_equal(self.s._max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
+		time = 50
+		try:
+			self.s.run(50)
+		except self.s.RuntimeError:
+			pass
+		nt.assert_greater_equal(self.s._max_iter, self.s.max_iter_factor*time/self.scheme.h)
 
 	@nt.raises(Solver.RuntimeError)
 	def test_sys_exception(self):
