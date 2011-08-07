@@ -7,6 +7,7 @@ from odelab.scheme import *
 from odelab.scheme.exponential import *
 
 from odelab.system import *
+from odelab.system.classic import *
 from odelab.solver import *
 import odelab.newton as rt
 
@@ -146,6 +147,18 @@ class Test_AB(Harness_Solver):
 		multi_scheme = AdamsBashforth(2)
 		multi_scheme.h = .1
 		self.solver = SingleStepSolver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
+
+class Test_RK34Vdp(object):
+	def setUp(self):
+		time = 7.8
+		self.h_init = time/50
+		self.scheme = RungeKutta34(h=self.h_init)
+		self.s = Solver(self.scheme, VanderPol(mu=1.))
+		self.s.initialize(u0 = array([.2,1]), time=time, )
+
+	def test_run(self):
+		self.s.run()
+		nt.assert_less(self.scheme.h, self.h_init)
 
 class Harness_Solver_NoComplex(Harness_Solver):
 

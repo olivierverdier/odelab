@@ -30,12 +30,12 @@ class Scheme(object):
 
 	tail_length = 1
 
-	def increment_stepsize(self):
+	def adjust_stepsize(self, error):
 		"""
 		Change the step size based on error estimation.
 		To be overridden for a variable step size method.
 		"""
-		pass
+		pass # todo: write a general implementation
 
 
 	def initialize(self, events):
@@ -130,9 +130,9 @@ class RungeKutta34 (Scheme):
 	# default tolerance
 	tol = 1e-6
 
-	def increment_stepsize(self):
-		if self.error > 1e-15:
-			self.h *= (self.tol/self.error)**(1/self.error_order)
+	def adjust_stepsize(self, error):
+		if error > 1e-15:
+			self.h *= (self.tol/error)**(1/self.error_order)
 		else:
 			self.h = 1.
 
@@ -143,7 +143,8 @@ class RungeKutta34 (Scheme):
 		Y3 = f(t + h/2, u + h*Y2/2)
 		Z3 = f(t + h, u - h*Y1 + 2*h*Y2)
 		Y4 = f(t + h, u + h*Y3)
-		self.error = np.linalg.norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
+		error = np.linalg.norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
+		self.adjust_stepsize(error)
 		return t+h, u + h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
 
 class ode15s(Scheme):
