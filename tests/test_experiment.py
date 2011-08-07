@@ -2,13 +2,12 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.solver import SingleStepSolver, load_solver
+from odelab.solver import Solver, load_solver
 from odelab.system import System
 from odelab.experiment import Experiment
 
 import numpy as np
 import nose.tools as nt
-from nose.plugins.skip import SkipTest
 import numpy.testing as npt
 
 import tempfile
@@ -22,7 +21,7 @@ class BigSystem(System):
 		super(BigSystem, self).__init__(*args, **kwargs)
 		self.data = np.zeros([32,32], dtype=complex)
 
-class Harness_Experiment(object):
+class Test_Experiment(object):
 	name = 'tmpexp'
 	def setUp(self):
 		self.file = tempfile.NamedTemporaryFile()
@@ -31,14 +30,14 @@ class Harness_Experiment(object):
 		self.prefix = os.path.dirname(self.path)
 		self.file.close()
 		from odelab.scheme import ExplicitEuler
-		s = self.solver_class(system=System(f), scheme=ExplicitEuler(h=.1), path=self.path)
+		s = Solver(system=System(f), scheme=ExplicitEuler(h=.1), path=self.path)
 		s.catch_runtime = False
 
 		params = {
 			'family': self.family,
 			'system': System,
 			'system_params': {'f': f},
-			'solver': SingleStepSolver,
+			'solver': Solver,
 			'scheme': ExplicitEuler,
 			'scheme_params': {},
 			'initialize': {
@@ -56,7 +55,7 @@ class Harness_Experiment(object):
 	def test_load(self):
 		s = load_solver(self.path, self.name)
 		#s = Experiment.load(self.path, self.name)
-		nt.assert_true(isinstance(s, SingleStepSolver))
+		nt.assert_true(isinstance(s, Solver))
 		nt.assert_equal(s.scheme.__class__.__name__, 'ExplicitEuler')
 		nt.assert_equal(len(s), 11)
 		with s.open_store() as events:
@@ -67,10 +66,4 @@ class Harness_Experiment(object):
 		s = load_solver(self.path, self.name)
 		s.run()
 
-class Test_Single(Harness_Experiment):
-	solver_class = SingleStepSolver
 
-class Test_Multi(Harness_Experiment):
-	def setUp(self):
-		raise SkipTest("Multistep solvers do not work")
-	#solver_class = MultiStepSolver
