@@ -43,6 +43,7 @@ class Scheme(object):
 Called the first time the scheme is used during a simulation.
 		"""
 		self.roundoff = 0.
+		self.last_event = events[:,-1]
 
 	def delta(self, t,u0,h):
 		"""
@@ -84,10 +85,12 @@ Implementation of the Compensated Summation algorithm as described in _[HaLuWa20
 		self.roundoff += u0 - u1
 		return t1, u1
 
-	def do_step(self, event):
+	def do_step(self):
+		event = self.last_event
 		u,t = event[:-1], event[-1]
 		new_t, new_u = self.step(t,u,self.h)
-		return np.hstack([new_u, new_t])
+		self.last_event = np.hstack([new_u, new_t])
+		return self.last_event
 
 
 class ExplicitEuler (Scheme):

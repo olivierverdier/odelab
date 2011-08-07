@@ -330,7 +330,7 @@ Method to open the data store. Any access to the events must make use of this me
 		self.current_scheme.initialize(events)
 
 	def step(self, event):
-		return self.current_scheme.do_step(event)
+		return self.current_scheme.do_step()
 
 SingleStepSolver = Solver
 
