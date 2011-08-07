@@ -131,14 +131,20 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 
 	@contextmanager
-	def open_store(self, read=True):
-		mode = ['a','r'][read]
+	def open_store(self, write=False):
+		"""
+Method to open the data store. Any access to the events must make use of this method::
+
+	with solver.open_store() as events:
+		...
+		"""
+		mode = ['r','a'][write]
 		with tables.openFile(self.path, mode) as f:
 			node = f.getNode('/'+self.name)
 			yield node
 
 	def __len__(self):
-		with self.open_store(read=True) as events:
+		with self.open_store() as events:
 			size = events.nrows
 		return size
 
@@ -186,7 +192,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 	@contextmanager
 	def simulating(self):
-		with self.open_store(read=False) as events:
+		with self.open_store(write=True) as events:
 			self._start_time = time.time()
 			yield events
 			end_time = time.time()
@@ -247,19 +253,19 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		"""
 		Return u[index] after post-processing.
 		"""
-		with self.open_store(read=True) as events:
+		with self.open_store() as events:
 			event = events[:,index]
 		if process:
 			event = self.system.postprocess(event)
 		return event
 
 	def get_times(self):
-		with self.open_store(read=True) as events:
+		with self.open_store() as events:
 			times = events[-1]
 		return times
 
 	def final_time(self):
-		with self.open_store(read=True) as events:
+		with self.open_store() as events:
 			final = events[-1,-1]
 		return final
 
