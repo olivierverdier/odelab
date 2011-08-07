@@ -81,14 +81,6 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		self.set_name(name=name)
 
-		# first remove the events node if they exist
-		#try:
-			#self.load_data()
-		#except tables.NoSuchNodeError:
-			#pass
-		#else:
-			#self.events.remove()
-
 		# compression algorithm
 		compression = tables.Filters(complevel=1, complib='zlib', fletcher32=True)
 
