@@ -64,7 +64,6 @@ class Harness_Experiment(object):
 			npt.assert_array_almost_equal(events[-1], np.linspace(0,1,11))
 
 	def test_load_run(self):
-		raise SkipTest('Not possible to restart a stored simulation')
 		s = load_solver(self.path, self.name)
 		s.run()
 

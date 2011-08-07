@@ -157,11 +157,12 @@ Method to open the data store. Any access to the events must make use of this me
 		last_event = events[:,-1]
 		event = last_event
 		init_stage = len(events)
+		tail_length = self.scheme.tail_length
 		for stage in itertools.count(init_stage): # infinite loop
-			if stage < self.scheme.tail_length: # not enough past values to run main scheme
+			if stage < tail_length: # not enough past values to run main scheme
 				if stage == 1:
 					self.set_scheme(self.init_scheme, events)
-			if stage == self.scheme.tail_length: # main scheme kicks in
+			if stage == tail_length or init_stage > tail_length: # main scheme kicks in
 				self.set_scheme(self.scheme, events)
 			event = self.step(event)
 			yield event
