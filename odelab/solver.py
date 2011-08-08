@@ -21,6 +21,12 @@ import itertools
 import warnings
 import time
 
+import progressbar as pb
+widgets = [pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(), ' ',  ' ', pb.ETA(),  ]
+progress_bar = pb.ProgressBar(widgets=widgets)
+del pb
+
+
 from odelab.plotter import Plotter
 
 import tables
@@ -223,6 +229,10 @@ Method to open the data store. Any access to the events must make use of this me
 			generator = self.generate(events)
 			t0 = events[-1,-1]
 			tf = t0 + time # final time
+
+			progress_bar.maxval = time
+			progress_bar.start()
+
 			for iteration in xrange(self._max_iter): # todo: use enumerate
 				try:
 					event = next(generator)
@@ -236,7 +246,9 @@ Method to open the data store. Any access to the events must make use of this me
 						raise self.Unstable('Unstable after %d steps.' % iteration)
 
 					events.append(event.reshape(-1,1))
-					if event[-1] > tf - self.t_tol:
+					t = event[-1]
+					progress_bar.update(t-t0)
+					if t > tf - self.t_tol:
 						break
 			else:
 				raise self.FinalTimeNotReached("Reached maximal number of iterations: {0}".format(self._max_iter))
