@@ -180,23 +180,31 @@ The new variables :math:`Q`, :math:`P` are obtained with the transformation:
 	P = p + \grad S
 
 	"""
+	def s(self,z):
+		return np.cos(z)
+	def sder(self,z):
+		return -np.sin(z)
+	def ssec(self,z):
+		return -np.cos(z)
+
 	perturbation_size = .2
 	def perturbation(self, q):
 		"""
-Gradient of the generating function S = cos(z).
+Gradient of the generating function S = s(z).
 		"""
 		pert = np.zeros_like(q)
 		z = q[2]
-		pert[-1] = -np.sin(z)
+		pert[-1] = self.sder(z)
 		return pert
 
 	def perturbation_jacobian(self, q):
 		"""
 Hessian of the generating function S.
 		"""
-		hess = np.zeros([3,3])
 		z = q[2]
-		hess [-1,-1] = -np.cos(z)
+		h = self.ssec(z)
+		hess = np.zeros([3,3])
+		hess [-1,-1] = h
 		return hess
 
 	def velocity(self, u):
@@ -209,6 +217,18 @@ Hessian of the generating function S.
 		orig_force = super(NonReversibleContactOscillator,self).force(u) # works because force depends only on position
 		q = self.position(u)
 		return orig_force - np.dot(self.perturbation_jacobian(q),self.velocity(u))
+
+	def average_force(self, u0,u1):
+		orig_average_force = super(NonReversibleContactOscillator,self).average_force(u0,u1)
+		v0 = self.velocity(u0)[2]
+		v1 = self.velocity(u1)[2]
+		z0 = self.position(u0)[2]
+		z1 = self.position(u1)[2]
+		if np.allclose(z0,z1):
+			perturbation = self.ssec(z0)*(v0+v1)/2
+		else:
+			perturbation = (self.sder(z1)*v1 - self.sder(z0)*v0 - (self.s(z1)-self.s(z0))/(z1-z0)*(v1-v0))/(z1-z0)
+		return orig_average_force - np.array([0.,0.,perturbation])
 
 
 

@@ -84,6 +84,10 @@ class Test_NROsc(Test_McOsc):
 		self.s = SingleStepSolver(self.scheme, self.sys)
 		self.s.time = 10.
 
+class Test_NROsc_H(Test_NROsc):
+	def set_scheme(self):
+		self.scheme = NonHolonomicEnergy()
+
 
 # Vertical Rolling Disk
 
