@@ -223,17 +223,17 @@ Method to open the data store. Any access to the events must make use of this me
 			generator = self.generate(events)
 			t0 = events[-1,-1]
 			tf = t0 + time # final time
-			for i in xrange(self._max_iter): # todo: use enumerate
+			for iteration in xrange(self._max_iter): # todo: use enumerate
 				try:
 					event = next(generator)
 				except Exception as e:
 					if self.catch_runtime:
-						raise self.RuntimeError('%s raised after %d steps: %s' % (type(e).__name__,i,e.args), e, i)
+						raise self.RuntimeError('%s raised after %d steps: %s' % (type(e).__name__,iteration,e.args), e, iteration)
 					else:
 						raise
 				else:
 					if np.any(np.isnan(event)):
-						raise self.Unstable('Unstable after %d steps.' % i)
+						raise self.Unstable('Unstable after %d steps.' % iteration)
 
 					events.append(event.reshape(-1,1))
 					if event[-1] > tf - self.t_tol:
