@@ -41,7 +41,7 @@ class Harness_Osc(object):
 		h = self.sys.time_step(self.N)
 		self.scheme.h = h
 		time = nb_Poincare_iterations*self.N*h
-		self.s.initialize(u0=self.sys.initial_sin(z0), time=time)
+		self.s.initialize(u0=self.sys.initial_cos(z0), time=time)
 		self.s.run()
 		#self.s.plot(['radius'])
 		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=self.decimal)

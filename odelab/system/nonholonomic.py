@@ -246,7 +246,7 @@ Hessian of the generating function S.
 		"""
 		Initial condition assuming y(t) = √(2Hy)*cos(t)
 		"""
-		u0 = super(NonReversibleContactOscillator,self).initial_cos(z0,h0,hy,z0dot)
+		u0 = super(NonReversibleContactOscillator,self).initial_cos(z0,H0,Hy,z0dot)
 		u0[5] -= self.sder(u0[2])
 		return u0
 
