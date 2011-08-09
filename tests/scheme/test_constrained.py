@@ -34,6 +34,8 @@ class Harness_Osc(object):
 	z0s = np.linspace(-.9,.9,10)*np.sqrt(2)
 	N = 40
 
+	decimal = 1
+
 	def test_z0(self, i=5, nb_Poincare_iterations=10):
 		z0 = self.z0s[i]
 		h = self.sys.time_step(self.N)
@@ -42,7 +44,7 @@ class Harness_Osc(object):
 		self.s.initialize(u0=self.sys.initial_sin(z0), time=time)
 		self.s.run()
 		#self.s.plot(['radius'])
-		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=1)
+		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=self.decimal)
 		with self.s.open_store() as events:
 			energy = self.s.system.energy(events)
 
@@ -53,7 +55,6 @@ class Harness_Osc(object):
 		time = nb_Poincare_iterations*self.N*h
 		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
 		self.s.run()
-
 
 class Test_McOsc(Harness_Osc):
 	label = 'ML'
@@ -71,6 +72,7 @@ class Test_JayOsc3(Harness_Osc):
 		self.scheme = Spark(3)
 
 class Test_HOsc(Harness_Osc):
+	decimal = 6
 	label = 'H'
 	N=5 # bigger time step to make test faster
 	def set_scheme(self):
@@ -85,6 +87,7 @@ class Test_NROsc(Test_McOsc):
 		self.s.time = 10.
 
 class Test_NROsc_H(Test_NROsc):
+	decimal = 10
 	def set_scheme(self):
 		self.scheme = NonHolonomicEnergy()
 

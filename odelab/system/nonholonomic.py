@@ -169,7 +169,7 @@ Non Reversible contact oscillator. The new Hamiltonian is obtained from that of 
 
 .. math::
 
-	H(q,p) = \frac{1}{2}\bigl(\|q\|^2 + \|p+\grad S\|^2\bigr)
+	H(q,p) = \frac{1}{2}\bigl(\|q\|^2 + \|p + \grad S\|^2\bigr)
 
 The perturbation is $\grad S$, where :math:`S` depends only on :math:`q`.
 The new variables :math:`Q`, :math:`P` are obtained with the transformation:
@@ -177,7 +177,7 @@ The new variables :math:`Q`, :math:`P` are obtained with the transformation:
 .. math::
 
 	Q = q
-	P = p + \grad S
+	P = p - \grad S
 
 	"""
 	def s(self,z):
@@ -208,7 +208,7 @@ Hessian of the generating function S.
 		return hess
 
 	def velocity(self, u):
-		return super(NonReversibleContactOscillator, self).velocity(u) + self.perturbation(self.position(u))
+		return self.momentum(u) + self.perturbation(self.position(u))
 
 	def momentum(self,u):
 		return u[3:6]
@@ -220,16 +220,43 @@ Hessian of the generating function S.
 
 	def average_force(self, u0,u1):
 		orig_average_force = super(NonReversibleContactOscillator,self).average_force(u0,u1)
-		v0 = self.velocity(u0)[2]
-		v1 = self.velocity(u1)[2]
+		p0 = self.momentum(u0)[2]
+		p1 = self.momentum(u1)[2]
 		z0 = self.position(u0)[2]
 		z1 = self.position(u1)[2]
 		if np.allclose(z0,z1):
-			perturbation = self.ssec(z0)*(v0+v1)/2
+			perturbation = self.ssec(z0)*((p0+p1)/2 + self.sder(z0))
 		else:
-			perturbation = (self.sder(z1)*v1 - self.sder(z0)*v0 - (self.s(z1)-self.s(z0))/(z1-z0)*(v1-v0))/(z1-z0)
+			perturbation = (self.sder(z1)*(p1+self.sder(z1)/2) - self.sder(z0)*(p0+self.sder(z0)/2) - (self.s(z1)-self.s(z0))/(z1-z0)*(p1-p0) )/(z1-z0)
 		return orig_average_force - np.array([0.,0.,perturbation])
 
+	def average_velocity(self,u0,u1):
+		average_momentum = (self.momentum(u0) + self.momentum(u1))/2
+		z0 = self.position(u0)[2]
+		z1 = self.position(u1)[2]
+		if np.allclose(z0,z1):
+			perturbation = self.sder(z0)
+		else:
+			perturbation = (self.s(z1) - self.s(z0))/(z1-z0)
+		average_momentum[2] += perturbation
+		return 	average_momentum
+
+
+	def initial_cos(self, z0, H0=1.5, Hy=.5, z0dot=0.):
+		"""
+		Initial condition assuming y(t) = √(2Hy)*cos(t)
+		"""
+		u0 = super(NonReversibleContactOscillator,self).initial_cos(z0,h0,hy,z0dot)
+		u0[5] -= self.sder(u0[2])
+		return u0
+
+	def energy(self, u):
+		p = self.momentum(u).copy()
+		p[2] += self.sder(u[2])
+		q = self.position(u)
+		p2 = np.square(p)
+		q2 = np.square(q)
+		return (p2[0] + p2[1] + p2[2] + q2[0] + q2[1] + q2[2] + self.epsilon*q2[0]*q2[2])/2
 
 
 
