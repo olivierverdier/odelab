@@ -36,7 +36,7 @@ class Harness_Osc(object):
 
 	decimal = 1
 
-	def test_z0(self, i=5, nb_Poincare_iterations=10):
+	def test_z0(self, i=5, nb_Poincare_iterations=1):
 		z0 = self.z0s[i]
 		h = self.sys.time_step(self.N)
 		self.scheme.h = h
@@ -62,19 +62,16 @@ class Test_McOsc(Harness_Osc):
 		self.scheme = McLachlan()
 
 class Test_JayOsc2(Harness_Osc):
-	N=10 # bigger time step to make test faster
 	def set_scheme(self):
 		self.scheme = Spark(2)
 
 class Test_JayOsc3(Harness_Osc):
-	N=5 # bigger time step to make test faster
 	def set_scheme(self):
 		self.scheme = Spark(3)
 
 class Test_HOsc(Harness_Osc):
 	decimal = 6
 	label = 'H'
-	N=5 # bigger time step to make test faster
 	def set_scheme(self):
 		self.scheme = NonHolonomicEnergy()
 
@@ -194,7 +191,7 @@ class HarnessRobot(object):
 
 	def test_energy(self):
 		s = self.s
-		s.run(time=100)
+		s.run(time=10)
 		nt.assert_almost_equal(s.system.energy(s.final()), s.system.energy(s.initial()), places=4)
 
 class Test_Robot_ML(HarnessRobot):
@@ -303,7 +300,8 @@ class Harness_Chaplygin(object):
 		h_Jay = .1
 		time_Jay = 100
 		self.scheme.h = h_Jay
-		self.s.initialize(u0=u0_Jay,time=time_Jay,)
+		#self.s.initialize(u0=u0_Jay,time=time_Jay,)
+		self.s.initialize(u0=u0_Jay,time=1)
 		#print self.s.system.energy(s.final())
 		#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
 		#return self.s
