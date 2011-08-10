@@ -91,6 +91,14 @@ class Test_NROsc_H(Test_NROsc):
 	def set_scheme(self):
 		self.scheme = NonHolonomicEnergy()
 
+class Test_NROsc_SP2(Test_NROsc):
+	def set_scheme(self):
+		self.scheme = Spark(2)
+
+class Test_NROsc_SP3(Test_NROsc):
+	def set_scheme(self):
+		self.scheme = Spark(3)
+
 
 # Vertical Rolling Disk
 

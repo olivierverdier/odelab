@@ -197,16 +197,6 @@ Gradient of the generating function S = s(z).
 		pert[-1] = self.sder(z)
 		return pert
 
-	def perturbation_jacobian(self, q):
-		"""
-Hessian of the generating function S.
-		"""
-		z = q[2]
-		h = self.ssec(z)
-		hess = np.zeros([3,3])
-		hess [-1,-1] = h
-		return hess
-
 	def velocity(self, u):
 		return self.momentum(u) + self.perturbation(self.position(u))
 
@@ -216,7 +206,8 @@ Hessian of the generating function S.
 	def force(self,u):
 		orig_force = super(NonReversibleContactOscillator,self).force(u) # works because force depends only on position
 		q = self.position(u)
-		return orig_force - np.dot(self.perturbation_jacobian(q),self.velocity(u))
+		orig_force[2] -= self.ssec(q[2])*self.velocity(u)[2]
+		return orig_force
 
 	def average_force(self, u0,u1):
 		orig_average_force = super(NonReversibleContactOscillator,self).average_force(u0,u1)
