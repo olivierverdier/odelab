@@ -22,7 +22,7 @@ import warnings
 import time
 
 import progressbar as pb
-widgets = [pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(), ' ',  ' ', pb.ETA(),  ]
+widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(u'■'), ' ',  ' ', pb.ETA(),  ]
 progress_bar = pb.ProgressBar(widgets=widgets)
 del pb
 
@@ -231,6 +231,7 @@ Method to open the data store. Any access to the events must make use of this me
 			tf = t0 + time # final time
 
 			progress_bar.maxval = time
+			progress_bar.widgets[0] = self.name
 			progress_bar.start()
 
 			for iteration in xrange(self._max_iter): # todo: use enumerate
