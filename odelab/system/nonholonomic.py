@@ -91,7 +91,7 @@ perturbation of the contact oscillator.
 		return u[6:7]
 
 	def force(self, u):
-		q = self.position(u) # copy?
+		q = self.position(u)
 		return -q - self.epsilon*q[2]*q[0]*array([q[2],np.zeros_like(q[0]),q[0]])
 
 	def average_force(self, u0, u1):
@@ -171,13 +171,13 @@ Non Reversible contact oscillator. The new Hamiltonian is obtained from that of 
 
 	H(q,p) = \frac{1}{2}\bigl(\|q\|^2 + \|p + \grad S\|^2\bigr)
 
-The perturbation is $\grad S$, where :math:`S` depends only on :math:`q`.
+The perturbation is :math:`\grad S`, where :math:`S` depends only on :math:`q`.
 The new variables :math:`Q`, :math:`P` are obtained with the transformation:
 
 .. math::
 
-	Q = q
-	P = p - \grad S
+	Q &= q \\
+	P &= p - \grad S
 
 	"""
 	def s(self,z):
@@ -383,13 +383,13 @@ class SinePendulum(Pendulum):
 
 def average_x_sqsq_force(x0,x1,y0,y1):
 	"""
-	mean force on the x component for the potential -x^2y^2
+	mean force on the x component for the potential :math:`-x^2y^2`
 	"""
 	return (x0*y0**2 + x1*y1**2)/4 + (2*y0*y1*(x0+x1) + x0*y1**2 + x1*y0**2)/12
 
 def add_average_sqsq_component(f,q0,q1,i,j):
 	"""
-	mean force for a potential - q_i^2 q_j^2
+	mean force for a potential :math:`- q_i^2 q_j^2`
 	"""
 	f[i] += average_x_sqsq_force(q0[i],q1[i],q0[j],q1[j])
 	f[j] += average_x_sqsq_force(q0[j],q1[j],q0[i],q1[i])
