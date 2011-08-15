@@ -29,7 +29,7 @@ class Test_Experiment(object):
 		self.family = os.path.basename(self.path)
 		self.prefix = os.path.dirname(self.path)
 		self.file.close()
-		from odelab.scheme import ExplicitEuler
+		from odelab.scheme.classic import ExplicitEuler
 		s = Solver(system=System(f), scheme=ExplicitEuler(h=.1), path=self.path)
 		s.catch_runtime = False
 

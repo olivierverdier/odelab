@@ -4,6 +4,7 @@ from __future__ import division
 
 from odelab.scheme.rungekutta import *
 from odelab.scheme import *
+from odelab.scheme.classic import *
 from odelab.scheme.exponential import *
 
 from odelab.system import *
