@@ -58,7 +58,7 @@ Compute the difference between current and next state.
 		except fsolve.DidNotConverge:
 			logging.info("Switch nonlinear solver")
 			root = newton.run(guess)
-		du = self.reconstruct(root)
+		du = self.reconstruct(root,t,u0,h)
 		return t+h, du
 
 	def get_guess(self,t,u0,h):
@@ -67,7 +67,7 @@ Default guess for the Newton iterations, assuming that the residual has the same
 		"""
 		return np.zeros_like(u0)
 
-	def reconstruct(self, root):
+	def reconstruct(self, root,t,u0,h):
 		"""
 Default reconstruction function. It assumes that the root is already delta u.
 		"""

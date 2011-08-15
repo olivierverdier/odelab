@@ -195,7 +195,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 		guess = np.column_stack([np.zeros_like(u)]*s)
 		return guess
 
-	def reconstruct(self, full_result):
+	def reconstruct(self, full_result,t,u0,h):
 		# we keep the last Z value:
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
 		return  result
