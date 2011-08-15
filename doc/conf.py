@@ -177,9 +177,11 @@ htmlhelp_basename = 'odelabdoc'
 latex_elements = {
 'papersize': 'a4paper',
 'preamble': r"""
-\newcommand{\ee}{\mathrm{e}}
-\newcommand{\NN}{\mathbf{N}}
-\newcommand{\dd}{\mathrm{d}}
+\newcommand*{\ee}{\mathrm{e}}
+\newcommand*{\NN}{\mathbf{N}}
+\newcommand*{\dd}{\mathrm{d}}
+\newcommand*{\grad}{\operatorname{grad}}
+\newcommand*{\bracket}[2]{\left\langle #1,#2 \right\rangle}
 """,
 'inputenc': r'\usepackage[utf8x]{inputenc}',
 'utf8extra': r'\SetUnicodeOption{mathletters}',
