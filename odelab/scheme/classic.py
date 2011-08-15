@@ -6,35 +6,32 @@ from . import Scheme
 import numpy as np
 
 class ExplicitEuler (Scheme):
-	def step(self, t, u, h):
-		return t + h, u + self.h*self.system.f(t, u)
+	def delta(self, t, u, h):
+		return t + h, self.h*self.system.f(t, u)
 
 class ImplicitEuler (Scheme):
-	def step(self, t, u, h):
-		def residual(u1):
-			return u1 - u - h*self.system.f(t+h,u1)
-		N = self.root_solver(residual)
-		u1 = N.run(u+h*self.system.f(t,u))
-		return t + self.h, u1
+	def get_residual(self, t, u0, h):
+		def residual(du):
+			return du - h*self.system.f(t+h,u0+du)
+		return residual
 
-
-class RungeKutta4 (Scheme):
+class RungeKutta4(Scheme):
 	"""
 	Runge-Kutta of order 4.
 	"""
-	def step(self, t, u, h):
+	def delta(self, t, u, h):
 		f = self.system.f
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
 		Y3 = f(t + h/2., u + h*Y2/2.)
 		Y4 = f(t + h, u + h*Y3)
-		return t+h, u + h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
+		return t+h, h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
 
 class ExplicitTrapezoidal(Scheme):
-	def step(self,t,u,h):
+	def delta(self,t,u,h):
 		f = self.system.f
 		u1 = u + h*f(t,u)
-		res = u + h*.5*(f(t,u) + f(t+h,u1))
+		res = h*.5*(f(t,u) + f(t+h,u1))
 		return t+h, res
 
 class RungeKutta34 (Scheme):
@@ -51,7 +48,7 @@ class RungeKutta34 (Scheme):
 		else:
 			self.h = 1.
 
-	def step(self, t, u, h):
+	def delta(self, t, u, h):
 		f = self.system.f
 		Y1 = f(t, u)
 		Y2 = f(t + h/2., u + h*Y1/2.)
@@ -60,4 +57,4 @@ class RungeKutta34 (Scheme):
 		Y4 = f(t + h, u + h*Y3)
 		error = np.linalg.norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
 		self.adjust_stepsize(error)
-		return t+h, u + h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
+		return t+h, h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
