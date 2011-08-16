@@ -2,6 +2,7 @@
 from __future__ import division
 
 from odelab.system import *
+from odelab.system.nonholonomic.contactoscillator import ContactOscillator
 
 import numpy.testing as npt
 import nose.tools as nt

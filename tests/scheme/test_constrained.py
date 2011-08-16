@@ -6,6 +6,7 @@ from odelab.scheme import *
 from odelab.scheme.constrained import *
 
 from odelab.system import *
+from odelab.system.nonholonomic.contactoscillator import *
 from odelab.solver import *
 
 import numpy.testing as npt
