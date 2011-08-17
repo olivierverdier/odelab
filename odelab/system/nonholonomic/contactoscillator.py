@@ -66,13 +66,6 @@ perturbation of the contact oscillator.
 		"""
 		return (u[1]**2 + u[4]**2)/2
 
-	def radius_cos(self, u, Hy=.5):
-		q = self.position(u)
-		vel = self.velocity(u)
-		t = u[-1]
-		a = np.sqrt(2*Hy)
-		return (q[0]**2 + q[2]**2 + (1+(a*np.cos(t))**2)*vel[2]**2)
-
 	def radius(self, u):
 		"""
 		Conserved quantity equal to H - Hy.
