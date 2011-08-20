@@ -56,6 +56,20 @@ The energy is assumed to be
 		q2 = np.square(q)
 		return (v2[0] + v2[1] + v2[2])/2 + self.potential(u)
 
+	def initial(self,u00):
+		ur"""
+		Figure out a valid initial condition by replacing :math:`v_x` by :math:`-yv_z`, and the true value of :math:`λ`.
+		"""
+		u0 = u00.copy()
+		force = self.force(u0)
+		Fx = force[0]
+		Fz = force[2]
+		y = self.position(u0)[1]
+		vel = self.velocity(u0)
+		u0[3] = - y * u0[5]
+		u0[6] = -(Fx + y*Fz + vel[1]*vel[2])/(1+y**2)
+		return u0
+
 
 class ContactOscillator(ContactSystem):
 	"""

@@ -57,6 +57,17 @@ class Harness_Osc(object):
 		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
 		self.s.run()
 
+class Test_Initial(Harness_Osc):
+	def set_scheme(self):
+		self.scheme = McLachlan()
+
+	def test_initial(self):
+		u0 = self.sys.initial_cos(self.z0s[5])
+		u00 = ContactSystem.initial(self.sys, u0)
+		nt.assert_false(u0 is u00)
+		npt.assert_almost_equal(u0,u00)
+
+
 class Test_McOsc(Harness_Osc):
 	label = 'ML'
 	def set_scheme(self):
