@@ -4,7 +4,60 @@ from __future__ import division
 
 from . import NonHolonomic, np
 
-class ContactOscillator(NonHolonomic):
+
+class ContactSystem(NonHolonomic):
+	"""
+General class of 3D mechanical systems with the constraint codistribution
+
+.. math::
+	\dd x + y \dd z
+
+The energy is assumed to be
+
+.. math::
+	H = v_x^2 + v_y^2 + v_z^2 + U(x,y,z)
+	"""
+	size = 7 # 3+3+1
+	def label(self, component):
+		return [u'x',u'y',u'z',u'ẋ',u'ẏ',u'ż',u'λ'][component]
+
+	def position(self,u):
+		return u[:3]
+
+	def momentum(self,u):
+		return u[3:6]
+
+	def velocity(self,u):
+		return self.momentum(u)
+
+	def lag(self,u):
+		return u[6:7]
+
+	def codistribution(self, u):
+		y = self.position(u)[1]
+		return np.array([[np.ones_like(y), np.zeros_like(y), y]])
+
+	def potential(self,u):
+		"""
+		Potential energy
+		"""
+		q = self.position(u)
+		q2 = np.square(q)
+		return (q2[0] + q2[1] + q2[2])/2
+
+	def force(self, u):
+		q = self.position(u)
+		return -q
+
+	def energy(self, u):
+		vel = self.velocity(u)
+		q = self.position(u)
+		v2 = np.square(vel)
+		q2 = np.square(q)
+		return (v2[0] + v2[1] + v2[2])/2 + self.potential(u)
+
+
+class ContactOscillator(ContactSystem):
 	"""
 Example 5.2 in [MP]_.
 
@@ -15,26 +68,11 @@ perturbation of the contact oscillator.
 .. [MP] R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16**, No. 4, 283-328., (2006). :doi:`10.1007/s00332-005-0698-1`
 	"""
 
-	size = 7 # 3+3+1
-
 	def __init__(self, epsilon=0.):
 		self.epsilon = epsilon
 
-	def label(self, component):
-		return [u'x',u'y',u'z',u'ẋ',u'ẏ',u'ż',u'λ'][component]
-
-	def position(self, u):
-		return u[:3]
-
-	def velocity(self, u):
-		return u[3:6]
-
-
 	def state(self,u):
 		return u[:6]
-
-	def lag(self, u):
-		return u[6:7]
 
 	def force(self, u):
 		q = self.position(u)
@@ -48,10 +86,6 @@ perturbation of the contact oscillator.
 		px = (x0*z0**2 + x1*z1**2)/4 + (2*z0*z1*(x0+x1) + x0*z1**2 + x1*z0**2)/12
 		pz = (z0*x0**2 + z1*x1**2)/4 + (2*x0*x1*(z0+z1) + z0*x1**2 + z1*x0**2)/12
 		return -qm - self.epsilon*np.array([px, np.zeros_like(q0[0]), pz])
-
-	def codistribution(self, u):
-		q = self.position(u)
-		return np.array([[np.ones_like(q[1]), np.zeros_like(q[1]), q[1]]])
 
 	def energy(self, u):
 		vel = self.velocity(u)
