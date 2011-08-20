@@ -359,3 +359,5 @@ class Robot(NonHolonomic):
 		return .5*np.sum(self.momentum(u) * self.velocity(u), axis=0) + 10*np.sin(q3)
 
 
+# for compatibility:
+from contactoscillator import *
