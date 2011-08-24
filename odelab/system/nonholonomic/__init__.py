@@ -146,6 +146,16 @@ class VerticalRollingDisk(NonHolonomic):
 					-m*ohm_phi*R*ohm_theta*np.sin(phi),
 					m*ohm_phi*R*ohm_theta*np.cos(phi),])
 
+	def initial(self, u00):
+		"""
+		Make sure that the constraints are fulfilled at the initial conditions.
+		"""
+		u0 = np.copy(u00)
+		phi = u0[2]
+		vtheta = u0[7]
+		u0[4] = np.cos(phi)*vtheta
+		u0[5] = np.sin(phi)*vtheta
+		return u0
 
 class Pendulum(NonHolonomic):
 	def __init__(self, constraint=None, codistribution=None):

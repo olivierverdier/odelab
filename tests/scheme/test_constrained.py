@@ -119,7 +119,7 @@ class Harness_VerticalRollingDisk(object):
 		ohm_phi = 2.
 		ohm_theta = 1.
 		phi_0 = 0
-		self.u0 = array([0,0,phi_0,0.,0,0,ohm_phi,ohm_theta,0,0])
+		self.u0 = self.sys.initial(array([0,0,phi_0,0.,0,0,ohm_phi,ohm_theta,0,0]))
 		R = self.sys.radius
 		m = self.sys.mass
 		# consistent initial velocities
