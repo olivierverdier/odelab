@@ -7,9 +7,9 @@ from odelab.scheme import *
 from odelab.scheme.classic import *
 from odelab.scheme.exponential import *
 
-from odelab.system import *
 from odelab.system.classic import *
-from odelab.solver import *
+from odelab.system.exponential import *
+from odelab import *
 import odelab.newton as rt
 
 import tempfile
@@ -39,14 +39,14 @@ def time_f(t,u):
 	return t
 
 def test_solver_autosave():
-	solver = SingleStepSolver(ExplicitEuler(h=.1), System(f))
+	solver = Solver(ExplicitEuler(h=.1), System(f))
 	solver.initialize(u0=1.)
 	solver.run()
 	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1.0')
 
 def test_duration():
 	"""Duration are added from run to run"""
-	solver = SingleStepSolver(ExplicitEuler(h=.1), System(f))
+	solver = Solver(ExplicitEuler(h=.1), System(f))
 	solver.initialize(u0=1.,time=1.,)
 	solver.run()
 	d1 = solver.get_attrs('duration')
@@ -131,25 +131,25 @@ class Harness_Solver(Harness):
 
 class Test_EEuler(Harness_Solver):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(ExplicitEuler(h=.1), System(f))
+		self.solver = Solver(ExplicitEuler(h=.1), System(f))
 
 class Test_ETrapezoidal(Harness_Solver):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(ExplicitTrapezoidal(h=.1), System(f))
+		self.solver = Solver(ExplicitTrapezoidal(h=.1), System(f))
 
 class Test_RK4(Harness_Solver):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(RungeKutta4(h=.1), System(f))
+		self.solver = Solver(RungeKutta4(h=.1), System(f))
 
 class Test_RK34(Harness_Solver):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(RungeKutta34(h=.1), System(f))
+		self.solver = Solver(RungeKutta34(h=.1), System(f))
 
 class Test_AB(Harness_Solver):
 	def setup_solver(self):
 		multi_scheme = AdamsBashforth(2)
 		multi_scheme.h = .1
-		self.solver = SingleStepSolver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
+		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
 class Test_RK34Vdp(object):
 	def setUp(self):
@@ -171,21 +171,21 @@ class Harness_Solver_NoComplex(Harness_Solver):
 
 class Test_ode15s(Harness_Solver_NoComplex):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(ode15s(h=.1), System(f))
+		self.solver = Solver(ode15s(h=.1), System(f))
 
 class Test_LawsonEuler(Harness_Solver_NoComplex):
 	def set_system(self, f):
 		self.solver.system = NoLinear(f,self.dim)
 	def setup_solver(self):
-		self.solver = SingleStepSolver(LawsonEuler(h=.1), NoLinear(f,self.dim))
+		self.solver = Solver(LawsonEuler(h=.1), NoLinear(f,self.dim))
 
 class Test_IEuler(Harness_Solver):
 	def setup_solver(self):
-		self.solver = SingleStepSolver(ImplicitEuler(h=.1), System(f))
+		self.solver = Solver(ImplicitEuler(h=.1), System(f))
 
 @nt.raises(Solver.Unstable)
 def test_unstable():
-	s = SingleStepSolver(LawsonEuler(h=10.), Linear(np.array([[1.e2]])))
+	s = Solver(LawsonEuler(h=10.), Linear(np.array([[1.e2]])))
 	s.initialize(u0 = 1., time = 100,)
 	s.run()
 
@@ -221,17 +221,17 @@ class Harness_Solver_Order(Harness):
 
 class Test_ExplicitEuler(Harness_Solver_Order):
 	def setUp(self):
-		self.solver = SingleStepSolver(ExplicitEuler(h=.1), System(make_lin(self.a)))
+		self.solver = Solver(ExplicitEuler(h=.1), System(make_lin(self.a)))
 		self.order = -1.
 
 class Test_ImplicitEuler(Harness_Solver_Order):
 	def setUp(self):
-		self.solver = SingleStepSolver(ImplicitEuler(h=.1), System(make_lin(self.a)))
+		self.solver = Solver(ImplicitEuler(h=.1), System(make_lin(self.a)))
 		self.order = -1.
 
 class Test_RungeKutta4(Harness_Solver_Order):
 	def setUp(self):
-		self.solver = SingleStepSolver(RungeKutta4(h=.1), System(make_lin(self.a)))
+		self.solver = Solver(RungeKutta4(h=.1), System(make_lin(self.a)))
 		self.solver.err_kmin = 1
 		self.solver.err_kmax = 2.5
 		self.order = -4.
@@ -259,7 +259,7 @@ class Test_FinalTimeExceptions(object):
 	def setUp(self):
 		self.sys = LimitedSys(self.limit)
 		self.scheme = ExplicitEuler(h=.1)
-		self.s = SingleStepSolver(self.scheme, self.sys)
+		self.s = Solver(self.scheme, self.sys)
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0, time=10, )
 
@@ -294,7 +294,7 @@ def faulty_function(t,u):
 
 class Test_Exceptions(object):
 	def setUp(self):
-		self.s = SingleStepSolver(ExplicitEuler(h=.1), Linear(np.array([[1]])))
+		self.s = Solver(ExplicitEuler(h=.1), Linear(np.array([[1]])))
 	@nt.raises(Solver.NotInitialized)
 	def test_no_u0(self):
 		self.s.initialize()
@@ -303,12 +303,12 @@ class Test_Exceptions(object):
 		self.s.run()
 	@nt.raises(Solver.Unstable)
 	def test_unstable(self):
-		self.s = SingleStepSolver(ExplicitEuler(h=.1), Linear(np.array([[float('inf')]])))
+		self.s = Solver(ExplicitEuler(h=.1), Linear(np.array([[float('inf')]])))
 		self.s.initialize(u0=np.array([0]))
 		self.s.run()
 	@nt.raises(Solver.RuntimeError)
 	def test_runtime_exception(self):
-		self.s = SingleStepSolver(ExplicitEuler(h=.1), System(faulty_function))
+		self.s = Solver(ExplicitEuler(h=.1), System(faulty_function))
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
 		self.s.run()
@@ -323,7 +323,7 @@ def minus_x(t, x):
 class Test_Simple(object):
 	def setUp(self):
 		sys = TotSys(minus_x)
-		self.s = SingleStepSolver(ExplicitEuler(h=.1), sys)
+		self.s = Solver(ExplicitEuler(h=.1), sys)
 
 	def test_time(self):
 		sol = self.s
