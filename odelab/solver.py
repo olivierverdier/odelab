@@ -363,6 +363,7 @@ Create a solver object from a path to an hdf5 file.
 		if not isinstance(solver, Solver): # pickling has failed
 			solver = Solver(scheme=None, system=None, path=path)
 			solver.name = name
+		solver.path = path
 	return solver
 
 def load_solver_v2(path, name):

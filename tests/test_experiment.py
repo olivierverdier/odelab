@@ -78,4 +78,10 @@ class Test_Experiment(object):
 		s = load_solver(exp_path, 'main')
 		len(s) # ensure we can load the events
 
+	def test_moved(self):
+		base = os.path.dirname(__file__)
+		exp_path = os.path.join(base, 'fixtures', 'moved.h5')
+		s = load_solver(exp_path, 'main')
+		len(s)
+
 
