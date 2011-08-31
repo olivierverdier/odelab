@@ -71,5 +71,11 @@ class Test_Experiment(object):
 	def test_load_run(self):
 		s = load_solver(self.path, self.name)
 		s.run()
+	
+	def test_not_loadable(self):
+		base = os.path.dirname(__file__)
+		exp_path = os.path.join(base, 'fixtures', 'not_loadable.h5')
+		s = load_solver(exp_path, 'main')
+		len(s) # ensure we can load the events
 
 

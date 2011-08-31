@@ -360,6 +360,9 @@ Create a solver object from a path to an hdf5 file.
 			solver = events.attrs['solver']
 		except KeyError:
 			solver = load_solver_v2(path, name)
+		if not isinstance(solver, Solver): # pickling has failed
+			solver = Solver(scheme=None, system=None, path=path)
+			solver.name = name
 	return solver
 
 def load_solver_v2(path, name):
