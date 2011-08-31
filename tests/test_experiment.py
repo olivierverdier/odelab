@@ -30,22 +30,25 @@ class Test_Experiment(object):
 		self.prefix = os.path.dirname(self.path)
 		self.file.close()
 		from odelab.scheme.classic import ExplicitEuler
-		s = Solver(system=System(f), scheme=ExplicitEuler(h=.1), path=self.path)
-		s.catch_runtime = False
 
-		params = {
+		self.params = params = {
 			'family': self.family,
 			'system': System,
 			'system_params': {'f': f},
 			'solver': Solver,
 			'scheme': ExplicitEuler,
-			'scheme_params': {},
+			'scheme_params': {
+				'h': .1,
+				},
 			'initialize': {
 				'u0' : np.array([1.]),
 				'time': 1.,
 				'name': self.name,
 				},
 			}
+		scheme = ExplicitEuler(**params['scheme_params'])
+		s = Solver(system=System(f), scheme=scheme, path=self.path)
+		s.catch_runtime = False
 		s.initialize(**params['initialize'])
 		s.run()
 		#exp = Experiment(params, store_prefix=self.prefix)
@@ -60,6 +63,7 @@ class Test_Experiment(object):
 		nt.assert_equal(len(s), 11)
 		nt.assert_equal(s.name, self.name)
 		nt.assert_equal(s.path, self.path)
+		nt.assert_equal(s.scheme.h, self.params['scheme_params']['h'])
 		with s.open_store() as events:
 			nt.assert_equal(len(events), 11)
 			npt.assert_array_almost_equal(events[-1], np.linspace(0,1,11))
