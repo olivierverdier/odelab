@@ -58,6 +58,8 @@ class Test_Experiment(object):
 		nt.assert_true(isinstance(s, Solver))
 		nt.assert_equal(s.scheme.__class__.__name__, 'ExplicitEuler')
 		nt.assert_equal(len(s), 11)
+		nt.assert_equal(s.name, self.name)
+		nt.assert_equal(s.path, self.path)
 		with s.open_store() as events:
 			nt.assert_equal(len(events), 11)
 			npt.assert_array_almost_equal(events[-1], np.linspace(0,1,11))

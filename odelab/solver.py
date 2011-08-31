@@ -120,6 +120,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 				'solver_class': type(self),
 				}
 			events.attrs['solver_info'] = solver_info
+			events.attrs['solver'] = self
 
 			# duration counter:
 			events.attrs['duration'] = 0.
@@ -350,6 +351,18 @@ SingleStepSolver = Solver
 
 
 def load_solver(path, name):
+	"""
+Create a solver object from a path to an hdf5 file.
+	"""
+	with tables.openFile(path, 'r') as f:
+		events = f.getNode('/'+name)
+		try:
+			solver = events.attrs['solver']
+		except KeyError:
+			solver = load_solver_v2(path, name)
+	return solver
+
+def load_solver_v2(path, name):
 	"""
 Create a solver object from a path to an hdf5 file.
 	"""
