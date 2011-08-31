@@ -373,9 +373,12 @@ Create a solver object from a path to an hdf5 file.
 	with tables.openFile(path, 'r') as f:
 		events = f.getNode('/'+name)
 		info = events.attrs['solver_info']
-		system = info['system']
-		scheme = info['scheme']
-		solver_class = info['solver_class']
-	solver = solver_class(system=system, scheme=scheme, path=path)
-	solver.name = name
+		if isinstance(info, dict):
+			system = info['system']
+			scheme = info['scheme']
+			solver_class = info['solver_class']
+			solver = solver_class(system=system, scheme=scheme, path=path)
+		else:
+			solver = Solver(scheme=None, system=None, path=path)
+		solver.name = name
 	return solver

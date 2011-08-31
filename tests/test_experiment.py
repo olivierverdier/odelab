@@ -83,5 +83,11 @@ class Test_Experiment(object):
 		exp_path = os.path.join(base, 'fixtures', 'moved.h5')
 		s = load_solver(exp_path, 'main')
 		len(s)
+	
+	def test_loadv2(self):
+		base = os.path.dirname(__file__)
+		exp_path = os.path.join(base,'fixtures', 'format_v2.h5')
+		s = load_solver(exp_path, 'tmpexp')
+		len(s)
 
 
