@@ -112,12 +112,12 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 					}
 			events.attrs['init_params'] = info
 
-			# save system and scheme information; temporary solution only
+			# save system and scheme information in order to recover if unpickling fails
 			solver_info = {
-				'system': self.system,
-				'scheme': self.scheme,
-				'init_scheme': self.init_scheme,
-				'solver_class': type(self),
+				'system_class': repr(type(self.system)),
+				'scheme_class': repr(type(self.scheme)),
+				'init_scheme_class': repr(type(self.init_scheme)),
+				'solver_class': repr(type(self)),
 				}
 			events.attrs['solver_info'] = solver_info
 			events.attrs['solver'] = self

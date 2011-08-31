@@ -77,6 +77,10 @@ class Test_Experiment(object):
 		exp_path = os.path.join(base, 'fixtures', 'not_loadable.h5')
 		s = load_solver(exp_path, 'main')
 		len(s) # ensure we can load the events
+		# check that solver_info is set:
+		info = s.get_attrs('solver_info')
+		nt.assert_regexp_matches(info['system_class'], 'NoSystem')
+		
 
 	def test_moved(self):
 		base = os.path.dirname(__file__)
