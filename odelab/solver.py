@@ -278,6 +278,23 @@ Method to open the data store. Any access to the events must make use of this me
 			event = self.system.postprocess(event)
 		return event
 
+	def get_events(self, t0=None, time=None, sampling_rate=1.):
+		"""
+		Return the events from time t0, during time `time`, sampled.
+		"""
+		ts = self.get_times()
+		if t0 is None:
+			t0 = ts[0]
+		if time is None:
+			time = ts[-1] - ts[0]
+		indices = np.where((ts >= t0) & (ts < t0 + time))[0]
+		size = len(indices)
+		initial_index = indices[0]
+		final_index = indices[-1]+1
+		stride = np.ceil(1/sampling_rate)
+		with self.open_store() as events:
+			return events[:,slice(initial_index, final_index, stride)]
+
 	def get_times(self):
 		with self.open_store() as events:
 			times = events[-1]

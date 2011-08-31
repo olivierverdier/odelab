@@ -54,6 +54,23 @@ def test_duration():
 	d2 = solver.get_attrs('duration')
 	nt.assert_greater(d2, d1)
 
+class Test_Access(object):
+	"""
+	Test the Solver.get_events method.
+	"""
+	def setUp(self):
+		self.s = Solver(ExplicitEuler(.1), System(partial(const_f, 1.)))
+		self.time = 100
+		self.s.initialize(u0=np.array([0.]),time=self.time)
+		self.s.run()
+
+	def test_access(self):
+		sampling_rate = .5
+		evts = self.s.get_events(t0=0, time=50.05, sampling_rate=sampling_rate)
+		nt.assert_almost_equal(len(evts.T), len(self.s)*sampling_rate/2, -1) # approx 1/4 of total nb of events
+		## nt.assert_equal(len(evts.T), 250)
+		npt.assert_array_almost_equal(evts[:,-1], np.array([50.,50.]))
+
 
 from functools import partial
 const_r = partial(const_f, 1.)
