@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
-from __future__ import division
+from __future__ import division, unicode_literals
+
 
 
 from odelab.scheme import *
@@ -16,7 +17,6 @@ import os
 import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
-from nose.plugins.skip import SkipTest
 
 import pylab as pl
 pl.ioff()

@@ -58,7 +58,7 @@ class Plotter(object):
 		time_label = 'time'
 
 		for component_i, component in enumerate(components):
-			if isinstance(component, str):
+			if isinstance(component, basestring):
 				label = component
 				function = getattr(self.system, component)
 				data = function(events)
