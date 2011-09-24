@@ -25,7 +25,9 @@ sys.path.append(os.path.abspath('..'))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.jsmath', 'sphinx.ext.extlinks']
 
 extlinks = {'doi': ('http://dx.doi.org/%s', 'doi:'),
-'gbook': ('http://books.google.com/books?id=%s', 'gbook:')}
+'gbook': ('http://books.google.com/books?id=%s', 'gbook:'),
+'isbn': ('http://books.google.com/books?isbn=%s', 'isbn:'),
+}
 
 jsmath_path = 'asdf'
 

@@ -45,7 +45,7 @@ Usage is as follows::
 The evaluation at a matrix value is computed using the Paterson and Stockmeyer method (see [Golub]_ § 11.2.4).
 The polynomial is split into chunks of size :data:`s`.
 
-.. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed. :gbook:`mlOa7wPX6OYC`
+.. [Golub] Golub, G.H.  and van Loan, C.F., *Matrix Computations*, 3rd ed. :isbn:`9780801854149`
 	"""
 	def __init__(self, coeffs):
 		self.coeffs = coeffs
