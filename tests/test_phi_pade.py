@@ -14,6 +14,17 @@ def test_poly_exps():
 	nt.assert_array_almost_equal(X[1],x)
 	nt.assert_array_almost_equal(X[0], np.identity(2))
 
+def test_rational_fraction():
+	N = Polynomial([1.,2.])
+	D = Polynomial([3.,4])
+	R = RationalFraction(N.coeffs, D.coeffs)
+	X = np.random.random_sample([2,2])
+	Z = Polynomial.exponents(X)
+	nt.assert_array_almost_equal(R(Z), slin.solve(D(Z),N(Z)))
+	x = 3.
+	z = Polynomial.exponents(x)
+	nt.assert_array_almost_equal(R(z), N(z)/D(z))
+
 @nt.raises(ValueError)
 def test_poly_exception():
 	p = Polynomial([1.,2])
@@ -130,7 +141,9 @@ def test_phi_pade(k=4,d=10):
 		phis = phi(z)
 		for l in range(1,k+1):
 			print l
-			N,D = Rs[l]
+			R = Rs[l]
+			N = R.numerator
+			D = R.denominator
 			expected = phi_l(z,l)
 			Nz = simple_mul(N.coeffs, z)
 			Dz = simple_mul(D.coeffs, z)

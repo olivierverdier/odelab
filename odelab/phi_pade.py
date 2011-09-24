@@ -25,14 +25,6 @@ import math
 import sys
 sys.py3kwarning = True
 
-def solve(A,b):
-	"""
-	Silly method to take care of the scalar case.
-	"""
-	if np.isscalar(A):
-		return b/A
-	return lin.solve(A,b)
-
 class Polynomial(object):
 	"""
 Polynomial class used in the Padé approximation.
@@ -51,7 +43,7 @@ The polynomial is split into chunks of size :data:`s`.
 		self.coeffs = coeffs
 
 	@classmethod
-	def exponents(self, z, s):
+	def exponents(self, z, s=1):
 		"""
 Compute the first s+1 exponents of z.
 
@@ -93,6 +85,24 @@ Evaluate the polynomial on a matrix, using matrix multiplications (:func:`dot`).
 			B = sum(b*Z[j] for j,b in enumerate(p[s*k:s*(k+1)]))
 			P = np.dot(Z[s],P) + B
 		return P
+
+class RationalFraction(object):
+	"""
+Super simple Rational Function class, used to compute N(Z)/D(Z) for polynomials N and D.
+	"""
+	def __init__(self, numerator, denominator):
+		"""
+Initialize the object with numerator and denominator coefficients.
+		"""
+		self.numerator = Polynomial(numerator)
+		self.denominator = Polynomial(denominator)
+
+	def __call__(self, Z):
+		try:
+			return lin.solve(self.denominator(Z), self.numerator(Z))
+		except lin.LinAlgError:
+			return self.numerator(Z)/self.denominator(Z)
+
 
 def ninf(M):
 	if np.isscalar(M):
@@ -164,7 +174,7 @@ The numerator :math:`N` is now computed by:
 		C[1:] = 1./np.cumprod(np.arange(d+k+1)+1)
 		self.C = C # save for future use; C[j] == 1/j!
 		for m,Dr in enumerate(D):
-			yield Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]), Polynomial(Dr)
+			yield RationalFraction(np.convolve(Dr, C[m:m+d+1])[:d+1], Dr)
 
 	@classmethod
 	def scaling(self, z, threshold=0):
@@ -180,7 +190,7 @@ The numerator :math:`N` is now computed by:
 			s = int(math.floor(math.sqrt(self.d)))
 		Rs = self.pade
 		Z = Polynomial.exponents(z,s)
-		self.phi = [solve(PD(Z), PN(Z)) for PN,PD in Rs]
+		self.phi = [R(Z) for R in Rs]
 
 
 	def __call__(self, z):
