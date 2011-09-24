@@ -124,15 +124,16 @@ def test_phi_pade(k=4,d=10):
 	Test of the Padé approximation of :math:`φ_l` on matrices.
 	"""
 	phi = Phi(k,d)
-	N,D = phi.pade
+	Rs = phi.pade
 	for z in  [.1*np.array([[1.,2.],[3.,1.]]),.1j*np.array([[1.j,2.],[3.,1.]]), np.array([[.01]]), np.array([[.1]])]:
 		print z
 		phis = phi(z)
 		for l in range(1,k+1):
 			print l
+			N,D = Rs[l]
 			expected = phi_l(z,l)
-			Nz = simple_mul(N[l].coeffs, z)
-			Dz = simple_mul(D[l].coeffs, z)
+			Nz = simple_mul(N.coeffs, z)
+			Dz = simple_mul(D.coeffs, z)
 			computed = lin.solve(Dz,Nz)
 			yield compare_phi_pade, computed, expected, phis[l]
 

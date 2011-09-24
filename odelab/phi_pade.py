@@ -119,7 +119,7 @@ The variable ``result`` is a list of all the values of :math:`φ_{k}(M)` for :ma
 	def __init__(self, k, d=6):
 		self.k = k
 		self.d = d
-		self.pade = self.compute_Pade()
+		self.pade = list(self.compute_Pade())
 
 	def compute_Pade(self):
 		r"""
@@ -163,8 +163,8 @@ The numerator :math:`N` is now computed by:
 		C[0] = 1.
 		C[1:] = 1./np.cumprod(np.arange(d+k+1)+1)
 		self.C = C # save for future use; C[j] == 1/j!
-		N = [Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]) for m,Dr in enumerate(D)]
-		return N, [Polynomial(Dl) for Dl in D]
+		for m,Dr in enumerate(D):
+			yield Polynomial(np.convolve(Dr, C[m:m+d+1])[:d+1]), Polynomial(Dr)
 
 	@classmethod
 	def scaling(self, z, threshold=0):
@@ -178,9 +178,9 @@ The numerator :math:`N` is now computed by:
 		"""
 		if s is None:
 			s = int(math.floor(math.sqrt(self.d)))
-		N,D = self.pade
+		Rs = self.pade
 		Z = Polynomial.exponents(z,s)
-		self.phi = [solve(PD(Z), PN(Z)) for PN,PD in zip(N,D)]
+		self.phi = [solve(PD(Z), PN(Z)) for PN,PD in Rs]
 
 
 	def __call__(self, z):
