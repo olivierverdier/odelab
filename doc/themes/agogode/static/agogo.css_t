@@ -80,6 +80,7 @@ h1, h2, h3, h4 {
 
 h1 {
   color: {{ theme_headercolor1 }};
+  font-weight: bold;
 }
 
 h2 {
