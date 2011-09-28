@@ -202,9 +202,9 @@ div.document .section:first-child {
 
 div.document div.highlight {
   padding: 3px;
-  background-color: #eeeeec;
-  border-top: 2px solid #dddddd;
-  border-bottom: 2px solid #dddddd;
+  background-color: #fdfdd3;
+  border-top: 2px solid #fd9366;
+  border-bottom: 2px solid #fd9366;
   margin-top: .8em;
   margin-bottom: .8em;
 }
