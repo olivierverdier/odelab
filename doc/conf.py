@@ -22,14 +22,13 @@ sys.path.append(os.path.abspath('..'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.jsmath', 'sphinx.ext.extlinks']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax', 'sphinx.ext.extlinks']
 
 extlinks = {'doi': ('http://dx.doi.org/%s', 'doi:'),
 'gbook': ('http://books.google.com/books?id=%s', 'gbook:'),
 'isbn': ('http://books.google.com/books?isbn=%s', 'isbn:'),
 }
 
-jsmath_path = 'asdf'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
