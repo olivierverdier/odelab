@@ -50,6 +50,8 @@ div.bodywrapper a, div.footer a {
 }
 
 .left {
+	font-family: {{ theme_headerfont }};
+  font-weight: normal;
   float: left;
 }
 
@@ -124,13 +126,13 @@ dt:target, .highlighted {
 /* Header */
 
 div.header {
+  font-family: "Abel", sans-serif;
+  font-weight: normal;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
 div.header .headertitle {
-  font-family: {{ theme_headerfont }};
-  font-weight: normal;
   font-size: 180%;
   letter-spacing: .08em;
   margin-bottom: .8em;
