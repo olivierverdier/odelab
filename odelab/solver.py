@@ -21,10 +21,6 @@ import itertools
 import warnings
 import time
 
-import progressbar as pb
-widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(u'■'), ' ',  ' ', pb.ETA(),  ]
-progress_bar = pb.ProgressBar(widgets=widgets)
-del pb
 
 
 from odelab.plotter import Plotter
@@ -231,9 +227,10 @@ Method to open the data store. Any access to the events must make use of this me
 			t0 = events[-1,-1]
 			tf = t0 + time # final time
 
-			progress_bar.maxval = time
-			progress_bar.widgets[0] = self.name
-			progress_bar.start()
+			if self.with_progressbar:
+				progress_bar.maxval = time
+				progress_bar.widgets[0] = self.name
+				progress_bar.start()
 
 			for iteration in xrange(self._max_iter): # todo: use enumerate
 				try:
@@ -249,7 +246,8 @@ Method to open the data store. Any access to the events must make use of this me
 
 					events.append(event.reshape(-1,1))
 					t = event[-1]
-					progress_bar.update(t-t0)
+					if self.with_progressbar:
+						progress_bar.update(t-t0)
 					if t > tf - self.t_tol:
 						break
 			else:
@@ -399,3 +397,15 @@ Create a solver object from a path to an hdf5 file.
 			solver = Solver(scheme=None, system=None, path=path)
 		solver.name = name
 	return solver
+
+# try to import progressbar and use it if it is available
+try:
+	import progressbar as pb
+	widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(u'■'), ' ',  ' ', pb.ETA(),  ]
+	progress_bar = pb.ProgressBar(widgets=widgets)
+	del pb
+	with_progressbar = True
+except ImportError:
+	with_progressbar = False
+
+Solver.with_progressbar = with_progressbar
