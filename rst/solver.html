@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Solvers &mdash; odelab 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="odelab 0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Systems" href="system.html" />
+    <link rel="prev" title="Getting Started" href="intro.html" /> 
+  </head>
+  <body>
+<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela' rel='stylesheet' type='text/css'>
+<div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">odelab 0.0.1 documentation</a></div>
+        <div class="rel">
+          <a href="intro.html" title="Getting Started"
+             accesskey="P">previous</a> |
+          <a href="system.html" title="Systems"
+             accesskey="N">next</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+<a href="http://github.com/olivierverdier/odelab"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="solvers">
+<h1>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt> class takes care of</p>
+<ul class="simple">
+<li>initializing the problem</li>
+<li>running the simulation</li>
+<li>storing the results efficiently</li>
+</ul>
+<div class="section" id="using-the-solver-class">
+<h2>Using the <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt> class<a class="headerlink" href="#using-the-solver-class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="initialize-and-run">
+<h3>Initialize and Run<a class="headerlink" href="#initialize-and-run" title="Permalink to this headline">¶</a></h3>
+<p>You would generally start by picking a system <tt class="docutils literal"><span class="pre">system</span></tt> and a numerical scheme <tt class="docutils literal"><span class="pre">scheme</span></tt> and initialize the solver object as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">scheme</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The most important methods are then <tt class="xref py py-meth docutils literal"><span class="pre">initialize()</span></tt> and <tt class="xref py py-meth docutils literal"><span class="pre">run()</span></tt>.</p>
+<p>The initialization method is run as follows, for a given initial data <tt class="docutils literal"><span class="pre">u0</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">u0</span><span class="o">=</span><span class="n">u0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The next method to use is <tt class="xref py py-meth docutils literal"><span class="pre">run()</span></tt>, which actually runs the simulation.
+The required parameter is <tt class="docutils literal"><span class="pre">time</span></tt> which indicates the time span of the simulation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="storage">
+<h2>Storage<a class="headerlink" href="#storage" title="Permalink to this headline">¶</a></h2>
+<p>One of the most valuable features of <tt class="docutils literal"><span class="pre">odelab</span></tt> is the data storage.
+In many cases, either because the simulation is run for a very long time, or because the dimension of the phase space is very large, the produced data may be significant.
+In those cases, you do not want the whole data to be stored in memory, especially since the past data is hardly of any interest to the numerical scheme (which only needs a few steps back to move forward).</p>
+<div class="section" id="convenience-methods">
+<h3>Convenience Methods<a class="headerlink" href="#convenience-methods" title="Permalink to this headline">¶</a></h3>
+<p>The data may easily be accessed using some convenience methods.</p>
+<p>The methods <a class="reference internal" href="#odelab.solver.Solver.initial" title="odelab.solver.Solver.initial"><tt class="xref py py-meth docutils literal"><span class="pre">initial()</span></tt></a> and <a class="reference internal" href="#odelab.solver.Solver.final" title="odelab.solver.Solver.final"><tt class="xref py py-meth docutils literal"><span class="pre">final()</span></tt></a> give access to the initial and final state of the system.</p>
+<p>The method <a class="reference internal" href="#odelab.solver.Solver.get_events" title="odelab.solver.Solver.get_events"><tt class="xref py py-meth docutils literal"><span class="pre">get_events()</span></tt></a> may be used to extract some of the produced results, on a given time span, and with a given sampling rate.</p>
+</div>
+<div class="section" id="plotting-the-data">
+<h3>Plotting the Data<a class="headerlink" href="#plotting-the-data" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="components">
+<h3>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h3>
+<p>One may quickly plot the results using the method <a class="reference internal" href="#odelab.solver.Solver.plot" title="odelab.solver.Solver.plot"><tt class="xref py py-meth docutils literal"><span class="pre">plot()</span></tt></a>.
+The simplest use of that method is to plot all the coordinates on the whole time span, with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>One may restrict the plotted coordinates using by given them in a list.
+For instance, to only plot the first and third coordinates:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="generalized-components">
+<h3>Generalized Components<a class="headerlink" href="#generalized-components" title="Permalink to this headline">¶</a></h3>
+<p>Note that a method of the corresponding <tt class="xref py py-class docutils literal"><span class="pre">System</span></tt> object may also be used as components (what we call here <em>generalized component</em>).
+For example, if the system object implements a method <tt class="docutils literal"><span class="pre">energy</span></tt> which computes the energy of a given state, as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span><span class="n">u</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>then it is possible to plot the energy using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;energy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is possible to combine it with other components, or other <tt class="xref py py-class docutils literal"><span class="pre">System</span></tt> methods, by gathering them in a list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="s">&#39;energy&#39;</span><span class="p">])</span> <span class="c"># plot the first coordinate, and the energy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="d-plot">
+<h3>2D Plot<a class="headerlink" href="#d-plot" title="Permalink to this headline">¶</a></h3>
+<p>It is also possible to plot one coordinate against another.
+Suppose that coordinates 0 and 1 are positions in a plane.
+The trajectory is conveniently plotted with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">time_component</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The method <a class="reference internal" href="#odelab.solver.Solver.plot2D" title="odelab.solver.Solver.plot2D"><tt class="xref py py-meth docutils literal"><span class="pre">plot2D()</span></tt></a> is an alias to the call above.
+One may thus call:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c"># plot coordinate 1 against coordinate 0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieving-the-data">
+<h3>Retrieving the data<a class="headerlink" href="#retrieving-the-data" title="Permalink to this headline">¶</a></h3>
+<p>Since the data is stored in a file, the file must be opened when retrieving the data, and closed after that.
+This is achieved using the <tt class="xref py py-meth docutils literal"><span class="pre">open_store()</span></tt> context manager:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">solver</span><span class="o">.</span><span class="n">open_store</span><span class="p">()</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+    <span class="n">first_component</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="format-of-the-data">
+<h3>Format of the data<a class="headerlink" href="#format-of-the-data" title="Permalink to this headline">¶</a></h3>
+<p>The data is stored in a matrix of size <span class="math">\(N \times T\)</span>, where <span class="math">\(N\)</span> is the size of the phase space, and <span class="math">\(T\)</span> is the number of time points.
+In order to obtain the first component of the simulated vector, you would do as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">solver</span><span class="o">.</span><span class="n">open_store</span><span class="p">()</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+    <span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># first component</span>
+    <span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="c"># first component at time offset 5</span>
+    <span class="n">events</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="c"># the initial condition</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that the initial and final conditions may be obtained with <tt class="xref py py-meth docutils literal"><span class="pre">initial()</span></tt> and <tt class="xref py py-meth docutils literal"><span class="pre">final()</span></tt> respectively.</p>
+</div>
+</div>
+<div class="section" id="file-and-simulation-name">
+<span id="id1"></span><h3>File and simulation name<a class="headerlink" href="#file-and-simulation-name" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">odelab</span></tt> <em>always</em> stores the result in a file.
+For convenience, if no file name is specified, they are stored inside a temporary file.</p>
+<p>If you want to create a file in which to store the data, you may do so by using the <tt class="docutils literal"><span class="pre">path</span></tt> parameter when creating the <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt> object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">scheme</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;...&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The given path must be either a path to a new file to be created by <tt class="docutils literal"><span class="pre">odelab</span></tt>, or to an existing file <em>of type HDF5</em>.
+It could, for instance, point to the file storage of an earlier simulation.</p>
+<p>Each simulation has a name, which is also automatically created if none is specified.
+The name is given at the initialization:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;my_simulation&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The corresponding simulation may then be loaded at any later time using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span> <span class="o">=</span> <span class="n">load_solver</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-odelab.solver">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-odelab.solver" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="solver-ode-solvers">
+<h3><tt class="xref py py-mod docutils literal"><span class="pre">Solver</span></tt> &#8211; ODE Solvers<a class="headerlink" href="#solver-ode-solvers" title="Permalink to this headline">¶</a></h3>
+<p>A collection of solvers for ODEs of various types.</p>
+<span class="target" id="module-solver"></span><p>The <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> class contains methods on how to perform one iteration step.
+It is its responsibility to take care of the time step.</p>
+<p>The higher level class is <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt>, which is initialized with an instance of a <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> class.</p>
+<dl class="attribute">
+<dt id="odelab.solver.SingleStepSolver">
+<tt class="descclassname">odelab.solver.</tt><tt class="descname">SingleStepSolver</tt><a class="headerlink" href="#odelab.solver.SingleStepSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="odelab.solver.Solver">
+<em class="property">class </em><tt class="descclassname">odelab.solver.</tt><tt class="descname">Solver</tt><big>(</big><em>scheme</em>, <em>system</em>, <em>path=None</em>, <em>init_scheme=None</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>General Solver class, that takes care of calling the step function and storing the intermediate results.</p>
+<dl class="exception">
+<dt id="odelab.solver.Solver.AlreadyInitialized">
+<em class="property">exception </em><tt class="descname">AlreadyInitialized</tt><a class="headerlink" href="#odelab.solver.Solver.AlreadyInitialized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when a solver is already initialized.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="odelab.solver.Solver.FinalTimeNotReached">
+<em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">FinalTimeNotReached</tt><a class="headerlink" href="#odelab.solver.Solver.FinalTimeNotReached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the final time was not reached within the given <tt class="docutils literal"><span class="pre">max_iter</span></tt> number of iterations.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="odelab.solver.Solver.NotInitialized">
+<em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">NotInitialized</tt><a class="headerlink" href="#odelab.solver.Solver.NotInitialized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the solver is not properly initialized.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="odelab.solver.Solver.RuntimeError">
+<em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">RuntimeError</tt><a class="headerlink" href="#odelab.solver.Solver.RuntimeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised to relay an exception occurred while running the solver.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="odelab.solver.Solver.Unstable">
+<em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">Unstable</tt><a class="headerlink" href="#odelab.solver.Solver.Unstable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the scheme produces NaN values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.final">
+<tt class="descclassname">Solver.</tt><tt class="descname">final</tt><big>(</big><em>process=True</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.final" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to obtain the last computed value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.generate">
+<tt class="descclassname">Solver.</tt><tt class="descname">generate</tt><big>(</big><em>events</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the (t,u) values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.get_events">
+<tt class="descclassname">Solver.</tt><tt class="descname">get_events</tt><big>(</big><em>t0=None</em>, <em>time=None</em>, <em>sampling_rate=1.0</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.get_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the events from time t0, during time <cite>time</cite>, sampled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.get_u">
+<tt class="descclassname">Solver.</tt><tt class="descname">get_u</tt><big>(</big><em>index</em>, <em>process=True</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.get_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return u[index] after post-processing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.initial">
+<tt class="descclassname">Solver.</tt><tt class="descname">initial</tt><big>(</big><em>process=True</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.initial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to obtain the initial condition.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.initialize">
+<tt class="descclassname">Solver.</tt><tt class="descname">initialize</tt><big>(</big><em>u0=None</em>, <em>t0=0</em>, <em>time=None</em>, <em>name=None</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the solver to the initial condition <span class="math">\(u(t0) = u0\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>u0</strong> (<em>array</em>) &#8211; initial condition; if it is not provided, it is set to the previous initial condition.</li>
+<li><strong>t0</strong> (<em>scalar</em>) &#8211; initial time</li>
+<li><strong>time</strong> (<em>scalar</em>) &#8211; span of the simulation</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; name of this simulation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.open_store">
+<tt class="descclassname">Solver.</tt><tt class="descname">open_store</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.open_store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to open the data store. Any access to the events must make use of this method:</p>
+<dl class="docutils">
+<dt>with solver.open_store() as events:</dt>
+<dd>...</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.plot">
+<tt class="descclassname">Solver.</tt><tt class="descname">plot</tt><big>(</big><em>components=None</em>, <em>plot_exact=True</em>, <em>error=False</em>, <em>time_component=None</em>, <em>**plot_args</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.plot2D">
+<tt class="descclassname">Solver.</tt><tt class="descname">plot2D</tt><big>(</big><em>time_component=0</em>, <em>other_component=1</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.plot2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot components vs another one</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.plot_function">
+<tt class="descclassname">Solver.</tt><tt class="descname">plot_function</tt><big>(</big><em>function</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.plot_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a given function of the state. May be useful to plot constraints or energy.</p>
+<blockquote>
+<div>This is now a convenience function that calls the method <tt class="xref py py-meth docutils literal"><span class="pre">plot()</span></tt>.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>function</strong> (<em>string</em>) &#8211; <p>name of the method to call on the current system object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body">the code <tt class="docutils literal"><span class="pre">solver.plot_function('energy')</span></tt> will call the method <tt class="docutils literal"><span class="pre">solver.system.energy</span></tt> on the current stored solution points.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.run">
+<tt class="descclassname">Solver.</tt><tt class="descname">run</tt><big>(</big><em>time=None</em>, <em>max_iter=None</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the simulation for a given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>time</strong> (<em>scalar</em>) &#8211; the time span for which to run; if none is given, the default <tt class="docutils literal"><span class="pre">self.time</span></tt> is used</li>
+<li><strong>max_iter</strong> &#8211; the maximum number of iterations; if <tt class="docutils literal"><span class="pre">None</span></tt>, an estimate is computed base on the time step and time span</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.solver.Solver.set_name">
+<tt class="descclassname">Solver.</tt><tt class="descname">set_name</tt><big>(</big><em>name=None</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.set_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set or guess a name for this session.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="odelab.solver.load_solver">
+<tt class="descclassname">odelab.solver.</tt><tt class="descname">load_solver</tt><big>(</big><em>path</em>, <em>name</em><big>)</big><a class="headerlink" href="#odelab.solver.load_solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a solver object from a path to an hdf5 file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="odelab.solver.load_solver_v2">
+<tt class="descclassname">odelab.solver.</tt><tt class="descname">load_solver_v2</tt><big>(</big><em>path</em>, <em>name</em><big>)</big><a class="headerlink" href="#odelab.solver.load_solver_v2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a solver object from a path to an hdf5 file.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-solver-class">Using the <tt class="docutils literal"><span class="pre">Solver</span></tt> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#storage">Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-odelab.solver">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">Systems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scheme.html">Scheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exponential.html">Exponential Solvers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="../search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="intro.html" title="Getting Started"
+             >previous</a> |
+          <a href="system.html" title="Systems"
+             >next</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="../_sources/rst/solver.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+		<div>
+			<a href="http://www.mathjax.org/">
+  <img title="Powered by MathJax"
+       src="http://www.mathjax.org/badge.gif"
+       border="0" alt="Powered by MathJax" />
+   </a>
+   </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2010–2012, Olivier Verdier.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

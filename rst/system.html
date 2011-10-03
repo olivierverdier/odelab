@@ -1,0 +1,155 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Systems &mdash; odelab 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="odelab 0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Scheme" href="scheme.html" />
+    <link rel="prev" title="Solvers" href="solver.html" /> 
+  </head>
+  <body>
+<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela' rel='stylesheet' type='text/css'>
+<div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">odelab 0.0.1 documentation</a></div>
+        <div class="rel">
+          <a href="solver.html" title="Solvers"
+             accesskey="P">previous</a> |
+          <a href="scheme.html" title="Scheme"
+             accesskey="N">next</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+<a href="http://github.com/olivierverdier/odelab"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="systems">
+<h1>Systems<a class="headerlink" href="#systems" title="Permalink to this headline">¶</a></h1>
+<p>In <tt class="docutils literal"><span class="pre">odelab</span></tt>, a <em>system</em> generalizes the notion of a right-hand side.
+The rationale behind having a class to model it is that there is often a particular <em>structure</em> present in the right hand side.</p>
+<p>For example, the system might be a mechanical system, in which case we have to describe which part of the system is a force, and which part is a velocity (or a momentum).
+A system may also be compose of a fast and a slow component.
+It may be a <em>partitioned</em> system, i.e., the right-hand side may be different for different components.
+It may be a sum of a constant, linear part and a non-linear part, in which case some exponential integrators may be used.</p>
+<p>It is one of the long-term goals of this project to include all the common dynamical systems used in textbooks on differential equations, such as the van der Pol, Lotka-Volterra, Kepler systems.
+Some of those are already available as a subclass of <tt class="xref py py-class docutils literal"><span class="pre">odelab.system.System</span></tt>.</p>
+<div class="section" id="classical-systems">
+<h2>Classical Systems<a class="headerlink" href="#classical-systems" title="Permalink to this headline">¶</a></h2>
+<p>A collection of classical systems.</p>
+<span class="target" id="module-odelab.system.classic"></span><dl class="class">
+<dt id="odelab.system.classic.VanderPol">
+<em class="property">class </em><tt class="descclassname">odelab.system.classic.</tt><tt class="descname">VanderPol</tt><big>(</big><em>mu=1.0</em><big>)</big><a class="headerlink" href="#odelab.system.classic.VanderPol" title="Permalink to this definition">¶</a></dt>
+<dd><p>The van der Pol oscillator, defined by:</p>
+<div class="math">
+\[\begin{split}u_0' &amp;= u_1 \\
+u_1' &amp;= μ (1-u_0^2)u_1 - u_0\end{split}\]</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solvers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Systems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#classical-systems">Classical Systems</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scheme.html">Scheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exponential.html">Exponential Solvers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="../search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="solver.html" title="Solvers"
+             >previous</a> |
+          <a href="scheme.html" title="Scheme"
+             >next</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="../_sources/rst/system.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+		<div>
+			<a href="http://www.mathjax.org/">
+  <img title="Powered by MathJax"
+       src="http://www.mathjax.org/badge.gif"
+       border="0" alt="Powered by MathJax" />
+   </a>
+   </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2010–2012, Olivier Verdier.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

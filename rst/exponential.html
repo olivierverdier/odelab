@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exponential Solvers &mdash; odelab 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="odelab 0.0.1 documentation" href="../index.html" />
+    <link rel="prev" title="Scheme" href="scheme.html" /> 
+  </head>
+  <body>
+<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela' rel='stylesheet' type='text/css'>
+<div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">odelab 0.0.1 documentation</a></div>
+        <div class="rel">
+          <a href="scheme.html" title="Scheme"
+             accesskey="P">previous</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+<a href="http://github.com/olivierverdier/odelab"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="exponential-solvers">
+<h1>Exponential Solvers<a class="headerlink" href="#exponential-solvers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="shifted-exponentials">
+<h2>Shifted Exponentials<a class="headerlink" href="#shifted-exponentials" title="Permalink to this headline">¶</a></h2>
+<p>The <em>shifted exponentials</em>, usually called <em>φ-functions</em>, are defined by the following series:</p>
+<div class="math">
+\[φ_{\ell}(z) = ∑_{k=0}^{∞} \frac{z^k}{(\ell+k)!} \qquad \ell \in\NN\]</div>
+<p>Notice in particular that</p>
+<div class="math">
+\[φ_0(z) = \ee^z\]</div>
+<p>We observe the following recursion relation</p>
+<div class="math">
+\[φ_{\ell}(z) = \frac{1}{\ell!} + z ∑_{k=1}^{∞}\frac{x^{k-1}}{(\ell+k)!} = \frac{1}{\ell!} + z φ_{\ell+1}\]</div>
+<p>This allows to prove the useful identity, valid for <span class="math">\(\ell≥1\)</span>:</p>
+<div class="math">
+\[φ_{\ell}(z) =  \int_0^1 \ee^{z (1-x)} \frac{x^{\ell-1}}{(\ell - 1)!}  \dd x\]</div>
+<p>Indeed, by integration by parts, the recursion relation is the same as above, and for <span class="math">\(\ell=1\)</span> one has</p>
+<div class="math">
+\[φ_1(z) = \frac{\ee^z-1}{z}\]</div>
+</div>
+<div class="section" id="pade-approximations">
+<h2>Padé Approximations<a class="headerlink" href="#pade-approximations" title="Permalink to this headline">¶</a></h2>
+<p>One computes Padé approximations of the form</p>
+<div class="math">
+\[φ_{\ell}(z) = \frac{N(z)}{D(z)}\]</div>
+<div class="math">
+\[d^{\ell} := \frac{d!}{(2d-\ell)!}\]</div>
+<div class="math">
+\[D_j^\ell :=  d^{\ell} (-1)^j   \frac{ (2d + \ell -j)!}{j! (d-j)!}\]</div>
+<p>So one may start with:</p>
+<div class="math">
+\[D_0^0 = 1\]</div>
+<p>and compute for <span class="math">\(0≤j&lt;d\)</span>:</p>
+<div class="math">
+\[D_{j+1}^0 = \frac{-(d-j)}{(2d -j)(j+1)} D_{j}^{0}\]</div>
+<p>then, for <span class="math">\(0≤ \ell &lt; \ell_{\max}\)</span>:</p>
+<div class="math">
+\[D_{j}^{\ell+1} = (2d-\ell)(2d+\ell+1-j) D_{j}^{\ell}\]</div>
+<div class="math">
+\[C_j := \frac{1}{j!}\]</div>
+<div class="math">
+\[N^{\ell} =  C^{\ell} \star D^{\ell}\]</div>
+<span class="target" id="module-odelab.phi_pade"></span><div class="section" id="phi-pade-phi-pade">
+<h3><a class="reference internal" href="#module-phi_pade" title="phi_pade: Computation of φ functions."><tt class="xref py py-mod docutils literal"><span class="pre">phi_pade</span></tt></a> &#8211; Phi Padé<a class="headerlink" href="#phi-pade-phi-pade" title="Permalink to this headline">¶</a></h3>
+<p>Computation of φ functions using Padé approximations and Scaling and Squaring.</p>
+<span class="target" id="module-phi_pade"></span><p>Some formulae are taken from the <a class="reference external" href="http://www.math.ntnu.no/preprint/numerics/2005/N4-2005.pdf">Expint documentation</a>, of Håvard Berland, Bård Skaflestad and Will Wright.</p>
+<dl class="class">
+<dt id="odelab.phi_pade.Phi">
+<em class="property">class </em><tt class="descclassname">odelab.phi_pade.</tt><tt class="descname">Phi</tt><big>(</big><em>k</em>, <em>d=6</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.Phi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main class to compute the <span class="math">\(φ_l\)</span> functions.
+The simplest way to define those functions is by the formula:</p>
+<div class="math">
+\[φ_{\ell}(x) = ∑_{k=0}^{∞} \frac{x^k}{(\ell+k)!}\]</div>
+<p>Usage is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">phi</span> <span class="o">=</span> <span class="n">Phi</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">phi</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="xref py py-data docutils literal"><span class="pre">M</span></tt> is a square array.
+The variable <tt class="docutils literal"><span class="pre">result</span></tt> is a list of all the values of <span class="math">\(φ_{k}(M)\)</span> for <span class="math">\(0≤k≤l\)</span>.</p>
+<dl class="method">
+<dt id="odelab.phi_pade.Phi.compute_Pade">
+<tt class="descname">compute_Pade</tt><big>(</big><big>)</big><a class="headerlink" href="#odelab.phi_pade.Phi.compute_Pade" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Padé approximations of order <span class="math">\(d\)</span> of <span class="math">\(φ_l\)</span>, for <span class="math">\(0 ≤ l ≤ k\)</span>.</p>
+<p>The goal is to produce an approximation of the form:</p>
+<div class="math">
+\[φ_{\ell} = \frac{N}{D}\]</div>
+<p>where <span class="math">\(N\)</span> and <span class="math">\(D\)</span> are polynomials.
+The formula for <span class="math">\(D\)</span> is first computed recursively using the following recursion relations:</p>
+<div class="math">
+\[\begin{split}D_0^0 = 1\\
+D_{j+1}^0 = \frac{-(d-j)}{(2d -j)(j+1)} D_{j}^0\\
+D_{j}^{\ell+1} = (2d-\ell)(2d+\ell+1-j) D_{j}^{\ell}\end{split}\]</div>
+<p>Then, considering the inverse factorial series:</p>
+<div class="math">
+\[C_j := \frac{1}{j!}\]</div>
+<p>The numerator <span class="math">\(N\)</span> is now computed by:</p>
+<div class="math">
+\[N = D*C\]</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.phi_pade.Phi.eval_pade">
+<tt class="descname">eval_pade</tt><big>(</big><em>z</em>, <em>s=None</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.Phi.eval_pade" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate <span class="math">\(φ_l(z)\)</span> using the Padé approximation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="odelab.phi_pade.Phi.phi_square">
+<tt class="descname">phi_square</tt><big>(</big><em>l</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.Phi.phi_square" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formula for squaring phi_l from existing phi_k for k≤l, taken from the <a class="reference external" href="http://www.math.ntnu.no/preprint/numerics/2005/N4-2005.pdf">Expint documentation</a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="odelab.phi_pade.Polynomial">
+<em class="property">class </em><tt class="descclassname">odelab.phi_pade.</tt><tt class="descname">Polynomial</tt><big>(</big><em>coeffs</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.Polynomial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polynomial class used in the Padé approximation.
+Usage is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">p</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="p">([</span><span class="mf">4.</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="o">...</span><span class="p">])</span> <span class="c"># polynomial 4 + 2x + x**2 + ...</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="o">.</span><span class="n">exponents</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="c"># compute z**2 and z**3</span>
+<span class="n">p</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="c"># value of the polynomial p(z)</span>
+</pre></div>
+</div>
+<p>The evaluation at a matrix value is computed using the Paterson and Stockmeyer method (see <a class="reference internal" href="#golub">[Golub]</a> § 11.2.4).
+The polynomial is split into chunks of size <tt class="xref py py-data docutils literal"><span class="pre">s</span></tt>.</p>
+<table class="docutils citation" frame="void" id="golub" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Golub]</a></td><td>Golub, G.H.  and van Loan, C.F., <em>Matrix Computations</em>, 3rd ed. <a class="reference external" href="http://books.google.com/books?isbn=9780801854149">isbn:9780801854149</a></td></tr>
+</tbody>
+</table>
+<dl class="classmethod">
+<dt id="odelab.phi_pade.Polynomial.exponents">
+<em class="property">classmethod </em><tt class="descname">exponents</tt><big>(</big><em>z</em>, <em>s=1</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.Polynomial.exponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the first s+1 exponents of z.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">[I,z,z**2,...,z**s]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="odelab.phi_pade.RationalFraction">
+<em class="property">class </em><tt class="descclassname">odelab.phi_pade.</tt><tt class="descname">RationalFraction</tt><big>(</big><em>numerator</em>, <em>denominator</em><big>)</big><a class="headerlink" href="#odelab.phi_pade.RationalFraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Super simple Rational Function class, used to compute N(Z)/D(Z) for polynomials N and D.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">Systems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scheme.html">Scheme</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Exponential Solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#shifted-exponentials">Shifted Exponentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pade-approximations">Padé Approximations</a></li>
+</ul>
+</li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="../search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="scheme.html" title="Scheme"
+             >previous</a> |
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="../_sources/rst/exponential.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+		<div>
+			<a href="http://www.mathjax.org/">
+  <img title="Powered by MathJax"
+       src="http://www.mathjax.org/badge.gif"
+       border="0" alt="Powered by MathJax" />
+   </a>
+   </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2010–2012, Olivier Verdier.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
