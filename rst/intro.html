@@ -103,7 +103,7 @@ Suppose we want to solve the problem</p>
 This is done as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">odelab</span> <span class="kn">import</span> <span class="n">System</span>
 
-<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">u</span><span class="p">):</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">u</span>
 
 <span class="n">system</span> <span class="o">=</span> <span class="n">System</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -135,17 +135,19 @@ This is done as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">odelab</span> <span class="kn">import</span> <span class="n">Solver</span><span class="p">,</span> <span class="n">System</span>
 <span class="kn">from</span> <span class="nn">odelab.scheme.classic</span> <span class="kn">import</span> <span class="n">ExplicitEuler</span>
 
-<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">u</span><span class="p">):</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">u</span>
 
-<span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">ExplicitEuler</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">),</span> <span class="n">System</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">ExplicitEuler</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">),</span> <span class="n">system</span><span class="o">=</span><span class="n">System</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 <span class="n">s</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">u0</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
 <span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+
+<span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The result may be visualized using:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
+<p>[<a class="reference external" href="../plot_directive/code/explot.py">source code</a>, <a class="reference external" href="../plot_directive/code/explot.hires.png">hires.png</a>, <a class="reference external" href="../plot_directive/code/explot.pdf">pdf</a>]</p>
+<div class="figure">
+<img alt="../_images/explot.png" src="../_images/explot.png" />
 </div>
 </div>
 </div>
@@ -180,7 +182,6 @@ The main classes are <tt class="xref py py-class docutils literal"><span class="
 <li class="toctree-l1"><a class="reference internal" href="solver.html">Solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="system.html">Systems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scheme.html">Scheme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exponential.html">Exponential Solvers</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>

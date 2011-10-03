@@ -143,6 +143,28 @@ One may thus call:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span><span class="o">.</span><span class="n">plot2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c"># plot coordinate 1 against coordinate 0</span>
 </pre></div>
 </div>
+<div class="topic">
+<p class="topic-title first">Example: Solving the van der Pol equation</p>
+<p>Here is an example of solving the van der Pol equations with a Runge-Kutta method and then plotting the result with <tt class="docutils literal"><span class="pre">plot2D</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">odelab</span> <span class="kn">import</span> <span class="n">Solver</span>
+<span class="kn">from</span> <span class="nn">odelab.scheme.classic</span> <span class="kn">import</span> <span class="n">RungeKutta4</span>
+<span class="kn">from</span> <span class="nn">odelab.system.classic</span> <span class="kn">import</span> <span class="n">VanderPol</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">RungeKutta4</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">),</span> <span class="n">system</span><span class="o">=</span><span class="n">VanderPol</span><span class="p">())</span>
+<span class="n">s</span><span class="o">.</span><span class="n">initialize</span><span class="p">([</span><span class="mf">2.7</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;2.7&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">plot2D</span><span class="p">()</span>
+
+<span class="n">s</span><span class="o">.</span><span class="n">initialize</span><span class="p">([</span><span class="mf">1.3</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;1.3&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">plot2D</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>[<a class="reference external" href="../plot_directive/code/vanderpol.py">source code</a>, <a class="reference external" href="../plot_directive/code/vanderpol.hires.png">hires.png</a>, <a class="reference external" href="../plot_directive/code/vanderpol.pdf">pdf</a>]</p>
+<div class="figure">
+<img alt="../_images/vanderpol.png" src="../_images/vanderpol.png" />
+</div>
+</div>
 </div>
 <div class="section" id="retrieving-the-data">
 <h3>Retrieving the data<a class="headerlink" href="#retrieving-the-data" title="Permalink to this headline">¶</a></h3>
@@ -394,7 +416,6 @@ It is its responsibility to take care of the time step.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="system.html">Systems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scheme.html">Scheme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exponential.html">Exponential Solvers</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>

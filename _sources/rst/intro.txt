@@ -70,7 +70,7 @@ This is done as follows::
 
     from odelab import System
 
-    def f(u):
+    def f(t,u):
         return -u
 
     system = System(f)
@@ -99,21 +99,14 @@ Finally, we can run the simulation from :math:`t=0` to :math:`t=1` with the foll
 
     s.run(1.)
 
-To summarize what we have up to now, the whole code is the following::
+To summarize what we have up to now, the whole code is the following:
 
-    from odelab import Solver, System
-    from odelab.scheme.classic import ExplicitEuler
+.. literalinclude:: ../code/explot.py
+    :tab-width: 4
 
-    def f(u):
-        return -u
 
-    s = Solver(scheme=ExplicitEuler(.1), System(f))
-    s.initialize(u0=1.)
-    s.run(1.)
+.. plot:: code/explot.py
 
-The result may be visualized using::
-
-    s.plot()
 
 Architecture
 ============
