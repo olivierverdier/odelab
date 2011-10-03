@@ -6,7 +6,12 @@ Installation
 Instructions
 ============
 
-Quick installation instructions.
+|project| itself may be installed from the `odelab github repository`_ by running:
+
+.. code-block:: sh
+
+    pip install -e git+https://github.com/olivierverdier/odelab#egg=odelab
+
 |project| depends on other packages in order to function properly, apart from ``scipy``, ``numpy`` and ``matplotlib``:
 
 * `PyTables`_, a package for reading and writing files in the `HDF5 format`_.
@@ -18,6 +23,7 @@ The only package which might be problematic to install is ``PyTables``.
 .. _PyTables: https://github.com/PyTables/PyTables
 .. _python-progressbar: https://github.com/olivierverdier/python-progressbar
 .. _Theano: https://github.com/Theano/Theano
+.. _odelab github repository: https://github.com/olivierverdier/odelab
 
 .. _HDF5 format: http://www.hdfgroup.org/HDF5/
 
