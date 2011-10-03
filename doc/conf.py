@@ -22,7 +22,9 @@ sys.path.append(os.path.abspath('..'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax', 'sphinx.ext.extlinks']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax', 'sphinx.ext.extlinks',
+		'matplotlib.sphinxext.only_directives',
+		'matplotlib.sphinxext.plot_directive']
 
 extlinks = {'doi': ('http://dx.doi.org/%s', 'doi:'),
 'gbook': ('http://books.google.com/books?id=%s', 'gbook:'),
