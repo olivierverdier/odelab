@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'odelab'
-copyright = u'2010--2011, Olivier Verdier'
+copyright = u'2010–2012, Olivier Verdier'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
