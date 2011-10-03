@@ -92,18 +92,19 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		self.store.initialize(event0, self.name)
 
-		with self.open_store(write=True) as events:
-			# store the metadata
-			events.attrs['init_params'] = info
+		with self.open_store(write=True):
 
-			events.attrs['solver_info'] = solver_info
-			events.attrs['solver'] = self
+			# store the metadata
+			self.store['init_params'] = info
+
+			self.store['solver_info'] = solver_info
+			self.store['solver'] = self
 
 			# duration counter:
-			events.attrs['duration'] = 0.
+			self.store['duration'] = 0.
 
 			# append the initial condition:
-			events.append(np.array([event0]).reshape(-1,1)) # todo: factorize the call to reshape, append
+			self.store.append(np.array([event0]))
 
 
 	@contextmanager
@@ -114,18 +115,11 @@ Method to open the data store. Any access to the events must make use of this me
 	with solver.open_store() as events:
 		...
 		"""
-		with self.store.open(self.name, write) as events:
+		with self.store.open(write) as events:
 			yield events
 
 	def __len__(self):
-		with self.open_store() as events:
-			size = events.nrows
-		return size
-
-	def get_attrs(self, key):
-		with self.open_store() as events:
-			attr = events.attrs[key]
-		return attr
+		return len(self.store)
 
 	def generate(self, events):
 		"""
@@ -168,12 +162,12 @@ Method to open the data store. Any access to the events must make use of this me
 
 	@contextmanager
 	def simulating(self):
+		self._start_time = time.time()
 		with self.open_store(write=True) as events:
-			self._start_time = time.time()
 			yield events
 			end_time = time.time()
 			duration = end_time - self._start_time
-			events.attrs['duration'] += duration
+			self.store['duration'] += duration
 
 	catch_runtime = True # whether to catch runtime exception (not catching allows to see the traceback)
 
@@ -196,6 +190,8 @@ Method to open the data store. Any access to the events must make use of this me
 		if self._max_iter is None:
 			# generous estimation of the maximum number of iterations
 			self._max_iter = int(time/self.scheme.h * self.max_iter_factor)
+
+
 
 		with self.simulating() as events:
 			# start from the last time we stopped
@@ -220,7 +216,7 @@ Method to open the data store. Any access to the events must make use of this me
 					if np.any(np.isnan(event)):
 						raise self.Unstable('Unstable after %d steps.' % iteration)
 
-					events.append(event.reshape(-1,1))
+					self.store.append(event)
 					t = event[-1]
 					if self.with_progressbar:
 						progress_bar.update(t-t0)
@@ -359,6 +355,7 @@ Create a solver object from a path to an hdf5 file.
 			solver = Solver(scheme=None, system=None, path=path)
 			solver.name = name
 		solver.store = Store(path)
+		solver.store.name = solver.name
 	return solver
 
 def load_solver_v2(path, name):

@@ -51,9 +51,9 @@ def test_duration():
 	solver = Solver(ExplicitEuler(h=.1), System(f))
 	solver.initialize(u0=1.,time=1.,)
 	solver.run()
-	d1 = solver.get_attrs('duration')
+	d1 = solver.store['duration']
 	solver.run(time=.1)
-	d2 = solver.get_attrs('duration')
+	d2 = solver.store['duration']
 	nt.assert_greater(d2, d1)
 
 class Test_Access(object):

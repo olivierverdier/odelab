@@ -78,7 +78,7 @@ class Test_Experiment(object):
 		s = load_solver(exp_path, 'main')
 		len(s) # ensure we can load the events
 		# check that solver_info is set:
-		info = s.get_attrs('solver_info')
+		info = s.store['solver_info']
 		nt.assert_regexp_matches(info['system_class'], 'NoSystem')
 		
 
