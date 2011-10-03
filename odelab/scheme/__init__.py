@@ -14,6 +14,9 @@ import odelab.newton as _rt
 
 
 class Scheme(object):
+	"""
+General Scheme class. Subclass this class to define a specific integration method.
+	"""
 	def __init__(self, h=None):
 		if h is not None:
 			self.h = h
@@ -75,9 +78,9 @@ Default reconstruction function. It assumes that the root is already delta u.
 
 	def step(self, t,u0,h):
 		"""
-Implementation of the Compensated Summation algorithm as described in _[HaLuWa2006] §VIII.5.
+Implementation of the Compensated Summation algorithm as described in [HaLuWa06]_ §VIII.5.
 
-.. [HaLuWa2006] Hairer, Lubich, Wanner *Geometric Numerical Integration*, Springer, 2006.
+.. [HaLuWa06] Hairer, Lubich, Wanner *Geometric Numerical Integration*, Springer, 2006.
 		"""
 		t1, du = self.delta(t,u0,h)
 		self.roundoff += du

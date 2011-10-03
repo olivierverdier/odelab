@@ -43,7 +43,7 @@ class Solver (object):
 	scheme : :class:`odelab.scheme.Scheme`
 		Scheme to be used to perform the actual simulation.
 	path : :string:
-		Path to the file where to save the produced data (if None, a tempfile is created).
+		Path to the file where to save the produced data (if ``None``, a tempfile is created).
 		"""
 		self.system = system
 		self.scheme = scheme
@@ -209,10 +209,11 @@ Method to open the data store. Any access to the events must make use of this me
 		Run the simulation for a given time.
 
 :param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
-:param max_iter: the maximum number of iterations; if None, an estimate is computed base on the time step and time span
+:param max_iter: the maximum number of iterations; if ``None``, an estimate is computed base on the time step and time span
 		"""
 		if not hasattr(self,'name'):
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
+
 		if time is None:
 			time = self.time
 
@@ -316,6 +317,9 @@ Method to open the data store. Any access to the events must make use of this me
 		return self.get_u(-1, process)
 
 	def plot(self, components=None, plot_exact=True, error=False, time_component=None, **plot_args):
+		"""
+Plot.
+		"""
 		plotter = Plotter(self)
 		plotter.setup(plot_exact, error)
 		plotter.components = components
@@ -328,7 +332,7 @@ Method to open the data store. Any access to the events must make use of this me
 		"""
 		Plot a given function of the state. May be useful to plot constraints or energy.
 
-		This is now a convenience function that calls `odelab.solver.plot`.
+		This is now a convenience function that calls the method :meth:`plot`.
 
 :param string function: name of the method to call on the current system object
 

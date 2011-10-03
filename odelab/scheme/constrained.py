@@ -13,7 +13,7 @@ import odelab.newton as _rt
 class McLachlan(Scheme):
 	ur"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the
-algorithm given by equation (4.18) in [mclachlan06]_.
+algorithm given by equation (4.18) in [MLPe06]_.
 
 The scheme will work for any system as long as the necessary methods are implemented.
 The adapted scheme reads as follows:
@@ -22,7 +22,7 @@ The adapted scheme reads as follows:
 	q_{1/2} &= q_0 + \frac{h}{2}H_p(q_0,p_0) \\
 	p_1 &= p_0 + h\frac{H_q(q_{1/2},p_0) + H_q(q_{1/2},p_1)}{2} + h ∑_i λ_i α^i(q_{1/2})\\
 	q_1 &= q_{1/2} + \frac{h}{2}H_p(q_1,p_1)\\
-	&\bracket{θ(q_1)}{H_p(q_1,p_1)} = 0
+	&\langle{θ(q_1)},{H_p(q_1,p_1)}\rangle = 0
 
 
 
@@ -38,7 +38,7 @@ The :class:`odelab.system.System` object must implement:
 
 :References:
 
-.. [mclachlan06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1>`
+.. [MLPe06] \R. McLachlan and M. Perlmutter, *Integrators for Nonholonomic Mechanical Systems*, J. Nonlinear Sci., **16** 283-328, (2006) :doi:`/10.1007/s00332-005-0698-1`
 	"""
 
 	def get_residual(self, t, u0, h):
@@ -223,7 +223,7 @@ class MultiRKDAE(RKDAE):
 class Spark(MultiRKDAE):
 	r"""
 Solver for semi-explicit index 2 DAEs by Lobatto III RK methods
- as presented in [jay03]_.
+ as presented in [Ja03]_.
 
 We consider the following system of DAEs:
 
@@ -259,7 +259,7 @@ By vector, it is meant that methods must accept vector arguments, i.e., accept a
 
 References:
 
-.. [jay03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
+.. [Ja03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
 	"""
 
 	def __init__(self, nb_stages):
@@ -270,7 +270,7 @@ References:
 
 	def compute_mean_stage_constraint(self):
 		"""
-		Compute the s x (s+1) matrix defined in [jay03]_.
+		Compute the s x (s+1) matrix defined in [Ja03]_.
 		"""
 		s = self.nb_stages
 		A1t = LobattoIIIA.tableaux[s][1:-1,1:]

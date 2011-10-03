@@ -216,7 +216,7 @@ def add_average_sqsq_component(f,q0,q1,i,j):
 class ChaoticOscillator(NonHolonomic):
 	def __init__(self, size=3):
 		"""
-:param size: the unerlying size; the total dimension is 2n+1 + 2n+1 + 1 = 4n+3; that is 15 for the default size n=3
+:param size: the underlying size; the total dimension is 2n+1 + 2n+1 + 1 = 4n+3; that is 15 for the default size n=3
 		"""
 		self.size = size
 
