@@ -78,6 +78,9 @@ It is possible to combine it with other components, or other :class:`System` met
 
     solver.plot([0,'energy']) # plot the first coordinate, and the energy
 
+
+.. _plot2d:
+
 2D Plot
 -------
 
@@ -92,12 +95,6 @@ One may thus call::
 
     solver.plot2D(0,1) # plot coordinate 1 against coordinate 0
 
-.. topic:: Example: Solving the van der Pol equation
-
-    Here is an example of solving the van der Pol equations with a Runge-Kutta method and then plotting the result with ``plot2D``:
-
-    .. plot:: code/vanderpol.py
-        :include-source:
 
 
 Retrieving the data
@@ -129,6 +126,9 @@ In order to obtain the first component of the simulated vector, you would do as 
 File and simulation name
 ------------------------
 
+File Name
+^^^^^^^^^
+
 |project| *always* stores the result in a file.
 For convenience, if no file name is specified, they are stored inside a temporary file.
 
@@ -138,6 +138,11 @@ If you want to create a file in which to store the data, you may do so by using 
 
 The given path must be either a path to a new file to be created by |project|, or to an existing file *of type HDF5*.
 It could, for instance, point to the file storage of an earlier simulation.
+
+.. _simulation_name:
+
+Simulation Name
+^^^^^^^^^^^^^^^
 
 Each simulation has a name, which is also automatically created if none is specified.
 The name is given at the initialization::
