@@ -18,14 +18,13 @@ from __future__ import division
 import numpy as np
 
 import itertools
-import warnings
 import time
 
 
 
 from odelab.plotter import Plotter
 
-import tables
+from .store import Store
 
 from contextlib import contextmanager
 
@@ -48,12 +47,7 @@ class Solver (object):
 		self.system = system
 		self.scheme = scheme
 		self.init_scheme = init_scheme
-		if path is None: # file does not exist
-			import tempfile
-			f = tempfile.NamedTemporaryFile(delete=True)
-			self.path = f.name
-		else:
-			self.path = path
+		self.store = Store(path)
 
 	# default values for the total time
 	time = 1.
@@ -83,38 +77,25 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 		self.set_name(name=name)
 
-		# compression algorithm
-		compression = tables.Filters(complevel=1, complib='zlib', fletcher32=True)
+		info = {
+				'u0':u0,
+				't0':t0,
+				'time':time,
+				}
+		# save system and scheme information in order to recover if unpickling fails
+		solver_info = {
+			'system_class': repr(type(self.system)),
+			'scheme_class': repr(type(self.scheme)),
+			'init_scheme_class': repr(type(self.init_scheme)),
+			'solver_class': repr(type(self)),
+			}
 
-		with tables.openFile(self.path, 'a') as store:
-			# create a new extensible array node
-			with warnings.catch_warnings():
-				warnings.simplefilter('ignore')
-				try:
-					events = store.createEArray(
-						where=store.root,
-						name=self.name,
-						atom=tables.Atom.from_dtype(event0.dtype),
-						shape=(len(event0),0),
-						filters=compression)
-				except tables.NodeError:
-					raise self.AlreadyInitialized('Results with the name "{0}" already exist in that store.'.format(self.name))
+		self.store.initialize(event0, self.name)
 
+		with self.open_store(write=True) as events:
 			# store the metadata
-			info = {
-					'u0':u0,
-					't0':t0,
-					'time':time,
-					}
 			events.attrs['init_params'] = info
 
-			# save system and scheme information in order to recover if unpickling fails
-			solver_info = {
-				'system_class': repr(type(self.system)),
-				'scheme_class': repr(type(self.scheme)),
-				'init_scheme_class': repr(type(self.init_scheme)),
-				'solver_class': repr(type(self)),
-				}
 			events.attrs['solver_info'] = solver_info
 			events.attrs['solver'] = self
 
@@ -133,10 +114,8 @@ Method to open the data store. Any access to the events must make use of this me
 	with solver.open_store() as events:
 		...
 		"""
-		mode = ['r','a'][write]
-		with tables.openFile(self.path, mode) as f:
-			node = f.getNode('/'+self.name)
-			yield node
+		with self.store.open(self.name, write) as events:
+			yield events
 
 	def __len__(self):
 		with self.open_store() as events:
@@ -181,10 +160,6 @@ Method to open the data store. Any access to the events must make use of this me
 		Raised when the solver is not properly initialized.
 		"""
 
-	class AlreadyInitialized(Exception):
-		"""
-		Raised when a solver is already initialized.
-		"""
 
 	class RuntimeError(Exception):
 		"""
@@ -373,6 +348,7 @@ def load_solver(path, name):
 	"""
 Create a solver object from a path to an hdf5 file.
 	"""
+	import tables
 	with tables.openFile(path, 'r') as f:
 		events = f.getNode('/'+name)
 		try:
@@ -382,13 +358,14 @@ Create a solver object from a path to an hdf5 file.
 		if not isinstance(solver, Solver): # pickling has failed
 			solver = Solver(scheme=None, system=None, path=path)
 			solver.name = name
-		solver.path = path
+		solver.store = Store(path)
 	return solver
 
 def load_solver_v2(path, name):
 	"""
 Create a solver object from a path to an hdf5 file.
 	"""
+	import tables
 	with tables.openFile(path, 'r') as f:
 		events = f.getNode('/'+name)
 		info = events.attrs['solver_info']

@@ -7,6 +7,8 @@ from odelab.scheme import *
 from odelab.scheme.classic import *
 from odelab.scheme.exponential import *
 
+from odelab.store import Store
+
 from odelab.system.classic import *
 from odelab.system.exponential import *
 from odelab import *
@@ -94,7 +96,7 @@ class Harness_Solver(Harness):
 		nt.assert_equal(self.solver.time, Solver.time)
 		nt.assert_equal(len(self.solver), 1)
 
-	@nt.raises(Solver.AlreadyInitialized)
+	@nt.raises(Store.AlreadyInitialized)
 	def test_initialize_twice(self):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
