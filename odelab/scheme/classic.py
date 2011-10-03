@@ -1,15 +1,28 @@
 #!/usr/bin/env python
-# −*− coding: UTF−8 −*−
+# coding: UTF-8
 from __future__ import division
+
 
 from . import Scheme
 import numpy as np
 
 class ExplicitEuler (Scheme):
+	"""
+Explicit version of the Euler method, defined by:
+
+.. math::
+	u_1 = u_1 + hf(t_0, u_0)
+	"""
 	def delta(self, t, u0, h):
 		return t + h, self.h*self.system.f(t, u0)
 
 class ImplicitEuler (Scheme):
+	"""
+The standard implicit Euler scheme, defined by:
+
+.. math::
+	u_1 = u_0 + hf(t_1, u_1)
+	"""
 	def get_residual(self, t, u0, h):
 		def residual(du):
 			return du - h*self.system.f(t+h,u0+du)
@@ -17,7 +30,7 @@ class ImplicitEuler (Scheme):
 
 class RungeKutta4(Scheme):
 	"""
-	Runge-Kutta of order 4.
+Standard Runge-Kutta of order 4.
 	"""
 	def delta(self, t, u0, h):
 		f = self.system.f
@@ -36,7 +49,7 @@ class ExplicitTrapezoidal(Scheme):
 
 class RungeKutta34 (Scheme):
 	"""
-	Adaptive Runge-Kutta of order four.
+Adaptive Runge-Kutta of order four.
 	"""
 	error_order = 4.
 	# default tolerance
