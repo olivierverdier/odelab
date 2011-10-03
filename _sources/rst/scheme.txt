@@ -81,7 +81,16 @@ At this stage, the solver object has been initialized, and in particular has a i
 This is especially useful for using external numerical schemes, as those often require the right hand side and initial conditions to be known at initialization.
 An example of scheme using an external numerical scheme is given by :class:`~odelab.scheme.ode15s`, which uses SciPy's function ``odeint``.
 
+Family of Numerical Schemes
+===========================
 
+|project| comes with a variety of numerical schemes to be used out of the box.
+For instance:
+
+ * generic Runge-Kutta methods
+ * generic linear multi-step methods
+ * generic explicit general linear methods
+ * generic exponential methods
 
 ”Classical“ Numerical Scheme
 ============================

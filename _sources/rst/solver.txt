@@ -92,6 +92,8 @@ One may thus call::
 
     solver.plot2D(0,1) # plot coordinate 1 against coordinate 0
 
+.. _vanderpol_example:
+
 .. topic:: Example: Solving the van der Pol equation
 
     Here is an example of solving the van der Pol equations with a Runge-Kutta method and then plotting the result with ``plot2D``:

@@ -123,6 +123,19 @@ At this stage, the solver object has been initialized, and in particular has a i
 This is especially useful for using external numerical schemes, as those often require the right hand side and initial conditions to be known at initialization.
 An example of scheme using an external numerical scheme is given by <a class="reference internal" href="#odelab.scheme.ode15s" title="odelab.scheme.ode15s"><tt class="xref py py-class docutils literal"><span class="pre">ode15s</span></tt></a>, which uses SciPy&#8217;s function <tt class="docutils literal"><span class="pre">odeint</span></tt>.</p>
 </div>
+<div class="section" id="family-of-numerical-schemes">
+<h2>Family of Numerical Schemes<a class="headerlink" href="#family-of-numerical-schemes" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">odelab</span></tt> comes with a variety of numerical schemes to be used out of the box.
+For instance:</p>
+<blockquote>
+<div><ul class="simple">
+<li>generic Runge-Kutta methods</li>
+<li>generic linear multi-step methods</li>
+<li>generic explicit general linear methods</li>
+<li>generic exponential methods</li>
+</ul>
+</div></blockquote>
+</div>
 <div class="section" id="classical-numerical-scheme">
 <h2>”Classical“ Numerical Scheme<a class="headerlink" href="#classical-numerical-scheme" title="Permalink to this headline">¶</a></h2>
 <p>A collection of classical numerical scheme described in all the basic textbooks on differential equations.</p>
@@ -244,6 +257,7 @@ It is a BDF method of max order 5</p>
 <li class="toctree-l2"><a class="reference internal" href="#main-methods">Main Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time-adaptivity">Time Adaptivity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#initialization-and-external-solvers">Initialization and External Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#family-of-numerical-schemes">Family of Numerical Schemes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#classical-numerical-scheme">”Classical“ Numerical Scheme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-odelab.scheme">The <tt class="docutils literal"><span class="pre">Scheme</span></tt> class</a></li>
 </ul>

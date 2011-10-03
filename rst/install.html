@@ -62,17 +62,15 @@
 <span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>Quick installation instructions.
-<tt class="docutils literal"><span class="pre">odelab</span></tt> depends on several packages in order to function properly, apart from <tt class="docutils literal"><span class="pre">scipy</span></tt> and <tt class="docutils literal"><span class="pre">numpy</span></tt>:</p>
-<ul class="simple">
-<li><a class="reference external" href="https://github.com/PyTables/PyTables">PyTables</a>, a package for reading and writing files in the <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5 format</a>.</li>
-<li><a class="reference external" href="https://github.com/olivierverdier/python-progressbar">python-progressbar</a>, a package to display progress bars</li>
-<li><a class="reference external" href="https://github.com/Theano/Theano">Theano</a> will be used in future versions.</li>
-</ul>
-<p>You may install those packages with <tt class="docutils literal"><span class="pre">pip</span></tt> by running the following command</p>
-<div class="highlight-sh"><div class="highlight"><pre>pip install -r path/to/odelab/requirements.txt
+<p><tt class="docutils literal"><span class="pre">odelab</span></tt> itself may be installed from the <a class="reference external" href="https://github.com/olivierverdier/odelab">odelab github repository</a> by running:</p>
+<div class="highlight-sh"><div class="highlight"><pre>pip install -e git+https://github.com/olivierverdier/odelab#egg<span class="o">=</span>odelab
 </pre></div>
 </div>
+<p><tt class="docutils literal"><span class="pre">odelab</span></tt> depends on other packages in order to function properly, apart from <tt class="docutils literal"><span class="pre">scipy</span></tt>, <tt class="docutils literal"><span class="pre">numpy</span></tt> and <tt class="docutils literal"><span class="pre">matplotlib</span></tt>:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/PyTables/PyTables">PyTables</a>, a package for reading and writing files in the <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5 format</a>.</li>
+<li><a class="reference external" href="https://github.com/olivierverdier/python-progressbar">python-progressbar</a>, an optional package to display progress bars</li>
+</ul>
 <p>The only package which might be problematic to install is <tt class="docutils literal"><span class="pre">PyTables</span></tt>.</p>
 </div>
 <div class="section" id="test-the-installation">
