@@ -108,6 +108,19 @@ To summarize what we have up to now, the whole code is the following:
 .. plot:: code/explot.py
 
 
+.. _vanderpol_example:
+
+Example with Plot
+-----------------
+
+.. topic:: Example: Solving the van der Pol equation
+
+    Here is an example of solving the van der Pol equations with a Runge-Kutta method and then plotting the result with ``plot2D``.
+    See :ref:`simulation_name` and :ref:`plot2d` for more information.
+
+    .. plot:: code/vanderpol.py
+        :include-source:
+
 Architecture
 ============
 
