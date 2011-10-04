@@ -59,8 +59,8 @@ class Harness_RKDAE(object):
 		pl.legend()
 		oz = -regz[0]
 		ol = -regl[0]
-		nt.assert_true(ol > self.expected_orders[0] - self.tol)
-		nt.assert_true(oz > self.expected_orders[1] - self.tol)
+		nt.assert_greater(ol, self.expected_orders[0] - self.tol)
+		nt.assert_greater(oz, self.expected_orders[1] - self.tol)
 		return sol
 
 class Test_LDIRK243(Harness_RKDAE):
