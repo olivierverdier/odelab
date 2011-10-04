@@ -61,6 +61,9 @@ def test_initialize_len1():
 	solver.initialize(u0=1.)
 	nt.assert_equal(len(solver),1)
 
+class InitializedTwiceError(ValueError):
+	pass
+
 class Scheme_init_once(ExplicitEuler):
 	def __init__(self, *args,**kwargs):
 		super(Scheme_init_once,self).__init__(*args, **kwargs)
@@ -68,7 +71,7 @@ class Scheme_init_once(ExplicitEuler):
 
 	def initialize(self, events):
 		if self.is_initialized:
-			raise Exception('initialized twice!')
+			raise InitializedTwiceError('initialized twice!')
 		super(Scheme_init_once,self).initialize(events)
 		self.is_initialized = True
 
@@ -83,6 +86,15 @@ def test_start_from_two():
 	solver.run(1.)
 	print len(solver)
 	print solver.get_events()
+
+@nt.raises(InitializedTwiceError)
+def test_initialize_reset_scheme():
+	solver = Solver(Scheme_init_once(.1), System(f))
+	solver.initialize(u0=1., name='first')
+	nt.assert_is(solver.current_scheme, None)
+	solver.run(1.)
+	solver.initialize(u0=2.,name='second')
+	solver.run(1.)
 
 @nt.raises(MultistepInitializationError)
 def test_multistep_init_exception():

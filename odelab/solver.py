@@ -64,6 +64,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 :param scalar time: span of the simulation
 :param string name: name of this simulation
 		"""
+		self.current_scheme = None
 		if u0 is None: # initial condition not provided
 			raise self.NotInitialized("You must provide an initial condition.")
 		if np.isscalar(u0):
@@ -133,7 +134,7 @@ Method to open the data store. Any access to the events must make use of this me
 			if stage < tail_length: # not enough past values to run main scheme
 				if stage == 1:
 					self.set_scheme(self.init_scheme, events)
-			if stage == tail_length: # main scheme kicks in
+			elif self.current_scheme is None: # main scheme kicks in
 				self.set_scheme(self.scheme, events)
 			event = self.step(event)
 			yield event
