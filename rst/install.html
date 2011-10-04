@@ -66,10 +66,11 @@
 <div class="highlight-sh"><div class="highlight"><pre>pip install -e git+https://github.com/olivierverdier/odelab#egg<span class="o">=</span>odelab
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">odelab</span></tt> depends on other packages in order to function properly, apart from <tt class="docutils literal"><span class="pre">scipy</span></tt>, <tt class="docutils literal"><span class="pre">numpy</span></tt> and <tt class="docutils literal"><span class="pre">matplotlib</span></tt>:</p>
+<p><tt class="docutils literal"><span class="pre">odelab</span></tt> depends <tt class="docutils literal"><span class="pre">scipy</span></tt>, <tt class="docutils literal"><span class="pre">numpy</span></tt> and <tt class="docutils literal"><span class="pre">matplotlib</span></tt> in order to function properly.</p>
+<p>There are also packages that, although not strictly necessary, improve <tt class="docutils literal"><span class="pre">odelab</span></tt> significantly:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/PyTables/PyTables">PyTables</a>, a package for reading and writing files in the <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5 format</a>.</li>
-<li><a class="reference external" href="https://github.com/olivierverdier/python-progressbar">python-progressbar</a>, an optional package to display progress bars</li>
+<li><a class="reference external" href="https://github.com/PyTables/PyTables">PyTables</a>, a package for reading and writing files in the <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5 format</a>. Without this package, you will not be able to automatically store the simulation results on disk, and the memory usage may by higher.</li>
+<li><a class="reference external" href="https://github.com/olivierverdier/python-progressbar">python-progressbar</a>, an optional package to display progress bars. Mostly interesting for very long simulation, as it indicates an estimate of the time left before the simulation is finished.</li>
 </ul>
 <p>The only package which might be problematic to install is <tt class="docutils literal"><span class="pre">PyTables</span></tt>.</p>
 </div>
