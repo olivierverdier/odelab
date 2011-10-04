@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from __future__ import division, unicode_literals
+from __future__ import division
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # −*− coding: UTF−8 −*−
-from __future__ import division, unicode_literals
+from __future__ import division
 
 from odelab.solver import Solver, load_solver
 from odelab.system import System
