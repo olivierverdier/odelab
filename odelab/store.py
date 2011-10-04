@@ -12,9 +12,36 @@ Stores data produced by the solver, if PyTables is available.
 
 from contextlib import contextmanager
 import warnings
+import numpy as np
 
 class SimpleStore(object):
-	pass
+	def __init__(self, path=None):
+		self.info = {}
+
+	def __getitem__(self, key):
+		return self.info[key]
+
+	def __setitem__(self, key, value):
+		self.info[key] = value
+
+	def initialize(self, event0, name):
+		self.name = name
+		self.events = []
+
+	def __len__(self):
+		return len(self.events)
+
+	def append(self, event):
+		self.events.append(event)
+
+	@contextmanager
+	def open(self, name=None, write=False):
+		events = np.array(self.events).T
+		yield events
+
+	def get_nb_stage(self, events):
+		return len(events.T)
+
 
 class PyTableStore(SimpleStore):
 	class AlreadyInitialized(Exception):
@@ -82,7 +109,11 @@ class PyTableStore(SimpleStore):
 			node = f.getNode('/'+self.name)
 			yield node
 
-import tables
-
-Store = PyTableStore
+try:
+	import tables
+except ImportError:
+	warnings.warn('PyTables is not available; falling back to a simpler store')
+	Store = SimpleStore
+else:
+	Store = PyTableStore
 

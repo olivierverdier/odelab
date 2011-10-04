@@ -104,7 +104,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 			self.store['duration'] = 0.
 
 			# append the initial condition:
-			self.store.append(np.array([event0]))
+			self.store.append(event0)
 
 
 	@contextmanager

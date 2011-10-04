@@ -7,7 +7,7 @@ from odelab.scheme import *
 from odelab.scheme.classic import *
 from odelab.scheme.exponential import *
 
-from odelab.store import Store
+from odelab.store import Store, PyTableStore, SimpleStore
 
 from odelab.system.classic import *
 from odelab.system.exponential import *
@@ -133,8 +133,10 @@ class Harness_Solver(Harness):
 		nt.assert_equal(self.solver.time, Solver.time)
 		nt.assert_equal(len(self.solver), 1)
 
-	@nt.raises(Store.AlreadyInitialized)
+	@nt.raises(PyTableStore.AlreadyInitialized)
 	def test_initialize_twice(self):
+		if Store is SimpleStore:
+			raise SkipTest()
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		self.solver.initialize(u0=u0)
