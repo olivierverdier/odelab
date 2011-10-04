@@ -136,7 +136,7 @@ Method to open the data store. Any access to the events must make use of this me
 					self.set_scheme(self.init_scheme, events)
 			elif self.current_scheme is None: # main scheme kicks in
 				self.set_scheme(self.scheme, events)
-			event = self.step(event)
+			event = self.step()
 			yield event
 
 
@@ -334,7 +334,7 @@ Plot.
 		self.current_scheme.system = self.system
 		self.current_scheme.initialize(events)
 
-	def step(self, event):
+	def step(self):
 		return self.current_scheme.do_step()
 
 SingleStepSolver = Solver
