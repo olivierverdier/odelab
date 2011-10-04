@@ -3,3 +3,6 @@
 from __future__ import division
 
 from .scheme import *
+
+import matplotlib
+matplotlib.use('agg')
