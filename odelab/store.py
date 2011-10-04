@@ -72,6 +72,9 @@ class PyTableStore(SimpleStore):
 			size = events.nrows
 		return size
 
+	def get_nb_stage(self, events):
+		return len(events)
+
 	@contextmanager
 	def open(self, write=False):
 		mode = ['r','a'][write]
