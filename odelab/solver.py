@@ -133,7 +133,7 @@ Method to open the data store. Any access to the events must make use of this me
 			if stage < tail_length: # not enough past values to run main scheme
 				if stage == 1:
 					self.set_scheme(self.init_scheme, events)
-			if stage == tail_length or init_stage > tail_length: # main scheme kicks in
+			if stage == tail_length: # main scheme kicks in
 				self.set_scheme(self.scheme, events)
 			event = self.step(event)
 			yield event

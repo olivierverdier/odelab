@@ -56,6 +56,34 @@ def test_duration():
 	d2 = solver.store['duration']
 	nt.assert_greater(d2, d1)
 
+def test_initialize_len1():
+	solver = Solver(ExplicitEuler(.1),System(f))
+	solver.initialize(u0=1.)
+	nt.assert_equal(len(solver),1)
+
+class Scheme_init_once(ExplicitEuler):
+	def __init__(self, *args,**kwargs):
+		super(Scheme_init_once,self).__init__(*args, **kwargs)
+		self.is_initialized = False
+
+	def initialize(self, events):
+		if self.is_initialized:
+			raise Exception('initialized twice!')
+		super(Scheme_init_once,self).initialize(events)
+		self.is_initialized = True
+
+def test_start_from_two():
+	# check that a scheme is not initialized twice, even if we start from more than one event
+	dt = .1
+	solver = Solver(Scheme_init_once(dt), System(f))
+	solver.initialize(u0=1.)
+	solver.run(2*dt)
+	nt.assert_equal(len(solver),3)
+	solver.scheme.is_initialized = False
+	solver.run(1.)
+	print len(solver)
+	print solver.get_events()
+
 class Test_Access(object):
 	"""
 	Test the Solver.get_events method.
