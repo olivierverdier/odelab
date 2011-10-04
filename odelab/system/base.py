@@ -16,7 +16,7 @@ class System(object):
 			self.f = f
 
 	def label(self, component):
-		return '%d' % component
+		return '%s' % component
 
 	def preprocess(self, u0):
 		return u0
