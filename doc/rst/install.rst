@@ -12,10 +12,12 @@ Instructions
 
     pip install -e git+https://github.com/olivierverdier/odelab#egg=odelab
 
-|project| depends on other packages in order to function properly, apart from ``scipy``, ``numpy`` and ``matplotlib``:
+|project| depends ``scipy``, ``numpy`` and ``matplotlib`` in order to function properly.
 
-* `PyTables`_, a package for reading and writing files in the `HDF5 format`_.
-* `python-progressbar`_, an optional package to display progress bars
+There are also packages that, although not strictly necessary, improve |project| significantly:
+
+* `PyTables`_, a package for reading and writing files in the `HDF5 format`_. Without this package, you will not be able to automatically store the simulation results on disk, and the memory usage may by higher.
+* `python-progressbar`_, an optional package to display progress bars. Mostly interesting for very long simulation, as it indicates an estimate of the time left before the simulation is finished.
 
     
 The only package which might be problematic to install is ``PyTables``.
