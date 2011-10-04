@@ -84,6 +84,15 @@ def test_start_from_two():
 	print len(solver)
 	print solver.get_events()
 
+@nt.raises(MultistepInitializationError)
+def test_multistep_init_exception():
+	multi_scheme = AdamsBashforth(2)
+	multi_scheme.h = .1
+	s = Solver(scheme=multi_scheme, system=System(f))
+	s.initialize(u0=1.)
+	with s.open_store() as events:
+		s.set_scheme(multi_scheme, events)
+
 class Test_Access(object):
 	"""
 	Test the Solver.get_events method.
