@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 # −*− coding: UTF−8 −*−
-from __future__ import division
+from __future__ import division, unicode_literals
 
 from odelab.solver import Solver, load_solver
 from odelab.system import System
 from odelab.experiment import Experiment
 
 import numpy as np
-import nose.tools as nt
 import numpy.testing as npt
+
+import nose.tools as nt
+from nose.plugins.skip import SkipTest
 
 import tempfile
 import os
+
+from odelab.store import Store, SimpleStore
+if Store is SimpleStore:
+	raise SkipTest('Solver loading makes no sense without PyTables')
 
 def f(t,u):
 	return -u

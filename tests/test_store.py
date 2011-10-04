@@ -2,10 +2,11 @@
 # -*- coding: UTF-8 -*-
 from __future__ import division
 
-from odelab.store import SimpleStore, PyTableStore
+from odelab.store import SimpleStore, PyTableStore, Store
 import numpy as np
 
 import nose.tools as nt
+from nose.plugins.skip import SkipTest
 
 class Harness_Store(object):
 	def test_open(self):
@@ -35,5 +36,7 @@ class Test_SimpleStore(Harness_Store):
 
 class Test_PyTableStore(Harness_Store):
 	def setUp(self):
+		if Store is SimpleStore:
+			raise SkipTest()
 		self.s = PyTableStore()
 		self.s.initialize(np.array([1., 0]), name='foo')
