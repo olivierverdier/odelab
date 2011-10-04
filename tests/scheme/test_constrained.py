@@ -33,7 +33,7 @@ class Harness_Osc(object):
 
 
 	z0s = np.linspace(-.9,.9,10)*np.sqrt(2)
-	N = 40
+	N = 15
 
 	decimal = 1
 
@@ -112,7 +112,7 @@ class Test_NROsc_SP3(Test_NROsc):
 # Vertical Rolling Disk
 
 class Harness_VerticalRollingDisk(object):
-	h = .01
+	h = .1
 	def setUp(self):
 		self.sys = VerticalRollingDisk()
 		self.setup_scheme()

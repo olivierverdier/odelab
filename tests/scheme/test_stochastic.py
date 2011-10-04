@@ -27,7 +27,8 @@ class Test_Differentiator(object):
 		sys = Differentiator(LinBumpSignal(self.V0,self.t0))
 ## 		sys.kT = 0. # no noise
 		scheme = EulerMaruyama()
-		scheme.h = 2.5e-11
+		## scheme.h = 2.5e-11
+		scheme.h = self.t0
 		self.s = SingleStepSolver(scheme, sys)
 		self.s.initialize(u0 = np.array([0,0,0,0,0.]),  time=5*self.t0)
 		self.s.run()
