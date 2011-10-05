@@ -89,6 +89,14 @@ class Harness_Circle(object):
 		self.s.plot(components=['output'], error=True)
 		self.s.plot_function('output')
 
+	def test_resolution(self, max_res=10):
+		p = self.s.plot(plot_exact=False)
+		p.max_plot_res = max_res
+		p.plot()
+		a = p.axis
+		nb_points = a.get_lines()[-1].get_data()
+		nt.assert_less_equal(len(nb_points), max_res)
+
 class Test_Circle_EEuler(Harness_Circle):
 	def set_scheme(self):
 		self.scheme = ExplicitEuler()

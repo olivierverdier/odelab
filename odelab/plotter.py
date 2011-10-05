@@ -16,9 +16,8 @@ class Plotter(object):
 		plot_res = plot_res or self.max_plot_res
 		# some sampling
 		size = len(self.solver)
-		stride = np.ceil(size/self.max_plot_res)
-		with self.solver.open_store() as events:
-			return events[:,::stride]
+		sampling_rate = self.max_plot_res/size
+		return self.solver.get_events(sampling_rate=sampling_rate)
 
 	def get_components(self):
 		# components
