@@ -262,7 +262,7 @@ Method to open the data store. Any access to the events must make use of this me
 		size = len(indices)
 		initial_index = indices[0]
 		final_index = indices[-1]+1
-		stride = np.ceil(1/sampling_rate)
+		stride = int(np.ceil(1/sampling_rate))
 		with self.open_store() as events:
 			return events[:,slice(initial_index, final_index, stride)]
 
