@@ -380,7 +380,7 @@ Create a solver object from a path to an hdf5 file.
 # try to import progressbar and use it if it is available
 try:
 	import progressbar as pb
-	widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar(u'■'), ' ',  ' ', pb.ETA(),  ]
+	widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar('='), ' ',  ' ', pb.ETA(),  ]
 	progress_bar = pb.ProgressBar(widgets=widgets)
 	del pb
 	with_progressbar = True
