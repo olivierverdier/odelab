@@ -360,7 +360,7 @@ def test_rkdae():
 		scheme.h = .1
 		sol = SingleStepSolver(scheme, sys)
 		sol.initialize(u0=u0, time=1)
-		yield CompareExact('RadauIIA-{}'.format(s)), sol, u0, 2
+		yield CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2
 
 
 

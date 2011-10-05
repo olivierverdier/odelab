@@ -192,7 +192,7 @@ class Harness_Solver(Harness):
 		self.check_const(const_c, 1.+0j, 1.+1.j)
 
 	def test_repr(self):
-		expected = '<Solver: {}'.format(repr(self.solver.scheme))
+		expected = '<Solver: {0}'.format(repr(self.solver.scheme))
 		r = repr(self.solver)
 		nt.assert_true(r.startswith(expected))
 		if self.solver.init_scheme is not None:

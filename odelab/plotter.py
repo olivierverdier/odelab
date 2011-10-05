@@ -110,7 +110,7 @@ class Plotter(object):
 			exact = pts.get('exact', None)
 			if exact is not None:
 				current_color = axis.lines[-1].get_color() # figure out current colour
-				axis.plot(ats, exact, ls='-', lw=2, label='{}*'.format(label), color=current_color)
+				axis.plot(ats, exact, ls='-', lw=2, label='{0}*'.format(label), color=current_color)
 
 		axis.set_xlabel(pts['time_label'])
 		axis.legend()

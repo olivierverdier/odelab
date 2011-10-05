@@ -323,7 +323,7 @@ Plot.
 		solver = type(self).__name__
 		scheme = repr(self.scheme)
 		if self.init_scheme is not None:
-			init_scheme = '({})'.format(repr(self.init_scheme))
+			init_scheme = '({0})'.format(repr(self.init_scheme))
 		else:
 			init_scheme = ''
 		system = repr(self.system)

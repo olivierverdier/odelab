@@ -37,7 +37,7 @@ class Harness_RKDAE(object):
 		ks = np.arange(1,5)
 		for k in ks:
 			self.scheme.h = pow(2,-k)
-			sol.initialize(u0=self.u0,time=1, name='{}_{}'.format(type(self).__name__, k))
+			sol.initialize(u0=self.u0,time=1, name='{0}_{1}'.format(type(self).__name__, k))
 			sol.run()
 			zexact = sol.system.exact(sol.final_time(),self.u0)[0]
 			lexact = sol.system.exact(sol.final_time(),self.u0)[2]
