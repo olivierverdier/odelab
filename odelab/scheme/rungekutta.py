@@ -11,18 +11,6 @@ class MultistepInitializationError(ValueError):
 Raised when not enough initial steps are available to start the multistep scheme.
 	"""
 
-class RungeKutta(Scheme):
-	"""
-	Collection of classes containing the coefficients of various Runge-Kutta methods.
-
-	:Attributes:
-		tableaux : dictionary
-			dictionary containing a Butcher tableau for every available number of stages.
-	"""
-	@classmethod
-	def time_vector(cls, tableau):
-		return tableau[:,0]
-
 class GeneralLinear(Scheme):
 	pass
 
@@ -134,6 +122,17 @@ class Butcher(ExplicitGeneralLinear):
 		[[-3/8, -3/8,-3/4,7/4],
 		[-7/8,9/8,-3/4,7/4]])
 	}
+class RungeKutta(Scheme):
+	"""
+	Collection of classes containing the coefficients of various Runge-Kutta methods.
+
+	:Attributes:
+		tableaux : dictionary
+			dictionary containing a Butcher tableau for every available number of stages.
+	"""
+	@classmethod
+	def time_vector(cls, tableau):
+		return tableau[:,0]
 
 class ImplicitEuler(RungeKutta):
 	tableaux = {
