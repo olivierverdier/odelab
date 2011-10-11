@@ -9,6 +9,8 @@ from odelab.system import *
 from odelab.system.nonholonomic.contactoscillator import *
 from odelab.solver import *
 
+import odelab.scheme.rungekutta as rk
+
 import numpy.testing as npt
 import pylab as pl
 from pylab import *
@@ -356,7 +358,7 @@ def test_rkdae():
 	sys = GraphSystem(sq)
 	u0 = array([0.,0.,1.])
 	for s in range(2,4):
-		scheme = RKDAE(RadauIIA.tableaux[s])
+		scheme = RKDAE(rk.RadauIIA.tableaux[s])
 		scheme.h = .1
 		sol = SingleStepSolver(scheme, sys)
 		sol.initialize(u0=u0, time=1)

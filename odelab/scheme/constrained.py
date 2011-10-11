@@ -6,7 +6,6 @@ import numpy as np
 
 from odelab.scheme import Scheme
 
-from odelab.scheme.rungekutta import *
 
 import odelab.newton as _rt
 
@@ -164,6 +163,8 @@ Non-holonomic Leap Frog:
 		q1 = q0 + h*v1
 		u1 = np.hstack([q1,vl1])
 		return t+h, u1
+
+from .rungekutta import RungeKutta, LobattoIIIA
 
 class RKDAE(Scheme):
 	"""
