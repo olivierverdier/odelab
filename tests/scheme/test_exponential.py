@@ -75,7 +75,6 @@ class Harness_ComplexConvection(object):
 		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
 
 	def test_run(self, do_plot=False):
-		raise SkipTest('Test fail because the system is too big to be stored in a HDF5 header')
 		self.B = BurgersComplex(viscosity=0., size=32)
 		umax=.5
 		self.u0 = 2*umax*(.5 - np.abs(self.B.points))
@@ -105,11 +104,11 @@ class Test_CC_EE(Harness_ComplexConvection):
 	N=150
 
 class Test_CC_RK4(Harness_ComplexConvection):
-	scheme = Kutta(4)
+	scheme = Kutta4()
 	N = 10
 
 class Test_CC_RK38(Harness_ComplexConvection):
-	scheme = Kutta(38)
+	scheme = Kutta38()
 	N = 10
 
 class Test_CC_Heun(Harness_ComplexConvection):
@@ -153,23 +152,23 @@ class Test_CC_ode15s(Harness_ComplexConvection):
 	N=2
 
 class Test_CC_AB1(Harness_ComplexConvection):
-	scheme = AdamsBashforth(1)
+	scheme = AdamsBashforth1()
 	N = 150
 
 class Test_CC_AB2(Harness_ComplexConvection):
-	scheme = AdamsBashforth(2)
+	scheme = AdamsBashforth2()
 	N = 50
 
 class Test_CC_AB2e(Harness_ComplexConvection):
-	scheme = AdamsBashforth('2e')
+	scheme = AdamsBashforth2e()
 	N = 50
 
 class Test_CC_B1(Harness_ComplexConvection):
-	scheme = Butcher(1)
+	scheme = Butcher1()
 	N=50
 
 class Test_CC_B3(Harness_ComplexConvection):
-	scheme = Butcher(3)
+	scheme = Butcher3()
 	N=120
 
 # Auxiliary test to check that the tableaux are square

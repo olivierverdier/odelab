@@ -20,14 +20,9 @@ class ExplicitGeneralLinear(GeneralLinear):
 	"""
 	scaled_input = True # whether to have the input as (y_0, hf(y_1), hf(y_2)...)
 
-	def __init__(self, nb_stages=None):
-		super(ExplicitGeneralLinear, self).__init__()
-		if nb_stages is not None:
-			self.nb_stages = nb_stages
-
 	@property
 	def tail_length(self):
-		return len(self.tableaux[self.nb_stages][1])
+		return len(self.tableau[1])
 
 	def initialize(self,events):
 		super(ExplicitGeneralLinear, self).initialize(events)
@@ -43,7 +38,7 @@ class ExplicitGeneralLinear(GeneralLinear):
 
 	def step(self, t, u, h):
 		f = self.system.f
-		ua, vb = self.tableaux[self.nb_stages]
+		ua, vb = self.tableau
 		nb_stages = len(ua)
 		nb_steps = len(vb)
 		Y = np.zeros([len(u), nb_stages+nb_steps], dtype=u.dtype)
@@ -65,63 +60,65 @@ class ExplicitGeneralLinear(GeneralLinear):
 
 
 class Heun(ExplicitGeneralLinear):
-	nb_stages = 3
-	tableaux = {
-	3: ([[0,None,None,None,1],
+	tableau = ([[0,None,None,None,1],
 		[1/3,1/3,None,None,1],
 		[2/3, 0,2/3,None,1]],
 		[[1/4,0,3/4,1]]
 	)
-	}
 
 class Kutta(ExplicitGeneralLinear):
-	tableaux = {
-	4: ([	[0, None, None, None, None,1],
+	pass
+
+class Kutta4(Kutta):
+	tableau = ([	[0, None, None, None, None,1],
 			[1/2, 1/2, None, None, None,1],
 			[1/2, None, 1/2, None, None,1],
 			[1., None, None, 1, None,1]],
-				[[1/6, 1/3, 1/3, 1/6, 1]]),
+				[[1/6, 1/3, 1/3, 1/6, 1]])
 
-	38: ([[0,None,None,None,None,1],
+class Kutta38(Kutta):
+	tableau = ([[0,None,None,None,None,1],
 		[1/3,1/3,None,None,None,1],
 		[2/3,-1/3, 1.,None,None,1],
 		[1, 1, -1, 1, None,1]],
 		[[1/8,3/8,3/8,1/8,1]])
-	}
-
 
 class AdamsBashforth(ExplicitGeneralLinear):
+	pass
 
+class AdamsBashforth1(AdamsBashforth):
+	tableau = ([[0, None, 1]], [[1, 1]])
 
-	tableaux = {
-	1: ([[0, None, 1]], [[1, 1]]),
-	2: ([[0, None, 1, 3/2,-1/2]],
+class AdamsBashforth2(AdamsBashforth):
+	tableau = ([[0, None, 1, 3/2,-1/2]],
 		[	[None,1, 3/2,-1/2],
 			[1, None, None, None],
 			[None,None,1,None]
-		]),
-	'2e': ([	[0, None, None, 1, None],
+		])
+
+class AdamsBashforth2e(AdamsBashforth):
+	tableau = ([	[0, None, None, 1, None],
 			[1., 3/2, None, 1, -1/2]
 		],
 		[	[3/2, None, 1, -1/2],
 			[1, None, None, None]
 		])
 
-	}
-
 class Butcher(ExplicitGeneralLinear):
 	scaled_input = False
 
-	tableaux = {
-	1: ([[0, None, None, 1, 0],
+class Butcher1(Butcher):
+	tableau = ([[0, None, None, 1, 0],
 			[1., 2, None, 0, 1]],
 			[[5/4, 1/4, 1/2, 1/2],
-			[3/4, -1/4, 1/2, 1/2]]),
-	3: ([[0, None, None, 1, 0],
+			[3/4, -1/4, 1/2, 1/2]])
+
+class Butcher3(Butcher):
+	tableau = ([[0, None, None, 1, 0],
 		[1, None, None, 0, 1]],
 		[[-3/8, -3/8,-3/4,7/4],
 		[-7/8,9/8,-3/4,7/4]])
-	}
+
 class RungeKutta(Scheme):
 	"""
 	Collection of classes containing the coefficients of various Runge-Kutta methods.

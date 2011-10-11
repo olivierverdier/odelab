@@ -38,6 +38,13 @@ class Burgers(Exponential):
 
 
 class BurgersComplex(Burgers):
+	def __getstate__(self):
+		state = self.__dict__.copy()
+		del state['laplace']
+		del state['points']
+		del state['k']
+		return state
+
 	def initialize(self):
 		self.k = 2*np.pi*np.array(np.fft.fftfreq(self.size, 1/self.size),dtype='complex')
 		self.k[len(self.k)/2] = 0

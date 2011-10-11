@@ -98,8 +98,7 @@ def test_initialize_reset_scheme():
 
 @nt.raises(MultistepInitializationError)
 def test_multistep_init_exception():
-	multi_scheme = AdamsBashforth(2)
-	multi_scheme.h = .1
+	multi_scheme = AdamsBashforth2(.1)
 	s = Solver(scheme=multi_scheme, system=System(f))
 	s.initialize(u0=1.)
 	with s.open_store() as events:
@@ -217,8 +216,7 @@ class Test_RK34(Harness_Solver):
 
 class Test_AB(Harness_Solver):
 	def setup_solver(self):
-		multi_scheme = AdamsBashforth(2)
-		multi_scheme.h = .1
+		multi_scheme = AdamsBashforth2(.1)
 		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
 class Test_RK34Vdp(object):
