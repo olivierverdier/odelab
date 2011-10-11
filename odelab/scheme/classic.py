@@ -14,7 +14,7 @@ Explicit version of the Euler method, defined by:
 	u_1 = u_1 + hf(t_0, u_0)
 	"""
 	def delta(self, t, u0, h):
-		return t + h, self.h*self.system.f(t, u0)
+		return h, self.h*self.system.f(t, u0)
 
 class ImplicitEuler (Scheme):
 	"""
@@ -38,14 +38,14 @@ Standard Runge-Kutta of order 4.
 		Y2 = f(t + h/2., u0 + h*Y1/2.)
 		Y3 = f(t + h/2., u0 + h*Y2/2.)
 		Y4 = f(t + h, u0 + h*Y3)
-		return t+h, h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
+		return h, h/6.*(Y1 + 2.*Y2 + 2.*Y3 + Y4)
 
 class ExplicitTrapezoidal(Scheme):
 	def delta(self,t,u0,h):
 		f = self.system.f
 		u1 = u0 + h*f(t,u0)
 		res = h*.5*(f(t,u0) + f(t+h,u1))
-		return t+h, res
+		return h, res
 
 class RungeKutta34 (Scheme):
 	"""
@@ -70,4 +70,4 @@ Adaptive Runge-Kutta of order four.
 		Y4 = f(t + h, u0 + h*Y3)
 		error = np.linalg.norm(h/6*(2*Y2 + Z3 - 2*Y3 - Y4))
 		self.adjust_stepsize(error)
-		return t+h, h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)
+		return h, h/6*(Y1 + 2*Y2 + 2*Y3 + Y4)

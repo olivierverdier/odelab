@@ -62,7 +62,7 @@ Compute the difference between current and next state.
 			logging.info("Switch nonlinear solver")
 			root = newton.run(guess)
 		du = self.reconstruct(root,t,u0,h)
-		return t+h, du
+		return h, du
 
 	def get_guess(self,t,u0,h):
 		"""
@@ -82,11 +82,11 @@ Implementation of the Compensated Summation algorithm as described in [HaLuWa06]
 
 .. [HaLuWa06] Hairer, Lubich, Wanner *Geometric Numerical Integration*, Springer, 2006.
 		"""
-		t1, du = self.delta(t,u0,h)
+		dt, du = self.delta(t,u0,h)
 		self.roundoff += du
 		u1 = u0 + self.roundoff
 		self.roundoff += u0 - u1
-		return t1, u1
+		return t+dt, u1
 
 	def do_step(self):
 		event = self.last_event
