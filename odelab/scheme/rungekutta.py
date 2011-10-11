@@ -23,12 +23,14 @@ class RKDAE(RungeKutta):
 Partitioned Runge-Kutta for index 2 DAEs.
 	"""
 
-	def __init__(self, tableau):
-		super(RKDAE, self).__init__()
-		self.tableau = tableau
+	def __init__(self, *args, **kwargs):
+		super(RKDAE, self).__init__(*args, **kwargs)
+		tableau = kwargs.get('tableau')
+		if tableau is not None:
+			self.tableau = tableau
 		self.ts = self.get_ts()
-		nb_stages = len(tableau) - 1
-		self.QT = np.eye(nb_stages+1, nb_stages)
+		self.nb_stages = len(self.tableau) - 1
+		self.QT = np.eye(self.nb_stages+1, self.nb_stages)
 
 	def get_ts(self):
 		return RungeKutta.time_vector(self.tableau)
@@ -115,9 +117,8 @@ References:
 .. [Ja03] \L. Jay - *Solution of index 2 implicit differential-algebraic equations by Lobatto Runge-Kutta methods.* BIT 43, 1, 93-106 (2003). :doi:`10.1023/A:1023696822355`
 	"""
 
-	def __init__(self, nb_stages):
-		self.nb_stages = nb_stages
-		super(Spark, self).__init__(LobattoIIIA.tableaux[nb_stages])
+	def __init__(self, *args, **kwargs):
+		super(Spark, self).__init__(*args, **kwargs)
 		self.QT = self.compute_mean_stage_constraint().T
 
 
@@ -135,6 +136,7 @@ References:
 		L = np.linalg.inv(np.vstack([A1t, es]))
 		Q = np.dot(L,Q)
 		return Q
+
 
 class ImplicitEuler(RungeKutta):
 	tableaux = {
@@ -235,6 +237,15 @@ class LobattoIIID(RungeKutta):
 [1  ,1/12,  5/6,  1/12],
 [1 ,1/6, 2/3, 1/6]])
 	}
+
+class Spark2(Spark):
+	tableau = LobattoIIIA.tableaux[2]
+
+class Spark3(Spark):
+	tableau = LobattoIIIA.tableaux[3]
+
+class Spark4(Spark):
+	tableau = LobattoIIIA.tableaux[4]
 
 class RadauIIA(RungeKutta):
 	ss = sqrt(6)

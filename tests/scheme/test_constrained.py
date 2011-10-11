@@ -77,11 +77,11 @@ class Test_McOsc(Harness_Osc):
 
 class Test_JayOsc2(Harness_Osc):
 	def set_scheme(self):
-		self.scheme = Spark(2)
+		self.scheme = Spark2()
 
 class Test_JayOsc3(Harness_Osc):
 	def set_scheme(self):
-		self.scheme = Spark(3)
+		self.scheme = Spark3()
 
 class Test_HOsc(Harness_Osc):
 	decimal = 6
@@ -104,11 +104,11 @@ class Test_NROsc_H(Test_NROsc):
 
 class Test_NROsc_SP2(Test_NROsc):
 	def set_scheme(self):
-		self.scheme = Spark(2)
+		self.scheme = Spark2()
 
 class Test_NROsc_SP3(Test_NROsc):
 	def set_scheme(self):
-		self.scheme = Spark(3)
+		self.scheme = Spark3()
 
 
 # Vertical Rolling Disk
@@ -172,15 +172,15 @@ class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk):
 
 class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk):
 	def setup_scheme(self):
-		self.scheme = Spark(2)
+		self.scheme = Spark2()
 
 class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk):
 	def setup_scheme(self):
-		self.scheme = Spark(3)
+		self.scheme = Spark3()
 
 class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk):
 	def setup_scheme(self):
-		self.scheme = Spark(4)
+		self.scheme = Spark4()
 
 class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
 	def setup_scheme(self):
@@ -225,7 +225,7 @@ def minus_time(tx):
 class Test_SparkODE(object):
 	def setUp(self):
 		self.sys = ODESystem(minus_time)
-		scheme = Spark(4)
+		scheme = Spark4()
 		scheme.h = .1
 		self.s = SingleStepSolver(scheme, self.sys)
 		self.s.initialize(array([1.]))
@@ -247,7 +247,7 @@ class Test_JayExample(object):
 ## 		self.s.initialize(array([1.]))
 
 	def test_spark(self):
-		scheme = Spark(2)
+		scheme = Spark2()
 		scheme.h = .05
 		self.s = SingleStepSolver(scheme, self.sys)
 		self.s.initialize(u0=array([1.,1.,1.]), time=1,)
@@ -358,8 +358,7 @@ def test_rkdae():
 	sys = GraphSystem(sq)
 	u0 = array([0.,0.,1.])
 	for s in range(2,4):
-		scheme = RKDAE(RadauIIA.tableaux[s])
-		scheme.h = .1
+		scheme = RKDAE(.1, tableau=RadauIIA.tableaux[s])
 		sol = SingleStepSolver(scheme, sys)
 		sol.initialize(u0=u0, time=1)
 		yield CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2

@@ -66,21 +66,21 @@ class Harness_RKDAE(object):
 class Test_LDIRK243(Harness_RKDAE):
 	expected_orders = 1,2
 	def set_scheme(self):
-		self.scheme = RKDAE(RK.LDIRK343.tableaux[3])
+		self.scheme = RKDAE(tableau=RK.LDIRK343.tableaux[3])
 class Test_RadauIIA2(Harness_RKDAE):
 	expected_orders = 2,3
 	def set_scheme(self):
-		self.scheme = RKDAE(RK.RadauIIA.tableaux[2])
+		self.scheme = RKDAE(tableau=RK.RadauIIA.tableaux[2])
 class Test_RadauIIA3(Harness_RKDAE):
 	expected_orders = 3,5
 	def set_scheme(self):
-		self.scheme = RKDAE(RK.RadauIIA.tableaux[3])
+		self.scheme = RKDAE(tableau=RK.RadauIIA.tableaux[3])
 class Test_ImplicitEuler(Harness_RKDAE):
 	expected_orders = 1,1
 	def set_scheme(self):
-		self.scheme = RKDAE(RK.ImplicitEuler.tableaux[1])
+		self.scheme = RKDAE(tableau=RK.ImplicitEuler.tableaux[1])
 class Test_Gauss(Harness_RKDAE):
 	expected_orders = 1,1
 	def set_scheme(self):
-		self.scheme = RKDAE(RK.ImplicitEuler.tableaux[1])
+		self.scheme = RKDAE(tableau=RK.ImplicitEuler.tableaux[1])
 

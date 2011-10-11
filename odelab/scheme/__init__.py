@@ -17,7 +17,7 @@ class Scheme(object):
 	"""
 General Scheme class. Subclass this class to define a specific integration method.
 	"""
-	def __init__(self, h=None):
+	def __init__(self, h=None, *args, **kwargs):
 		if h is not None:
 			self.h = h
 
