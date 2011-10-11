@@ -46,7 +46,7 @@ class ExplicitGeneralLinear(GeneralLinear):
 		tail_length = self.tail_length
 		tail = np.array(events[:,-self.tail_length:])
 		if len(tail.T) < tail_length:
-			raise MultistepInitializationError('Only {0}/{1} past values given to initalize this multistep scheme'.format(len(tail.T),tail_length))
+			raise MultistepInitializationError('Only {0}/{1} past values given to initialize this multistep scheme'.format(len(tail.T),tail_length))
 		if self.scaled_input:
 			for i in range(tail.shape[1]-1):
 				tail[:-1,i] = self.h*self.system.f(tail[-1,i], tail[:-1,i])
