@@ -4,7 +4,7 @@ from __future__ import division
 
 import odelab.system as dsys
 from odelab.solver import SingleStepSolver
-from odelab.scheme.constrained import RKDAE
+from odelab.scheme.rungekutta import RKDAE
 import odelab.scheme.rungekutta as RK
 
 import numpy as np
