@@ -132,7 +132,7 @@ Nonholonomic Symplectic Euler.
 		v0 = self.system.velocity(u0)
 		dvl = root
 		du = np.hstack([h*v0,dvl])
-		return du
+		return h, du
 
 class NonHolonomicLeapFrog(Scheme):
 	ur"""
@@ -210,7 +210,7 @@ Partitioned Runge-Kutta for index 2 DAEs.
 	def reconstruct(self, full_result,t,u0,h):
 		# we keep the last Z value:
 		result = np.hstack([self.system.state(full_result[:,-1]), self.system.lag(full_result[:,-2])])
-		return  result
+		return  h, result
 
 class MultiRKDAE(RKDAE):
 	def dynamics(self, YZT):

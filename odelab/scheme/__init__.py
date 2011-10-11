@@ -48,6 +48,12 @@ Called the first time the scheme is used during a simulation.
 		self.roundoff = 0.
 		self.last_event = events[:,-1]
 
+	def get_residual(self, t,u0,h):
+		"""
+Return the residual, which root is u1 - u0.
+		"""
+		raise NotImplementedError()
+
 	def delta(self, t,u0,h):
 		"""
 Compute the difference between current and next state.
@@ -61,8 +67,8 @@ Compute the difference between current and next state.
 		except fsolve.DidNotConverge:
 			logging.info("Switch nonlinear solver")
 			root = newton.run(guess)
-		du = self.reconstruct(root,t,u0,h)
-		return h, du
+		dt, du = self.reconstruct(root,t,u0,h)
+		return dt, du
 
 	def get_guess(self,t,u0,h):
 		"""
@@ -74,7 +80,7 @@ Default guess for the Newton iterations, assuming that the residual has the same
 		"""
 Default reconstruction function. It assumes that the root is already delta u.
 		"""
-		return root
+		return h, root
 
 	def step(self, t,u0,h):
 		"""
