@@ -2,7 +2,8 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.system.base import *
+from odelab.system.base import System
+import numpy as np
 
 class MechanicalSystem(System):
 	def velocity(self, u):

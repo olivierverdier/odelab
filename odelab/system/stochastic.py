@@ -2,7 +2,8 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.system.base import *
+from odelab.system.base import System
+import numpy as np
 
 class OrnsteinUhlenbeck(System):
 	def __init__(self, sigma=1, theta=1, mu=1):

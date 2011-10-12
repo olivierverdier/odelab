@@ -2,7 +2,8 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.system.base import *
+from odelab.system import System
+import numpy as np
 
 class Exponential(System):
 	def __init__(self, nonlin, L):

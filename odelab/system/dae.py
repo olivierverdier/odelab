@@ -3,8 +3,9 @@
 from __future__ import division
 
 import odelab.scheme.rungekutta as rk
-
-from odelab.system.base import *
+from odelab.system import System
+import numpy as np
+from numpy import array
 
 class JayExample(System):
 	r"""

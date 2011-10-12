@@ -2,7 +2,10 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-from odelab.system.base import *
+from ..mechanics import MechanicalSystem
+from ...scheme import rungekutta as rk
+import numpy as np
+
 
 def tensordiag(T):
 	if len(np.shape(T)) == 3: # vector case
