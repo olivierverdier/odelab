@@ -28,6 +28,7 @@ from .store import Store
 
 from contextlib import contextmanager
 
+
 class Solver (object):
 	"""
 	General Solver class, that takes care of calling the step function and storing the intermediate results.
@@ -220,7 +221,7 @@ Method to open the data store. Any access to the events must make use of this me
 					self.store.append(event)
 					t = event[-1]
 					if self.with_progressbar:
-						progress_bar.update(t-t0)
+						progress_bar.update(np.real(t-t0))
 					if t > tf - self.t_tol:
 						break
 			else:
