@@ -2,7 +2,7 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
-import odelab.system as dsys
+from odelab.system.graph import QuasiGraphSystem, GraphSystem
 from odelab.solver import SingleStepSolver
 from odelab.scheme.rungekutta import RKDAE
 import odelab.scheme.rungekutta as RK
@@ -20,7 +20,7 @@ fsin.der = np.cos
 
 class Harness_RKDAE(object):
 	def setUp(self):
-		self.system = dsys.QuasiGraphSystem(fsin)
+		self.system = QuasiGraphSystem(fsin)
 		#self.system = GraphSystem(fsin)
 		self.u0 = np.array([0.,0.,1])
 		self.set_scheme()
@@ -83,4 +83,31 @@ class Test_Gauss(Harness_RKDAE):
 	expected_orders = 1,1
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.ImplicitEuler.tableaux[1])
+
+# RK DAE
+
+class CompareExact(object):
+	def __init__(self, name):
+		self.description = name
+	def __call__(self, solver, u0, components, decimal=2):
+		solver.run()
+		print solver.final_time()
+		print solver.final()
+		exact = solver.system.exact(solver.final_time(), u0)
+		#npt.assert_array_almost_equal(solver.final()[:components], exact[:components], decimal=decimal)
+
+def sq(x):
+	return .5*x*x
+def lin(x):
+	return x
+sq.der = lin
+
+def test_rkdae():
+	sys = GraphSystem(sq)
+	u0 = np.array([0.,0.,1.])
+	for s in range(2,4):
+		scheme = RKDAE(.1, tableau=RK.RadauIIA.tableaux[s])
+		sol = SingleStepSolver(scheme, sys)
+		sol.initialize(u0=u0, time=1)
+		yield CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2
 
