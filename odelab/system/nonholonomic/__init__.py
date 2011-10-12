@@ -10,7 +10,7 @@ def tensordiag(T):
 		T = np.column_stack([T[:,s,s] for s in range(np.shape(T)[1])])
 	return T
 
-class NonHolonomic(System):
+class NonHolonomic(MechanicalSystem):
 	"""
 	Creates a DAE system out of a non-holonomic one, suitable to be used with the :class:`odelab.scheme.constrained.Spark` scheme.
 	"""

@@ -8,6 +8,27 @@ class MechanicalSystem(System):
 	def velocity(self, u):
 		return self.momentum(u)
 
+	def position(self, u):
+		"""select the position component"""
+
+	def lag(self, u):
+		"""select the lagrangian component"""
+
+	def vel_lag_split(self, vl):
+		"""splits between velocity and lagrangian"""
+
+	def vel_lag_stack(self,v,l):
+		"""stacks together the velocity and lagrangian parts"""
+
+	def force(self, u):
+		r"""compute the force as a function of `u`
+		It may be interpreted as :math:`-\frac{∂H}{∂q}`"""
+
+	def codistribution(self, u):
+		"""compute the codistribution matrix at `u`"""
+
+
+
 class HarmonicOscillator(MechanicalSystem):
 	def position(self,u):
 		return u[:1]

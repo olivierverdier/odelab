@@ -24,31 +24,6 @@ class System(object):
 	def postprocess(self, u1):
 		return u1
 
-	def velocity(self,u):
-		r"""select the velocity component
-		It may be interpreted as :math:`\frac{∂H}{∂p}`"""
-
-	def position(self, u):
-		"""select the position component"""
-
-	def lag(self, u):
-		"""select the lagrangian component"""
-
-	def vel_lag_split(self, vl):
-		"""splits between velocity and lagrangian"""
-
-	def vel_lag_stack(self,v,l):
-		"""stacks together the velocity and lagrangian parts"""
-
-	def force(self, u):
-		r"""compute the force as a function of `u`
-		It may be interpreted as :math:`-\frac{∂H}{∂q}`"""
-
-	def codistribution(self, u):
-		"""compute the codistribution matrix at `u`"""
-
-
-
 class ODESystem(System):
 	"""
 	Simple wrapper to transform an ODE into a semi-explicit DAE.
