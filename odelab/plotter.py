@@ -42,6 +42,11 @@ class Plotter(object):
 		self.plot_exact = plot_exact
 		self.error = error
 
+	def component_getter(self, component):
+		def get_component(events):
+			return events[component]
+		return get_component
+
 	def generate_plot_data(self):
 		events = self.get_sample()
 		ats = events[-1]
@@ -57,17 +62,20 @@ class Plotter(object):
 		time_label = 'time'
 
 		for component_i, component in enumerate(components):
+			# three cases, string, function, or integer
 			if isinstance(component, basestring):
 				label = component
 				function = getattr(self.system, component)
-				data = function(events)
-				if compute_exact:
-					exact_comp = function(np.vstack([exact, ats]))
+			elif callable(component):
+				label = repr(component)
+				function = component
 			else:
 				label = self.system.label(component)
-				data = events[component]
-				if compute_exact:
-					exact_comp = exact[component]
+				function = self.component_getter(component)
+
+			data = function(events)
+			if compute_exact:
+				exact_comp = function(np.vstack([exact, ats]))
 
 			if self.error and sys_exact:
 				data = np.log10(np.abs(data - exact_comp))

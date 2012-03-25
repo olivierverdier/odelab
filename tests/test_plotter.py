@@ -38,6 +38,8 @@ class DummySystem(System):
 		c,s = np.cos(t), np.sin(t)
 		return np.vstack([c*x-s*y, s*x + c*y])
 
+def observer(uts):
+	return uts[0] + uts[1]
 
 def rotational(t,u):
 	"""
@@ -88,6 +90,8 @@ class Harness_Circle(object):
 		# the following should be tested:
 		self.s.plot(components=['output'], error=True)
 		self.s.plot_function('output')
+		quick_setup(plotter, components=[observer], plot_exact=True)
+		plotter.savefig(path)
 
 	def test_resolution(self, max_res=10):
 		p = self.s.plot(plot_exact=False)
