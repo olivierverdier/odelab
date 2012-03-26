@@ -40,3 +40,13 @@ class Test_PyTableStore(Harness_Store):
 			raise SkipTest()
 		self.s = PyTableStore()
 		self.s.initialize(np.array([1., 0]), name='foo')
+
+class Test_Exceptions(object):
+	def setUp(self):
+		if Store is SimpleStore:
+			raise SkipTest()
+		self.s = PyTableStore()
+
+	@nt.raises(PyTableStore.NotInitialized)
+	def test_raise_not_initialized(self):
+		len(self.s)

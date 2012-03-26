@@ -49,6 +49,11 @@ class PyTableStore(SimpleStore):
 		Raised when a solver is already initialized.
 		"""
 
+	class NotInitialized(Exception):
+		"""
+		Raised when store was not properly initialized.
+		"""
+
 	def __init__(self, path=None):
 		if path is None: # file does not exist
 			import tempfile
@@ -105,9 +110,12 @@ class PyTableStore(SimpleStore):
 	@contextmanager
 	def open(self, write=False):
 		mode = ['r','a'][write]
-		with tables.openFile(self.path, mode) as f:
-			node = f.getNode('/'+self.name)
-			yield node
+		try:
+			with tables.openFile(self.path, mode) as f:
+				node = f.getNode('/'+self.name)
+				yield node
+		except IOError:
+			raise self.NotInitialized('This store has not been initialized')
 
 try:
 	import tables
