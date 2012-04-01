@@ -1,8 +1,8 @@
 Exponential Solvers
-===================
+*******************
 
 Shifted Exponentials
-**********************
+======================
 
 The *shifted exponentials*, usually called *φ-functions*, are defined by the following series:
 
@@ -32,7 +32,7 @@ Indeed, by integration by parts, the recursion relation is the same as above, an
 
 
 Padé Approximations
-*******************
+===================
 
 One computes Padé approximations of the form
 

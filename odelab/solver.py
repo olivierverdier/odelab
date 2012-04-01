@@ -3,13 +3,11 @@
 :mod:`Solver` -- ODE Solvers
 ============================
 
-A collection of solvers for ODEs of various types.
-
 .. module :: solver
 .. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
 
-The :class:`Scheme` class contains methods on how to perform one iteration step.
-It is its responsibility to take care of the time step.
+The class :class:`~odelab.solver.Solver` takes care of calling the numerical scheme to produce data, and of storing that data.
+
 
 The higher level class is :class:`Solver`, which is initialized with an instance of a :class:`Scheme` class.
 """

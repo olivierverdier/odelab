@@ -2,7 +2,14 @@
 from __future__ import division
 
 """
-Collection of schemes. The main function of a :class:`odelab.scheme.Scheme` class is to define a :meth:`odelab.scheme.Scheme.step` which computes one step of the numerical solution.
+.. module :: scheme
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
+The :class:`~odelab.scheme.Scheme` class contains methods on how to perform one iteration step.
+It is its responsibility to take care of the time step.
+
+Collection of schemes.
+The main function of a :class:`odelab.scheme.Scheme` class is to define a :meth:`odelab.scheme.Scheme.step` which computes one step of the numerical solution.
 """
 
 import numpy as np

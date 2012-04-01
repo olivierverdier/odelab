@@ -3,6 +3,9 @@
 :mod:`System` -- Systems
 ============================
 
+.. module :: system
+.. moduleauthor :: Olivier Verdier <olivier.verdier@gmail.com>
+
 Examples of ODE systems.
 
 Collection of subclasses of the class :class:`odelab.system.System`.
