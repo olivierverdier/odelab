@@ -15,7 +15,6 @@ The main function of a :class:`odelab.scheme.Scheme` class is to define a :meth:
 import numpy as np
 import numpy.linalg
 
-import logging
 
 import odelab.newton as _rt
 
@@ -46,13 +45,8 @@ Compute the difference between current and next state.
 		"""
 		residual = self.get_residual(t,u0,h)
 		guess = self.get_guess(t,u0,h)
-		fsolve = _rt.FSolve(residual)
-		newton = _rt.Newton(residual)
-		try:
-			root = fsolve.run(guess)
-		except fsolve.DidNotConverge:
-			logging.info("Switch nonlinear solver")
-			root = newton.run(guess)
+		solver = _rt.MultipleSolver(residual)
+		root = solver.run(guess)
 		dt, du = self.reconstruct(root,t,u0,h)
 		return dt, du
 

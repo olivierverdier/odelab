@@ -83,3 +83,7 @@ class Test_FSolve(Harness):
 	solver_class = FSolve
 	def test_complex(self):
 		raise SkipTest("FSolve does not work with complex")
+
+class Test_MultipleSolver(Test_FSolve):
+	solver_class = MultipleSolver
+

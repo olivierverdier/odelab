@@ -5,6 +5,8 @@ import numpy as np
 from numpy import array, dot
 from numpy.linalg import norm, inv
 
+import logging
+
 def jacobian(F,x,h=1e-6):
 	"""
 	Numerical Jacobian at x.
@@ -104,3 +106,23 @@ class FSolve(RootSolver):
 		if success != 1:
 			raise self.DidNotConverge(msg)
 		return self.get_result(result)
+
+class MultipleSolver(object):
+	solver_classes = [FSolve, Newton]
+	def __init__(self, residual=None, level=0):
+		self.solvers = [S(residual,level) for S in self.solver_classes]
+
+	def run(self, guess):
+		for solver in self.solvers:
+			try:
+				root = solver.run(guess)
+			except solver.DidNotConverge as e:
+				logging.info("Switch nonlinear solver")
+			else:
+				return root
+		else:
+			raise e
+
+
+
+

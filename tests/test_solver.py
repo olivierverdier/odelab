@@ -13,7 +13,6 @@ from odelab.store import Store, PyTableStore, SimpleStore
 from odelab.system.classic import *
 from odelab.system.exponential import *
 from odelab import *
-import odelab.newton as rt
 
 import tempfile
 import os
