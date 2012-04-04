@@ -40,27 +40,6 @@ General Scheme class. Subclass this class to define a specific integration metho
 
 	tail_length = 1
 
-	def adjust_stepsize(self, error):
-		"""
-		Change the step size based on error estimation.
-		To be overridden for a variable step size method.
-		"""
-		pass # todo: write a general implementation
-
-
-	def initialize(self, events):
-		"""
-Called the first time the scheme is used during a simulation.
-		"""
-		self.roundoff = 0.
-		self.last_event = events[:,-1]
-
-	def get_residual(self, t,u0,h):
-		"""
-Return the residual, which root is u1 - u0.
-		"""
-		raise NotImplementedError()
-
 	def delta(self, t,u0,h):
 		"""
 Compute the difference between current and next state.
@@ -76,18 +55,6 @@ Compute the difference between current and next state.
 			root = newton.run(guess)
 		dt, du = self.reconstruct(root,t,u0,h)
 		return dt, du
-
-	def get_guess(self,t,u0,h):
-		"""
-Default guess for the Newton iterations, assuming that the residual has the same size as u.
-		"""
-		return np.zeros_like(u0)
-
-	def reconstruct(self, root,t,u0,h):
-		"""
-Default reconstruction function. It assumes that the root is already delta u.
-		"""
-		return h, root
 
 	def step(self, t,u0,h):
 		"""
@@ -107,6 +74,42 @@ Implementation of the Compensated Summation algorithm as described in [HaLuWa06]
 		new_t, new_u = self.step(t,u,self.h)
 		self.last_event = np.hstack([new_u, new_t])
 		return self.last_event
+
+	def initialize(self, events):
+		"""
+Called the first time the scheme is used during a simulation.
+		"""
+		self.roundoff = 0.
+		self.last_event = events[:,-1]
+
+
+	def adjust_stepsize(self, error):
+		"""
+		Change the step size based on error estimation.
+		To be overridden for a variable step size method.
+		"""
+		pass # todo: write a general implementation
+
+
+
+	def get_residual(self, t,u0,h):
+		"""
+Return the residual, which root is u1 - u0.
+		"""
+		raise NotImplementedError()
+
+	def get_guess(self,t,u0,h):
+		"""
+Default guess for the Newton iterations, assuming that the residual has the same size as u.
+		"""
+		return np.zeros_like(u0)
+
+	def reconstruct(self, root,t,u0,h):
+		"""
+Default reconstruction function. It assumes that the root is already delta u.
+		"""
+		return h, root
+
 
 
 
