@@ -160,6 +160,11 @@ Method to open the data store. Any access to the events must make use of this me
 		Raised to relay an exception occurred while running the solver.
 		"""
 
+	class NotRun(Exception):
+		"""
+		Raised when trying to access the events although the solver is empty.
+		"""
+
 	@contextmanager
 	def simulating(self):
 		self._start_time = time.time()
@@ -253,6 +258,8 @@ Method to open the data store. Any access to the events must make use of this me
 		Return the events from time t0, during time `time`, sampled.
 		"""
 		ts = self.get_times()
+		if len(ts) == 1:
+			raise self.NotRun('The solver has not been run. If you wanted to check the initial condition, use Solver.initial().')
 		if t0 is None:
 			t0 = ts[0]
 		if time is None:
