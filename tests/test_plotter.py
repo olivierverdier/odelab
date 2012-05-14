@@ -16,7 +16,6 @@ import os
 
 import numpy as np
 import numpy.testing as npt
-import nose.tools as nt
 
 import unittest
 
@@ -59,13 +58,13 @@ class Harness_Circle(object):
 		self.set_scheme()
 		self.s = SingleStepSolver(self.scheme, DummySystem(self.f))
 		self.scheme.h = .01
-		self.s.initialize(u0 = array([1.,0.]),  time = 10.)
-		self.s.run()
+		self.s.initialize(u0 = array([1.,0.]))
+		self.s.run(time = 10.)
 
 	def test_plot_2D(self):
 		pl.clf()
 		a = self.s.plot(1,time_component=0).axis
-		nt.assert_equal(a.get_xlabel(), 'x')
+		self.assertEqual(a.get_xlabel(), 'x')
 		self.s.plot2D()
 		for l in a.get_lines():
 			d = l.get_data()
@@ -74,7 +73,7 @@ class Harness_Circle(object):
 
 	def test_plot(self):
 		a = self.s.plot(plot_exact=False).axis
-		nt.assert_equal(a.get_xlabel(), 'time')
+		self.assertEqual(a.get_xlabel(), 'time')
 		self.s.plot(plot_exact=True)
 		tmp = tempfile.gettempdir()
 		path = os.path.join(tmp, 'test_fig.pdf')
@@ -83,12 +82,12 @@ class Harness_Circle(object):
 		plotter.savefig(path)
 		quick_setup(plotter, components=['output', 0], plot_exact=False)
 		plotter.savefig(path)
-		nt.assert_equal(len(plotter.axis.lines), 2)
+		self.assertEqual(len(plotter.axis.lines), 2)
 		quick_setup(plotter, components='output',)
 		plotter.savefig(path)
 		quick_setup(plotter, components=['output', 0], plot_exact=True)
 		plotter.savefig(path)
-		nt.assert_equal(len(plotter.axis.lines), 4)
+		self.assertEqual(len(plotter.axis.lines), 4)
 		# the following should be tested:
 		self.s.plot(components=['output'], error=True)
 		self.s.plot_function('output')
@@ -101,16 +100,17 @@ class Harness_Circle(object):
 		p.plot()
 		a = p.axis
 		nb_points = a.get_lines()[-1].get_data()
-		nt.assert_less_equal(len(nb_points), max_res)
+		self.assertLessEqual(len(nb_points), max_res)
 
 	def test_t0(self):
 		t0 = 1
 		p = self.s.plot(t0=t0)
 		p.plot()
 		a = p.axis
-		## data = a.get_lines()[-1].get_data()
-		bound = a.get_xbound()
-		self.assertEqual(bound[0],t0)
+		data = a.get_lines()[-1].get_data()
+		## bound = a.get_xbound()
+		bound = data[0][0]
+		self.assertAlmostEqual(bound,t0, places=0)
 
 	def test_time(self):
 		time = 2.
