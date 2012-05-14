@@ -18,6 +18,8 @@ import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
 
+import unittest
+
 import pylab as pl
 pl.ioff()
 
@@ -101,15 +103,31 @@ class Harness_Circle(object):
 		nb_points = a.get_lines()[-1].get_data()
 		nt.assert_less_equal(len(nb_points), max_res)
 
-class Test_Circle_EEuler(Harness_Circle):
+	def test_t0(self):
+		t0 = 1
+		p = self.s.plot(t0=t0)
+		p.plot()
+		a = p.axis
+		## data = a.get_lines()[-1].get_data()
+		bound = a.get_xbound()
+		self.assertEqual(bound[0],t0)
+
+	def test_time(self):
+		time = 2.
+		p = self.s.plot(time=time)
+		a = p.axis
+		data = a.get_lines()[-1].get_data()
+		self.assertLessEqual(data[0][-1],time)
+
+class Test_Circle_EEuler(Harness_Circle, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = ExplicitEuler()
 
-class Test_Circle_IEuler(Harness_Circle):
+class Test_Circle_IEuler(Harness_Circle, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = ImplicitEuler()
 
 
-class Test_Circle_RK34(Harness_Circle):
+class Test_Circle_RK34(Harness_Circle, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = RungeKutta34()

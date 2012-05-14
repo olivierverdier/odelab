@@ -11,13 +11,15 @@ class Plotter(object):
 	def __init__(self, solver):
 		self.solver = solver
 		self.system = self.solver.system
+		self.t0 = None # first time from which to plot
+		self.time = None # time span of the plot
 
 	def get_sample(self, plot_res=None):
 		plot_res = plot_res or self.max_plot_res
 		# some sampling
 		size = len(self.solver)
 		sampling_rate = self.max_plot_res/size
-		return self.solver.get_events(sampling_rate=sampling_rate)
+		return self.solver.get_events(t0=self.t0, time=self.time, sampling_rate=sampling_rate)
 
 	def get_components(self):
 		# components

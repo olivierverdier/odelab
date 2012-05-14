@@ -294,7 +294,7 @@ Method to open the data store. Any access to the events must make use of this me
 		"""
 		return self.get_u(-1, process)
 
-	def plot(self, components=None, plot_exact=True, error=False, time_component=None, **plot_args):
+	def plot(self, components=None, plot_exact=True, error=False, time_component=None, t0=None, time=None, **plot_args):
 		"""
 Plot.
 		"""
@@ -303,6 +303,8 @@ Plot.
 		plotter.components = components
 		plotter.time_component = time_component
 		plotter.plot_args = plot_args
+		plotter.t0 = t0
+		plotter.time = time
 		plotter.plot()
 		return plotter
 
