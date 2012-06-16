@@ -16,7 +16,7 @@ Numerical simulation of ODEs in Python ([full documentation][doc] available).
 
 ![van der Pol example](http://olivierverdier.github.com/odelab/_images/vanderpol.png)
 
-That example can be reproduced with::
+That example can be reproduced with:
 
 ```python
 from odelab import Solver
