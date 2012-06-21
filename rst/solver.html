@@ -31,7 +31,7 @@
     <link rel="prev" title="Getting Started" href="intro.html" /> 
   </head>
   <body>
-<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela|Inconsolata' rel='stylesheet' type='text/css'>
 <div class="header-wrapper">
       <div class="header">
         <div class="headertitle"><a
@@ -49,7 +49,9 @@
        </div>
     </div>
 
-<a href="http://github.com/olivierverdier/odelab"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+<a href="http://github.com/olivierverdier/odelab">
+<img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub">
+</a>
     <div class="content-wrapper">
       <div class="content">
         <div class="document">
@@ -197,11 +199,9 @@ The name is given at the initialization:</p>
 </div>
 <div class="section" id="module-odelab.solver">
 <span id="api"></span><h2>API<a class="headerlink" href="#module-odelab.solver" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="solver-ode-solvers">
-<h3><tt class="xref py py-mod docutils literal"><span class="pre">Solver</span></tt> &#8211; ODE Solvers<a class="headerlink" href="#solver-ode-solvers" title="Permalink to this headline">¶</a></h3>
-<p>A collection of solvers for ODEs of various types.</p>
-<span class="target" id="module-solver"></span><p>The <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> class contains methods on how to perform one iteration step.
-It is its responsibility to take care of the time step.</p>
+<div class="section" id="module-solver">
+<span id="solver-ode-solvers"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">Solver</span></tt> &#8211; ODE Solvers<a class="headerlink" href="#module-solver" title="Permalink to this headline">¶</a></h3>
+<p>The class <a class="reference internal" href="#odelab.solver.Solver" title="odelab.solver.Solver"><tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt></a> takes care of calling the numerical scheme to produce data, and of storing that data.</p>
 <p>The higher level class is <tt class="xref py py-class docutils literal"><span class="pre">Solver</span></tt>, which is initialized with an instance of a <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> class.</p>
 <dl class="attribute">
 <dt id="odelab.solver.SingleStepSolver">
@@ -223,6 +223,12 @@ It is its responsibility to take care of the time step.</p>
 <dt id="odelab.solver.Solver.NotInitialized">
 <em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">NotInitialized</tt><a class="headerlink" href="#odelab.solver.Solver.NotInitialized" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when the solver is not properly initialized.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="odelab.solver.Solver.NotRun">
+<em class="property">exception </em><tt class="descclassname">Solver.</tt><tt class="descname">NotRun</tt><a class="headerlink" href="#odelab.solver.Solver.NotRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when trying to access the events although the solver is empty.</p>
 </dd></dl>
 
 <dl class="exception">
@@ -299,7 +305,7 @@ It is its responsibility to take care of the time step.</p>
 
 <dl class="method">
 <dt id="odelab.solver.Solver.plot">
-<tt class="descclassname">Solver.</tt><tt class="descname">plot</tt><big>(</big><em>components=None</em>, <em>plot_exact=True</em>, <em>error=False</em>, <em>time_component=None</em>, <em>**plot_args</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">Solver.</tt><tt class="descname">plot</tt><big>(</big><em>components=None</em>, <em>plot_exact=True</em>, <em>error=False</em>, <em>time_component=None</em>, <em>t0=None</em>, <em>time=None</em>, <em>**plot_args</em><big>)</big><a class="headerlink" href="#odelab.solver.Solver.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot.</p>
 </dd></dl>
 

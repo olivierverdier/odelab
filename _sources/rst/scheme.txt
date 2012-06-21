@@ -11,7 +11,10 @@ Let us examine the code to create the Explicit Euler scheme::
 
     class ExplicitEuler(Scheme):
         def delta(self, t, u0, h):
-            return h*self.system.f(t,u0)
+            return h, h*self.system.f(t,u0)
+
+The method :meth:`~odelab.scheme.Scheme.delta` takes as argument the current time ``t`` and state ``u0``, as well as the time step ``h``.
+It returns a time increment and a state increment.
 
 An object of the class :class:`Scheme` has access to the attribute :attr:`system`, which gives access to the system at hand.
 

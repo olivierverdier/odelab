@@ -30,7 +30,7 @@
     <link rel="prev" title="Systems" href="system.html" /> 
   </head>
   <body>
-<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Abel|Cabin|Varela|Inconsolata' rel='stylesheet' type='text/css'>
 <div class="header-wrapper">
       <div class="header">
         <div class="headertitle"><a
@@ -46,7 +46,9 @@
        </div>
     </div>
 
-<a href="http://github.com/olivierverdier/odelab"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+<a href="http://github.com/olivierverdier/odelab">
+<img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub">
+</a>
     <div class="content-wrapper">
       <div class="content">
         <div class="document">
@@ -63,9 +65,11 @@
 
 <span class="k">class</span> <span class="nc">ExplicitEuler</span><span class="p">(</span><span class="n">Scheme</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">h</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">u0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">u0</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The method <a class="reference internal" href="#odelab.scheme.Scheme.delta" title="odelab.scheme.Scheme.delta"><tt class="xref py py-meth docutils literal"><span class="pre">delta()</span></tt></a> takes as argument the current time <tt class="docutils literal"><span class="pre">t</span></tt> and state <tt class="docutils literal"><span class="pre">u0</span></tt>, as well as the time step <tt class="docutils literal"><span class="pre">h</span></tt>.
+It returns a time increment and a state increment.</p>
 <p>An object of the class <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> has access to the attribute <tt class="xref py py-attr docutils literal"><span class="pre">system</span></tt>, which gives access to the system at hand.</p>
 <p>If the method is implicit, all you have to do is to implement the <tt class="xref py py-meth docutils literal"><span class="pre">get_residual()</span></tt> method instead.
 Here is an example showing how to implement the Implicit Euler scheme:</p>
@@ -141,7 +145,7 @@ For instance:</p>
 <p>A collection of classical numerical scheme described in all the basic textbooks on differential equations.</p>
 <span class="target" id="module-odelab.scheme.classic"></span><dl class="class">
 <dt id="odelab.scheme.classic.ExplicitEuler">
-<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">ExplicitEuler</tt><big>(</big><em>h=None</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.ExplicitEuler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">ExplicitEuler</tt><big>(</big><em>h=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.ExplicitEuler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explicit version of the Euler method, defined by:</p>
 <div class="math">
 \[u_1 = u_1 + hf(t_0, u_0)\]</div>
@@ -149,7 +153,7 @@ For instance:</p>
 
 <dl class="class">
 <dt id="odelab.scheme.classic.ImplicitEuler">
-<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">ImplicitEuler</tt><big>(</big><em>h=None</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.ImplicitEuler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">ImplicitEuler</tt><big>(</big><em>h=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.ImplicitEuler" title="Permalink to this definition">¶</a></dt>
 <dd><p>The standard implicit Euler scheme, defined by:</p>
 <div class="math">
 \[u_1 = u_0 + hf(t_1, u_1)\]</div>
@@ -157,13 +161,13 @@ For instance:</p>
 
 <dl class="class">
 <dt id="odelab.scheme.classic.RungeKutta34">
-<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">RungeKutta34</tt><big>(</big><em>h=None</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.RungeKutta34" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">RungeKutta34</tt><big>(</big><em>h=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.RungeKutta34" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adaptive Runge-Kutta of order four.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="odelab.scheme.classic.RungeKutta4">
-<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">RungeKutta4</tt><big>(</big><em>h=None</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.RungeKutta4" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">odelab.scheme.classic.</tt><tt class="descname">RungeKutta4</tt><big>(</big><em>h=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.scheme.classic.RungeKutta4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Standard Runge-Kutta of order 4.</p>
 </dd></dl>
 
@@ -172,7 +176,7 @@ For instance:</p>
 <span id="the-scheme-class"></span><h2>The <tt class="xref py py-class docutils literal"><span class="pre">Scheme</span></tt> class<a class="headerlink" href="#module-odelab.scheme" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="odelab.scheme.Scheme">
-<em class="property">class </em><tt class="descclassname">odelab.scheme.</tt><tt class="descname">Scheme</tt><big>(</big><em>h=None</em><big>)</big><a class="headerlink" href="#odelab.scheme.Scheme" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">odelab.scheme.</tt><tt class="descname">Scheme</tt><big>(</big><em>h=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#odelab.scheme.Scheme" title="Permalink to this definition">¶</a></dt>
 <dd><p>General Scheme class. Subclass this class to define a specific integration method.</p>
 <dl class="method">
 <dt id="odelab.scheme.Scheme.adjust_stepsize">
