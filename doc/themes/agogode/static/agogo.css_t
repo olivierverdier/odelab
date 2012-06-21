@@ -475,3 +475,9 @@ div.viewcode-block:target {
     border-top: 1px solid #ac9;
     border-bottom: 1px solid #ac9;
 }
+
+/* code */
+
+pre {
+font-family: {{ theme_monospacefont }};
+}
