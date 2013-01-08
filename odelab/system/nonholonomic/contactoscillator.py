@@ -88,6 +88,11 @@ perturbation of the contact oscillator.
 	def state(self,u):
 		return u[:6]
 
+	def potential(self,u):
+		q = self.position(u)
+		q2 = np.square(q)
+		return super(ContactOscillator,self).potential(u) + self.epsilon*q2[0]*q2[2]/2
+
 	def force(self, u):
 		q = self.position(u)
 		return -q - self.epsilon*q[2]*q[0]*np.array([q[2],np.zeros_like(q[0]),q[0]])
@@ -106,7 +111,7 @@ perturbation of the contact oscillator.
 		q = self.position(u)
 		v2 = np.square(vel)
 		q2 = np.square(q)
-		return (v2[0] + v2[1] + v2[2] + q2[0] + q2[1] + q2[2] + self.epsilon*q2[0]*q2[2])/2
+		return self.potential(u) + (v2[0] + v2[1] + v2[2] )/2
 
 	def energy_y(self,u):
 		"""
@@ -122,7 +127,6 @@ perturbation of the contact oscillator.
 		vel = self.velocity(u)
 		x2 = q[0]**2
 		return .5*(x2 + (1+self.epsilon*x2)*q[2]**2 + (1+q[1]**2)*vel[2]**2)
-
 
 	def initial_cos(self, z0, H0=1.5, Hy=.5, z0dot=0.):
 		"""
