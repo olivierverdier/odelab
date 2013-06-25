@@ -28,6 +28,19 @@ The standard implicit Euler scheme, defined by:
 			return du - h*self.system.f(t+h,u0+du)
 		return residual
 
+class ImplicitMidPoint(Scheme):
+	"""
+The implicit mid point rule
+
+.. math::
+	u_1 = u_0 + hf((t_0 + t_1)/2, (u_0 + u_1)/2)
+	"""
+	def get_residual(self, t, u0, h):
+		def residual(du):
+			mid = u0 + du/2
+			return du - h*self.system.f(t+h/2, mid)
+		return residual
+
 class RungeKutta4(Scheme):
 	"""
 Standard Runge-Kutta of order 4.

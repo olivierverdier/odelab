@@ -214,6 +214,10 @@ class Test_RK4(Harness_Solver):
 	def setup_solver(self):
 		self.solver = Solver(RungeKutta4(h=.1), System(f))
 
+class Test_Midpoint(Harness_Solver):
+	def setup_solver(self):
+		self.solver = Solver(ImplicitMidPoint(h=.1), System(f))
+
 class Test_RK34(Harness_Solver):
 	def setup_solver(self):
 		self.solver = Solver(RungeKutta34(h=.1), System(f))
