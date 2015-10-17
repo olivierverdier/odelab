@@ -23,3 +23,11 @@ class SymplecticEuler(Scheme):
 				])
 		return residual
 
+class StormerVerlet(Scheme):
+	def get_residual(self, t,u0,h):
+		q0 = self.system.position(u0)
+		def residual(du):
+			u1 = u0+du
+			p1 = self.system.momentum(u1)
+			uu = np.hstack([q0,p1])
+
