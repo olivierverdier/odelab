@@ -106,6 +106,29 @@ class Test_NROsc_SP3(Test_NROsc):
 	def set_scheme(self):
 		self.scheme = Spark3()
 
+class Test_OscSolver(object):
+	def get_ht(self, z0,N,P):
+		u"""
+		N: nb iteration per Poincaré iteration
+		P: nb of Poincaré iterations
+		"""
+		h = 2*np.sin(np.pi/N) # is this correct?
+		time = P*N*h
+		return h,time
+
+	def setUp(self, N=40, P=100,):
+		z0 = -.5*np.sqrt(2)
+		print 'z0 =',z0
+		sys = ContactOscillator(epsilon=0)
+		u0 = sys.initial_cos(z0)
+		h,time = self.get_ht(z0, N,P)
+		solver = SingleStepSolver(McLachlan(h), sys,)
+		solver.initialize(time=time, u0=u0, )
+		self.solver = solver
+
+	def notest_run(self):
+		self.solver.run()
+
 
 # Vertical Rolling Disk
 
