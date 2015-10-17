@@ -6,3 +6,6 @@ from .scheme import *
 
 import matplotlib
 matplotlib.use('agg')
+
+import numpy as np
+np.seterr(all='ignore')

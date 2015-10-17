@@ -21,6 +21,7 @@ import numpy as np
 import numpy.testing as npt
 import nose.tools as nt
 from nose.plugins.skip import SkipTest
+import unittest
 
 import pylab as pl
 pl.ioff()
@@ -330,7 +331,7 @@ class LimitedSys(System):
 		else:
 			raise DummyException()
 
-class Test_FinalTimeExceptions(object):
+class Test_FinalTimeExceptions(unittest.TestCase):
 	limit = 20
 	def setUp(self):
 		self.sys = LimitedSys(self.limit)
@@ -339,55 +340,55 @@ class Test_FinalTimeExceptions(object):
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0, time=10, )
 
-	@nt.raises(Solver.FinalTimeNotReached)
 	def test_final_time_not_reached(self):
-		self.s.run(max_iter = 1)
+		with self.assertRaises(Solver.FinalTimeNotReached):
+			self.s.run(max_iter = 1)
 
 	def test_max_iter(self):
 		try:
 			self.s.run()
 		except self.s.RuntimeError:
 			pass
-		nt.assert_greater_equal(self.s._max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
+		self.assertGreaterEqual(self.s._max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
 		time = 50
 		try:
 			self.s.run(50)
 		except self.s.RuntimeError:
 			pass
-		nt.assert_greater_equal(self.s._max_iter, self.s.max_iter_factor*time/self.scheme.h)
+		self.assertGreaterEqual(self.s._max_iter, self.s.max_iter_factor*time/self.scheme.h)
 
-	@nt.raises(Solver.RuntimeError)
 	def test_sys_exception(self):
-		self.s.run()
+		with self.assertRaises(Solver.RuntimeError):
+			self.s.run()
 
-	@nt.raises(DummyException)
 	def test_sys_no_runtime_exception(self):
 		self.s.catch_runtime = False
-		self.s.run()
+		with self.assertRaises(DummyException):
+			self.s.run()
 
 def faulty_function(t,u):
 	raise Exception('message')
 
-class Test_Exceptions(object):
+class Test_Exceptions(unittest.TestCase):
 	def setUp(self):
 		self.s = Solver(ExplicitEuler(h=.1), Linear(np.array([[1]])))
-	@nt.raises(Solver.NotInitialized)
 	def test_no_u0(self):
-		self.s.initialize()
-	@nt.raises(Solver.NotInitialized)
+		with self.assertRaises(Solver.NotInitialized):
+			self.s.initialize()
 	def test_no_initialize(self):
-		self.s.run()
-	@nt.raises(Solver.Unstable)
+		with self.assertRaises(Solver.NotInitialized):
+			self.s.run()
 	def test_unstable(self):
 		self.s = Solver(ExplicitEuler(h=.1), Linear(np.array([[float('inf')]])))
 		self.s.initialize(u0=np.array([0]))
-		self.s.run()
-	@nt.raises(Solver.RuntimeError)
+		with self.assertRaises(Solver.Unstable):
+			self.s.run()
 	def test_runtime_exception(self):
 		self.s = Solver(ExplicitEuler(h=.1), System(faulty_function))
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
-		self.s.run()
+		with self.assertRaises(Solver.RuntimeError):
+			self.s.run()
 
 class TotSys(System):
 	def total(self, xt):
