@@ -28,6 +28,13 @@ class MechanicalSystem(System):
 	def codistribution(self, u):
 		"""compute the codistribution matrix at `u`"""
 
+	def assemble(self, q, u):
+		"""
+		Assemble a new state vector from position q and state vector u
+		It defaults to the storage [q,v]
+		"""
+		return np.hstack([q, self.velocity(u)])
+
 
 
 class HarmonicOscillator(MechanicalSystem):

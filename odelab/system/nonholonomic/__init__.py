@@ -55,16 +55,6 @@ class NonHolonomic(MechanicalSystem):
 		"""
 		return (self.velocity(u0) + self.velocity(u1))/2
 
-	def assemble(self, q,v,l):
-		"""
-		Default value for the assemble method.
-		"""
-		return np.hstack([q,v,l])
-
-
-
-
-
 
 class VerticalRollingDisk(NonHolonomic):
 	"""
@@ -85,8 +75,8 @@ class VerticalRollingDisk(NonHolonomic):
 		self.Iflip = Iflip
 		self.Irot = Irot
 
-	def label(self, component):
-		return ['x','y',u'φ',u'θ','vx','vy',u'ωφ',u'ωη',u'λ1',u'λ2'][component]
+	#def label(self, component):
+		#return ['x','y',u'φ',u'θ','vx','vy',u'ωφ',u'ωη',u'λ1',u'λ2'][component]
 
 	def position(self, u):
 		"""
@@ -194,6 +184,12 @@ class CirclePendulum(Pendulum):
 		x,y =  u[0], u[1]
 		return np.sqrt(x*x + y*y)
 
+	def energy(self, u):
+		q = self.position(u)
+		v = self.velocity(u)
+		v2 = np.square(v)
+		return (v2[0] + v2[1])/2 + q[1]
+
 class SinePendulum(Pendulum):
 	def codistribution(self, u):
 		x,y = self.position(u)
@@ -289,7 +285,7 @@ The nonholonomic constraint is given by
 
 .. math::
 
-	\cos(θ)\dot{x} - \sin(θ)\dot{y} - a \dot{θ}
+	- \sin(θ)\dot{x} + \cos(θ)\dot{y} - a \dot{θ}
 
 .. [Bloch] Bloch: *Nonholonomic Mechanics and Control*
 .. [Rheinboldt] Rabier, Rheinboldt: *Nonholonomic Motion of Rigid Mechanical Systems from a DAE Viewpoint*

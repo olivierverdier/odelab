@@ -15,7 +15,7 @@ General class of 3D mechanical systems with the constraint codistribution
 The energy is assumed to be
 
 .. math::
-	H = v_x^2 + v_y^2 + v_z^2 + U(x,y,z)
+	H = \frac{1}{2}(v_x^2 + v_y^2 + v_z^2) + U(x,y,z)
 	"""
 	size = 7 # 3+3+1
 	def label(self, component):
@@ -193,6 +193,9 @@ Gradient of the generating function S = s(z).
 
 	def momentum(self,u):
 		return u[3:6]
+
+	def assemble(self, q, u):
+		return np.hstack([q, self.momentum(u)])
 
 	def force(self,u):
 		orig_force = super(NonReversibleContactOscillator,self).force(u) # works because force depends only on position
