@@ -77,7 +77,10 @@ class PyTableStore(SimpleStore):
 			return self.getitem(events, key)
 
 	def setitem(self, events, key, value):
-		events.attrs[key] = value
+		try:
+			events.attrs[key] = value
+		except TypeError as e: # TODO: test this
+			warnings.warn(str(e))
 
 	def __setitem__(self, key, value):
 		with self.open(write=True) as events:
@@ -124,4 +127,4 @@ except ImportError:
 	Store = SimpleStore
 else:
 	Store = PyTableStore
-
+## Store = SimpleStore
