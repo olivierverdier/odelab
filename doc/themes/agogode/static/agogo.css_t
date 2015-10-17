@@ -237,11 +237,12 @@ div.document .descname {
 }
 
 div.document .docutils.literal {
-  background-color: #eeeeec;
+	color: #555;
   padding: 1px;
 }
 
 div.document .docutils.xref.literal {
+color: inherit;
   background-color: transparent;
   padding: 0px;
 }

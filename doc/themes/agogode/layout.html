@@ -34,6 +34,15 @@
     </div>
 {% endblock %}
 
+{%- block extrahead %}
+{{ super() }}
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25928927-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+{% endblock %}
+
 
 {% block content %}
 <a href="http://github.com/olivierverdier/odelab">
@@ -91,6 +100,19 @@
        border="0" alt="Powered by MathJax" />
    </a>
    </div>
+   <div class="right"><p>This page uses <a href="http://analytics.google.com/">
+		   Google Analytics</a> to collect statistics.
+</p>
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
 
         <div class="right">
           {{ super() }}
