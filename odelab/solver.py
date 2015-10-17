@@ -22,6 +22,7 @@ import time
 
 from odelab.plotter import Plotter
 
+import warnings
 from .store import Store
 
 from contextlib import contextmanager
@@ -69,7 +70,7 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if np.isscalar(u0):
 			u0 = [u0] # todo: test if this is necessary
 		u0 = np.array(u0)
-		raw_event0 = np.hstack([u0,t0])
+		raw_event0 = np.hstack([u0, t0])
 		event0 = self.system.preprocess(raw_event0)
 
 		if time is not None:
@@ -125,7 +126,7 @@ Method to open the data store. Any access to the events must make use of this me
 		"""
 		Generates the (t,u) values.
 		"""
-		last_event = events[:,-1]
+		last_event = events[:, -1]
 		event = last_event
 		init_stage = self.store.get_nb_stage(events)
 		tail_length = self.scheme.tail_length
@@ -201,7 +202,7 @@ Method to open the data store. Any access to the events must make use of this me
 		with self.simulating() as events:
 			# start from the last time we stopped
 			generator = self.generate(events)
-			t0 = events[-1,-1]
+			t0 = events[-1, -1]
 			tf = t0 + time # final time
 
 			if self.with_progressbar:
@@ -214,7 +215,7 @@ Method to open the data store. Any access to the events must make use of this me
 					event = next(generator)
 				except Exception as e:
 					if self.catch_runtime:
-						raise self.RuntimeError('%s raised after %d steps: %s' % (type(e).__name__,iteration,e.args), e, iteration)
+						raise self.RuntimeError('%s raised after %d steps: %s' % (type(e).__name__, iteration, e.args), e, iteration)
 					else:
 						raise
 				else:
@@ -248,7 +249,7 @@ Method to open the data store. Any access to the events must make use of this me
 		Return u[index] after post-processing.
 		"""
 		with self.open_store() as events:
-			event = events[:,index]
+			event = events[:, index]
 		if process:
 			event = self.system.postprocess(event)
 		return event
@@ -270,7 +271,8 @@ Method to open the data store. Any access to the events must make use of this me
 		final_index = indices[-1]+1
 		stride = int(np.ceil(1/sampling_rate))
 		with self.open_store() as events:
-			return events[:,slice(initial_index, final_index, stride)]
+			result = events[:, slice(initial_index, final_index, stride)]
+			return result
 
 	def get_times(self):
 		with self.open_store() as events:
@@ -279,7 +281,7 @@ Method to open the data store. Any access to the events must make use of this me
 
 	def final_time(self):
 		with self.open_store() as events:
-			final = events[-1,-1]
+			final = events[-1, -1]
 		return final
 
 	def initial(self, process=True):
@@ -305,7 +307,6 @@ Plot.
 		plotter.plot_args = plot_args
 		plotter.t0 = t0
 		plotter.time = time
-		plotter.plot()
 		return plotter
 
 	def plot_function(self, function, *args, **kwargs):
@@ -361,6 +362,7 @@ Create a solver object from a path to an hdf5 file.
 		except KeyError:
 			solver = load_solver_v2(path, name)
 		if not isinstance(solver, Solver): # pickling has failed
+			warnings.warn('Loading failed')
 			solver = Solver(scheme=None, system=None, path=path)
 			solver.name = name
 		solver.store = Store(path)
@@ -388,7 +390,7 @@ Create a solver object from a path to an hdf5 file.
 # try to import progressbar and use it if it is available
 try:
 	import progressbar as pb
-	widgets = ['',' ', pb.Timer('%s'),' ', pb.Percentage(), ' ', pb.Bar('='), ' ',  ' ', pb.ETA(),  ]
+	widgets = ['', ' ', pb.Timer('%s'), ' ', pb.Percentage(), ' ', pb.Bar('='), ' ',  ' ', pb.ETA(),  ]
 	progress_bar = pb.ProgressBar(widgets=widgets)
 	del pb
 	with_progressbar = True
