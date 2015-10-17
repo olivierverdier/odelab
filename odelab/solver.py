@@ -296,9 +296,17 @@ Method to open the data store. Any access to the events must make use of this me
 		"""
 		return self.get_u(-1, process)
 
-	def plot(self, components=None, plot_exact=True, error=False, time_component=None, t0=None, time=None, **plot_args):
+	def plot(self, *args, **kwargs):
 		"""
-Plot.
+Plot using the plotter object from :method:`odelab.Solver.plotter`.
+		"""
+		plotter = self.plotter(*args, **kwargs)
+		plotter.plot()
+		return plotter
+
+	def plotter(self, components=None, plot_exact=True, error=False, time_component=None, t0=None, time=None, **plot_args):
+		"""
+Constructs a plotter object.
 		"""
 		plotter = Plotter(self)
 		plotter.setup(plot_exact, error)
