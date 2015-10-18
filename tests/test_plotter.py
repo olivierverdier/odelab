@@ -77,7 +77,7 @@ class Harness_Circle(object):
 		self.s.plot(plot_exact=True)
 		tmp = tempfile.gettempdir()
 		path = os.path.join(tmp, 'test_fig.pdf')
-		print path
+		print(path)
 		plotter = Plotter(self.s)
 		plotter.savefig(path)
 		quick_setup(plotter, components=['output', 0], plot_exact=False)

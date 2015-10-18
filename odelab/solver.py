@@ -210,7 +210,7 @@ Method to open the data store. Any access to the events must make use of this me
 				progress_bar.widgets[0] = self.name
 				progress_bar.start()
 
-			for iteration in xrange(self._max_iter): # todo: use enumerate
+			for iteration in range(self._max_iter): # todo: use enumerate
 				try:
 					event = next(generator)
 				except Exception as e:

@@ -98,7 +98,7 @@ class Harness_ComplexConvection(object):
 				break
 		else:
 			raise Exception('No N!')
-		print type(self.scheme).__name__, N
+		print(type(self.scheme).__name__, N)
 
 class Test_CC_EE(Harness_ComplexConvection):
 	scheme = ExplicitEuler()

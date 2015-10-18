@@ -20,11 +20,11 @@ section for more information.
 """
 from __future__ import division
 
-from base import *
-from dae import *
-from stochastic import *
-from exponential import *
-from nonholonomic import *
+from .base import *
+from .dae import *
+from .stochastic import *
+from .exponential import *
+from .nonholonomic import *
 
 
 

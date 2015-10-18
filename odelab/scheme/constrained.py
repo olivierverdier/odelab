@@ -10,7 +10,7 @@ from odelab.scheme import Scheme
 import odelab.newton as _rt
 
 class McLachlan(Scheme):
-	ur"""
+	r"""
 Solver for the Lagrange-d'Alembert (LDA) equations using the
 algorithm given by equation (4.18) in [MLPe06]_.
 
@@ -134,7 +134,7 @@ Nonholonomic Symplectic Euler.
 		return h, du
 
 class NonHolonomicLeapFrog(Scheme):
-	ur"""
+	r"""
 Non-holonomic Leap Frog:
 
 .. math::

@@ -91,8 +91,8 @@ class CompareExact(object):
 		self.description = name
 	def __call__(self, solver, u0, components, decimal=2):
 		solver.run()
-		print solver.final_time()
-		print solver.final()
+		print(solver.final_time())
+		print(solver.final())
 		exact = solver.system.exact(solver.final_time(), u0)
 		#npt.assert_array_almost_equal(solver.final()[:components], exact[:components], decimal=decimal)
 

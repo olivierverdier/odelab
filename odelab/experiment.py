@@ -53,19 +53,19 @@ Default prefix from the command line.
 		parameters = self.parameters
 		self.solver = self.get_solver()
 		self.solver.initialize(**parameters['initialize'])
-		print '-'*80
-		print self.get_path()
-		print parameters['name']
+		print('-'*80)
+		print(self.get_path())
+		print(parameters['name'])
 		pprinter.pprint(parameters)
 		start_time = time.time()
 		try:
 			self.solver.run()
 		except Exception as e:
-			print e
+			print(e)
 		finally:
 			end_time = time.time()
 			self.duration = end_time - start_time
-			print str(timedelta(seconds=self.duration))
+			print(str(timedelta(seconds=self.duration)))
 			self.timestamp = datetime.datetime.now()
 			if save:
 				self.save()

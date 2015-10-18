@@ -84,8 +84,8 @@ def test_start_from_two():
 	nt.assert_equal(len(solver),3)
 	solver.scheme.is_initialized = False
 	solver.run(1.)
-	print len(solver)
-	print solver.get_events()
+	print(len(solver))
+	print(solver.get_events())
 
 @nt.raises(InitializedTwiceError)
 def test_initialize_reset_scheme():
@@ -140,7 +140,7 @@ class Harness_Solver(Harness):
 
 	def test_scheme_str(self):
 		# should not raise an exception even though h is not yet set in the underlying scheme:
-		print str(self.solver)
+		print(str(self.solver))
 
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
@@ -167,7 +167,7 @@ class Harness_Solver(Harness):
 		nt.assert_equal(self.solver.scheme.h, h)
 
 	def test_quadratic(self):
-		print type(self).__name__
+		print(type(self).__name__)
 		self.set_system(time_f)
 		self.solver.initialize(u0=1., time=1.,)
 		self.solver.run()
@@ -176,7 +176,7 @@ class Harness_Solver(Harness):
 
 	def check_const(self, f, u0, expected):
 		"""should solve the f=c exactly"""
-		print type(self).__name__
+		print(type(self).__name__)
 		self.check_skip(u0,f)
 		self.set_system(f)
 		self.solver.initialize(u0=u0, time=1.,)
@@ -292,7 +292,7 @@ class Harness_Solver_Order(Harness):
 	def notest_order(self):
 		self.solver.initialize(u0=self.u0, time=self.time)
 		order = self.solver.plot_error(do_plot=self.do_plot)
-		print order
+		print(order)
 		nt.assert_true(order < self.order + .1)
 
 class Test_ExplicitEuler(Harness_Solver_Order):

@@ -26,7 +26,7 @@ class Plotter(object):
 		if self.components is None: # plot all the components by default
 			components = range(self.solver.initial().size - 1)
 		# makes the code work when plotting a single component (either a string or an index):
-		elif isinstance(self.components, basestring) or not np.iterable(self.components):
+		elif isinstance(self.components, str) or not np.iterable(self.components):
 			components = [self.components]
 		else: # assuming components is already an iterable
 			components = self.components
@@ -65,7 +65,7 @@ class Plotter(object):
 
 		for component_i, component in enumerate(components):
 			# three cases, string, function, or integer
-			if isinstance(component, basestring):
+			if isinstance(component, str):
 				label = component
 				function = getattr(self.system, component)
 			elif callable(component):

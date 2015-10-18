@@ -57,7 +57,7 @@ The energy is assumed to be
 		return (v2[0] + v2[1] + v2[2])/2 + self.potential(u)
 
 	def initial(self,u00):
-		ur"""
+		r"""
 		Figure out a valid initial condition by replacing :math:`v_x` by :math:`-yv_z`, and the true value of :math:`λ`.
 		"""
 		u0 = u00.copy()
@@ -155,7 +155,7 @@ perturbation of the contact oscillator.
 		return 2*np.sin(np.pi/N)
 
 class NonReversibleContactOscillator(ContactOscillator):
-	ur"""
+	r"""
 Non Reversible contact oscillator. The new Hamiltonian is obtained from that of the Contact Oscillator by
 
 .. math::

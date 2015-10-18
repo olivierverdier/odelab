@@ -118,7 +118,7 @@ class Test_OscSolver(object):
 
 	def setUp(self, N=40, P=100,):
 		z0 = -.5*np.sqrt(2)
-		print 'z0 =',z0
+		print('z0 =',z0)
 		sys = ContactOscillator(epsilon=0)
 		u0 = sys.initial_cos(z0)
 		h,time = self.get_ht(z0, N,P)
@@ -252,8 +252,8 @@ class Test_SparkODE(object):
 	def test_run(self):
 		self.s.run()
 		exact = np.exp(-self.s.get_times())
-		print exact[-1]
-		print self.s.final()
+		print(exact[-1])
+		print(self.s.final())
 ## 		npt.assert_array_almost_equal(self.s.aus, exact, 5)
 		npt.assert_almost_equal(self.s.final()[0], exact[-1])
 ## 		plot(self.s.ats, np.vstack([self.s.aus, exact]).T)
@@ -271,10 +271,10 @@ class Test_JayExample(object):
 		self.s = SingleStepSolver(scheme, self.sys)
 		self.s.initialize(u0=array([1.,1.,1.]), time=1,)
 		self.s.run()
-		print self.s.final_time()
-		print self.s.final()
+		print(self.s.final_time())
+		print(self.s.final())
 		exact = self.sys.exact(self.s.final_time(),array([1.,1.,1.]))
-		print exact
+		print(exact)
 		npt.assert_array_almost_equal(self.s.final()[:2], exact[:2], decimal=2)
 
 def test_pendulum_ML():
@@ -303,14 +303,14 @@ class Harness_chaoticosc(object):
 	def test_run(self):
 		s = self.s
 		s.run()
-		print s.system.energy(s.final())
+		print(s.system.energy(s.final()))
 
 	def test_energy(self):
 		self.s.run()
 		H1 = self.s.system.energy(self.s.final())
 		H0 = self.s.system.energy(self.s.initial())
-		print H0
-		print H1
+		print(H0)
+		print(H1)
 		npt.assert_almost_equal(H1, H0, decimal=self.energy_tol)
 
 class Test_chaotic_ML(Harness_chaoticosc):

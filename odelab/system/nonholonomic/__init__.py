@@ -369,4 +369,4 @@ class Robot(NonHolonomic):
 
 
 # for compatibility:
-from contactoscillator import *
+from .contactoscillator import *

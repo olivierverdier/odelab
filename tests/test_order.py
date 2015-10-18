@@ -18,6 +18,6 @@ class Order_Burgers(object):
 		self.o = OrderFarm(solvers, B, info)
 		self.o.initialize()
 		self.o.run(np.linspace(2,3,5))
-		print self.o.orders()
+		print(self.o.orders())
 		self.o.plot()
 

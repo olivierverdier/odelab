@@ -16,7 +16,7 @@ import numpy as np
 import numpy.linalg
 
 
-import odelab.newton as _rt
+from .. import newton as _rt
 
 
 class Scheme(object):
