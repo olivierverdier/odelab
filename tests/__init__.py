@@ -4,8 +4,9 @@ from __future__ import division
 
 from .scheme import *
 
-import matplotlib
-matplotlib.use('agg')
+import matplotlib.pyplot
+matplotlib.pyplot.ioff()
+
 
 import numpy as np
 np.seterr(all='ignore')

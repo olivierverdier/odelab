@@ -436,5 +436,4 @@ class Test_Simple(object):
 		npt.assert_equal(lines[-1].get_linewidth(), 4)
 
 
-pl.ion()
 
