@@ -7,7 +7,6 @@ from odelab.scheme.stochastic import *
 from odelab.system import *
 from odelab.solver import *
 
-import pylab as pl
 
 import numpy as np
 

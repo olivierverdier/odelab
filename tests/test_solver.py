@@ -23,8 +23,7 @@ import nose.tools as nt
 from nose.plugins.skip import SkipTest
 import unittest
 
-import pylab as pl
-pl.ioff()
+import matplotlib.pyplot as plt
 
 Solver.catch_runtime = False
 
@@ -421,10 +420,10 @@ class Test_Simple(object):
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
 		self.s.run()
-		pl.clf()
+		plt.clf()
 		lines = self.s.plot(0,lw=5).axis.lines
 		npt.assert_equal(len(lines),1)
-		pl.clf()
+		plt.clf()
 		lines = self.s.plot(lw=5).axis.lines
 		npt.assert_equal(len(lines),3)
 		npt.assert_equal(lines[-1].get_linewidth(),5)

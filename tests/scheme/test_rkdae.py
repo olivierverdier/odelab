@@ -8,7 +8,7 @@ from odelab.scheme.rungekutta import RKDAE
 import odelab.scheme.rungekutta as RK
 
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as plt
 
 import odelab.order as order
 
@@ -46,17 +46,17 @@ class Harness_RKDAE(object):
 			logerrl = np.log2(np.abs(sol.final()[2] - lexact))
 			errz.append(logerrz)
 			errl.append(logerrl)
-		pl.clf()
-		pl.subplot(1,2,1)
-		pl.title('z')
+		plt.clf()
+		plt.subplot(1,2,1)
+		plt.title('z')
 		regz = order.linear_regression(ks,errz,do_plot=True)
-		pl.plot(ks,errz,'o-')
-		pl.legend()
-		pl.subplot(1,2,2)
-		pl.title(u'λ')
+		plt.plot(ks,errz,'o-')
+		plt.legend()
+		plt.subplot(1,2,2)
+		plt.title(u'λ')
 		regl = order.linear_regression(ks,errl,do_plot=True)
-		pl.plot(ks,errl,'o-')
-		pl.legend()
+		plt.plot(ks,errl,'o-')
+		plt.legend()
 		oz = -regz[0]
 		ol = -regl[0]
 		nt.assert_greater(ol, self.expected_orders[0] - self.tol)

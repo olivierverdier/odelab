@@ -19,8 +19,8 @@ import numpy.testing as npt
 
 import unittest
 
-import pylab as pl
-pl.ioff()
+import matplotlib.pyplot as plt
+
 
 Solver.catch_runtime = False
 
@@ -62,7 +62,7 @@ class Harness_Circle(object):
 		self.s.run(time = 10.)
 
 	def test_plot_2D(self):
-		pl.clf()
+		plt.clf()
 		a = self.s.plot(1,time_component=0).axis
 		self.assertEqual(a.get_xlabel(), 'x')
 		self.s.plot2D()
