@@ -9,7 +9,7 @@ from odelab.scheme.exponential import *
 
 from odelab.system import *
 from odelab.solver import *
-import odelab.newton as rt
+import newton as rt
 
 import tempfile
 import os

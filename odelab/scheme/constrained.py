@@ -7,7 +7,7 @@ import numpy as np
 from odelab.scheme import Scheme
 
 
-import odelab.newton as _rt
+import newton as _rt
 
 class McLachlan(Scheme):
 	r"""

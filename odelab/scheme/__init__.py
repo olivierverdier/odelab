@@ -16,7 +16,7 @@ import numpy as np
 import numpy.linalg
 
 
-from .. import newton as _rt
+import newton as _rt
 
 
 class Scheme(object):

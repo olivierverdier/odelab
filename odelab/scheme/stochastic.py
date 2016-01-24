@@ -5,7 +5,7 @@ import numpy as np
 import scipy.linalg as sl
 
 from odelab.scheme import Scheme
-from odelab.newton import FSolve, Newton
+from newton import FSolve, Newton
 
 class EulerMaruyama(Scheme):
 	def step(self,t,u,h):

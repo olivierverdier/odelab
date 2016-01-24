@@ -18,7 +18,8 @@ import numpy as np
 
 from odelab.scheme import Scheme
 
-from odelab.phi_pade import Phi, Polynomial
+from padexp import Exponential as Phi
+from padexp.polynomial import Polynomial
 
 
 class Exponential(Scheme):

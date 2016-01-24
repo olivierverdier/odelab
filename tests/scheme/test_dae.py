@@ -6,7 +6,7 @@ import odelab
 from odelab.scheme.stochastic import *
 from odelab.system import *
 from odelab.solver import *
-from odelab.newton import *
+from newton import *
 
 import nose.tools as nt
 
