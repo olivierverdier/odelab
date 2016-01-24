@@ -1,4 +1,3 @@
--e git+https://github.com/PyTables/PyTables.git@v.2.3#egg=pytables
 -e git+https://github.com/olivierverdier/python-progressbar#egg=progressbar
 -e git+https://github.com/olivierverdier/newton#egg=newton
 -e git+https://github.com/olivierverdier/padexp#egg=padexp
