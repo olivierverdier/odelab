@@ -31,7 +31,7 @@ install:
   - source activate test-environment
   - pip install -e "git+https://github.com/z4r/python-coveralls.git#egg=pycoveralls"
   - pip install nose-cov
-  - pip install .
+  - pip install -r requirements.txt .
 
 # Run test
 script:
