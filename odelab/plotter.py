@@ -80,7 +80,7 @@ class Plotter(object):
 				exact_comp = function(np.vstack([exact, ats]))
 
 			if self.error and sys_exact:
-				data = np.log10(np.abs(data - exact_comp))
+				data = np.log10(np.abs(data - exact_comp) + np.finfo(float).eps)
 			if self.time_component is not None and not component_i:
 				# at the first step, if time_component is not time, then replace the time vector by the desired component
 				ats = data
