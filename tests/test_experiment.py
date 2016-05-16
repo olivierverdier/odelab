@@ -2,6 +2,8 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
+import unittest
+
 from odelab.solver import Solver, load_solver
 from odelab.system import System
 from odelab.experiment import Experiment
@@ -9,7 +11,6 @@ from odelab.experiment import Experiment
 import numpy as np
 import numpy.testing as npt
 
-import nose.tools as nt
 from nose.plugins.skip import SkipTest
 
 import tempfile
@@ -27,7 +28,7 @@ class BigSystem(System):
 		super(BigSystem, self).__init__(*args, **kwargs)
 		self.data = np.zeros([32,32], dtype=complex)
 
-class Test_Experiment(object):
+class Test_Experiment(unittest.TestCase):
 	name = 'tmpexp'
 	def setUp(self):
 		self.file = tempfile.NamedTemporaryFile()
@@ -64,14 +65,14 @@ class Test_Experiment(object):
 	def test_load(self):
 		s = load_solver(self.path, self.name)
 		#s = Experiment.load(self.path, self.name)
-		nt.assert_true(isinstance(s, Solver))
-		nt.assert_equal(s.scheme.__class__.__name__, 'ExplicitEuler')
-		nt.assert_equal(len(s), 11)
-		nt.assert_equal(s.name, self.name)
-		nt.assert_equal(s.store.path, self.path)
-		nt.assert_equal(s.scheme.h, self.params['scheme_params']['h'])
+		self.assertTrue(isinstance(s, Solver))
+		self.assertEqual(s.scheme.__class__.__name__, 'ExplicitEuler')
+		self.assertEqual(len(s), 11)
+		self.assertEqual(s.name, self.name)
+		self.assertEqual(s.store.path, self.path)
+		self.assertEqual(s.scheme.h, self.params['scheme_params']['h'])
 		with s.open_store() as events:
-			nt.assert_equal(len(events), 11)
+			self.assertEqual(len(events), 11)
 			npt.assert_array_almost_equal(events[-1], np.linspace(0,1,11))
 
 	def test_load_run(self):
@@ -81,11 +82,12 @@ class Test_Experiment(object):
 	def test_not_loadable(self):
 		base = os.path.dirname(__file__)
 		exp_path = os.path.join(base, 'fixtures', 'not_loadable.h5')
-		s = load_solver(exp_path, 'main')
+		with self.assertWarns(UserWarning):
+			s = load_solver(exp_path, 'main')
 		len(s) # ensure we can load the events
 		# check that solver_info is set:
 		info = s.store['solver_info']
-		nt.assert_regexp_matches(info['system_class'], 'NoSystem')
+		self.assertRegex(info['system_class'], 'NoSystem')
 		
 
 	def test_moved(self):

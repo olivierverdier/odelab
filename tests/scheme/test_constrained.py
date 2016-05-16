@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import unittest
+
 
 from odelab.scheme import *
 from odelab.scheme.constrained import *
@@ -12,7 +14,6 @@ from odelab.solver import *
 from odelab.scheme.rungekutta import *
 
 import numpy.testing as npt
-import nose.tools as nt
 
 SingleStepSolver.catch_runtime = False
 
@@ -55,31 +56,31 @@ class Harness_Osc(object):
 		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
 		self.s.run()
 
-class Test_Initial(Harness_Osc):
+class Test_Initial(Harness_Osc, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = McLachlan()
 
 	def test_initial(self):
 		u0 = self.sys.initial_cos(self.z0s[5])
 		u00 = ContactSystem.initial(self.sys, u0)
-		nt.assert_false(u0 is u00)
+		self.assertFalse(u0 is u00)
 		npt.assert_almost_equal(u0,u00)
 
 
-class Test_McOsc(Harness_Osc):
+class Test_McOsc(Harness_Osc, unittest.TestCase):
 	label = 'ML'
 	def set_scheme(self):
 		self.scheme = McLachlan()
 
-class Test_JayOsc2(Harness_Osc):
+class Test_JayOsc2(Harness_Osc, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = Spark2()
 
-class Test_JayOsc3(Harness_Osc):
+class Test_JayOsc3(Harness_Osc, unittest.TestCase):
 	def set_scheme(self):
 		self.scheme = Spark3()
 
-class Test_HOsc(Harness_Osc):
+class Test_HOsc(Harness_Osc, unittest.TestCase):
 	decimal = 6
 	label = 'H'
 	def set_scheme(self):
@@ -106,7 +107,7 @@ class Test_NROsc_SP3(Test_NROsc):
 	def set_scheme(self):
 		self.scheme = Spark3()
 
-class Test_OscSolver(object):
+class Test_OscSolver(unittest.TestCase):
 	def get_ht(self, z0,N,P):
 		u"""
 		N: nb iteration per Poincaré iteration
@@ -173,39 +174,39 @@ class Harness_VerticalRollingDisk(object):
 		self.s.run()
 
 
-class Test_VerticalRollingDisk_ML(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_ML(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = McLachlan()
 
-class Test_VerticalRollingDisk_H(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_H(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = NonHolonomicEnergy()
 
-class Test_VerticalRollingDisk_H0(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_H0(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = NonHolonomicEnergy0()
 
-class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = NonHolonomicEnergyEMP()
 
-class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = Spark2()
 
-class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = Spark3()
 
-class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = Spark4()
 
-class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = SymplecticEuler()
 
-class Test_VerticalRollingDisk_LF(Harness_VerticalRollingDisk):
+class Test_VerticalRollingDisk_LF(Harness_VerticalRollingDisk, unittest.TestCase):
 	def setup_scheme(self):
 		self.scheme = NonHolonomicLeapFrog()
 
@@ -225,15 +226,15 @@ class HarnessRobot(object):
 	def test_energy(self):
 		s = self.s
 		s.run(time=10)
-		nt.assert_almost_equal(s.system.energy(s.final()), s.system.energy(s.initial()), places=4)
+		npt.assert_almost_equal(s.system.energy(s.final()), s.system.energy(s.initial()), decimal=4)
 
-class Test_Robot_ML(HarnessRobot):
+class Test_Robot_ML(HarnessRobot, unittest.TestCase):
 	scheme = McLachlan()
 
 	def test_energy(self):
 		pass
 
-class Test_Robot_H(HarnessRobot):
+class Test_Robot_H(HarnessRobot, unittest.TestCase):
 	scheme = NonHolonomicEnergy()
 
 # Test Spark on simple ODE
@@ -241,7 +242,7 @@ class Test_Robot_H(HarnessRobot):
 def minus_time(tx):
 	return -tx[0]
 
-class Test_SparkODE(object):
+class Test_SparkODE(unittest.TestCase):
 	def setUp(self):
 		self.sys = ODESystem(minus_time)
 		scheme = Spark4()
@@ -260,7 +261,7 @@ class Test_SparkODE(object):
 
 # Test spark with Jay Example as a system
 
-class Test_JayExample(object):
+class Test_JayExample(unittest.TestCase):
 	def setUp(self):
 		self.sys = JayExample()
 ## 		self.s.initialize(array([1.]))
@@ -313,11 +314,11 @@ class Harness_chaoticosc(object):
 		print(H1)
 		npt.assert_almost_equal(H1, H0, decimal=self.energy_tol)
 
-class Test_chaotic_ML(Harness_chaoticosc):
+class Test_chaotic_ML(Harness_chaoticosc, unittest.TestCase):
 	scheme = McLachlan()
 	energy_tol = 2
 
-class Test_chaotic_H(Harness_chaoticosc):
+class Test_chaotic_H(Harness_chaoticosc, unittest.TestCase):
 	scheme = NonHolonomicEnergy()
 	energy_tol = 10
 
@@ -343,9 +344,9 @@ class Harness_Chaplygin(object):
 		self.s.run()
 		#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
 
-class Test_Chaplygin_ML(Harness_Chaplygin):
+class Test_Chaplygin_ML(Harness_Chaplygin, unittest.TestCase):
 	scheme = McLachlan()
 
-class Test_Chaplygin_H(Harness_Chaplygin):
+class Test_Chaplygin_H(Harness_Chaplygin, unittest.TestCase):
 	scheme = NonHolonomicEnergy()
 

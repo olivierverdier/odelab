@@ -2,6 +2,8 @@
 # −*− coding: UTF−8 −*−
 from __future__ import division
 
+import unittest
+
 from odelab.system.graph import QuasiGraphSystem, GraphSystem
 from odelab.solver import SingleStepSolver
 from odelab.scheme.rungekutta import RKDAE
@@ -12,7 +14,6 @@ import matplotlib.pyplot as plt
 
 import odelab.order as order
 
-import nose.tools as nt
 
 def fsin(x):
 	return np.sin(x)
@@ -59,27 +60,27 @@ class Harness_RKDAE(object):
 		plt.legend()
 		oz = -regz[0]
 		ol = -regl[0]
-		nt.assert_greater(ol, self.expected_orders[0] - self.tol)
-		nt.assert_greater(oz, self.expected_orders[1] - self.tol)
+		self.assertGreater(ol, self.expected_orders[0] - self.tol)
+		self.assertGreater(oz, self.expected_orders[1] - self.tol)
 		return sol
 
-class Test_LDIRK243(Harness_RKDAE):
+class Test_LDIRK243(Harness_RKDAE, unittest.TestCase):
 	expected_orders = 1,2
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.LDIRK343.tableaux[3])
-class Test_RadauIIA2(Harness_RKDAE):
+class Test_RadauIIA2(Harness_RKDAE, unittest.TestCase):
 	expected_orders = 2,3
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.RadauIIA.tableaux[2])
-class Test_RadauIIA3(Harness_RKDAE):
+class Test_RadauIIA3(Harness_RKDAE, unittest.TestCase):
 	expected_orders = 3,5
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.RadauIIA.tableaux[3])
-class Test_ImplicitEuler(Harness_RKDAE):
+class Test_ImplicitEuler(Harness_RKDAE, unittest.TestCase):
 	expected_orders = 1,1
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.ImplicitEuler.tableaux[1])
-class Test_Gauss(Harness_RKDAE):
+class Test_Gauss(Harness_RKDAE, unittest.TestCase):
 	expected_orders = 1,1
 	def set_scheme(self):
 		self.scheme = RKDAE(tableau=RK.ImplicitEuler.tableaux[1])

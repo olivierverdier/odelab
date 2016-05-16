@@ -19,7 +19,6 @@ import os
 
 import numpy as np
 import numpy.testing as npt
-import nose.tools as nt
 from nose.plugins.skip import SkipTest
 import unittest
 
@@ -40,26 +39,23 @@ def const_f(c,t,u):
 def time_f(t,u):
 	return t
 
-def test_solver_autosave():
-	solver = Solver(ExplicitEuler(h=.1), System(f))
-	solver.initialize(u0=1.)
-	solver.run()
-	nt.assert_equal(solver.guess_name(), 'System_ExplicitEuler_T1.0')
+class TestMisc(unittest.TestCase):
+	def test_solver_autosave(self):
+		solver = Solver(ExplicitEuler(h=.1), System(f))
+		solver.initialize(u0=1.)
+		solver.run()
+		self.assertEqual(solver.guess_name(), 'System_ExplicitEuler_T1.0')
 
-def test_duration():
-	"""Duration are added from run to run"""
-	solver = Solver(ExplicitEuler(h=.1), System(f))
-	solver.initialize(u0=1.,time=1.,)
-	solver.run()
-	d1 = solver.store['duration']
-	solver.run(time=.1)
-	d2 = solver.store['duration']
-	nt.assert_greater(d2, d1)
+	def test_duration(self):
+		"""Duration are added from run to run"""
+		solver = Solver(ExplicitEuler(h=.1), System(f))
+		solver.initialize(u0=1.,time=1.,)
+		solver.run()
+		d1 = solver.store['duration']
+		solver.run(time=.1)
+		d2 = solver.store['duration']
+		self.assertGreater(d2, d1)
 
-def test_initialize_len1():
-	solver = Solver(ExplicitEuler(.1),System(f))
-	solver.initialize(u0=1.)
-	nt.assert_equal(len(solver),1)
 
 class InitializedTwiceError(ValueError):
 	pass
@@ -75,36 +71,42 @@ class Scheme_init_once(ExplicitEuler):
 		super(Scheme_init_once,self).initialize(events)
 		self.is_initialized = True
 
-def test_start_from_two():
-	# check that a scheme is not initialized twice, even if we start from more than one event
-	dt = .1
-	solver = Solver(Scheme_init_once(dt), System(f))
-	solver.initialize(u0=1.)
-	solver.run(2*dt)
-	nt.assert_equal(len(solver),3)
-	solver.scheme.is_initialized = False
-	solver.run(1.)
-	print(len(solver))
-	print(solver.get_events())
+class TestInitialize(unittest.TestCase):
+	def test_initialize_len1(self):
+		solver = Solver(ExplicitEuler(.1),System(f))
+		solver.initialize(u0=1.)
+		self.assertEqual(len(solver),1)
 
-@nt.raises(InitializedTwiceError)
-def test_initialize_reset_scheme():
-	solver = Solver(Scheme_init_once(.1), System(f))
-	solver.initialize(u0=1., name='first')
-	nt.assert_is(solver.current_scheme, None)
-	solver.run(1.)
-	solver.initialize(u0=2.,name='second')
-	solver.run(1.)
+	def test_start_from_two(self):
+		# check that a scheme is not initialized twice, even if we start from more than one event
+		dt = .1
+		solver = Solver(Scheme_init_once(dt), System(f))
+		solver.initialize(u0=1.)
+		solver.run(2*dt)
+		self.assertEqual(len(solver),3)
+		solver.scheme.is_initialized = False
+		solver.run(1.)
+		print(len(solver))
+		print(solver.get_events())
 
-@nt.raises(MultistepInitializationError)
-def test_multistep_init_exception():
-	multi_scheme = AdamsBashforth2(.1)
-	s = Solver(scheme=multi_scheme, system=System(f))
-	s.initialize(u0=1.)
-	with s.open_store() as events:
-		s.set_scheme(multi_scheme, events)
+	def test_initialize_reset_scheme(self):
+		solver = Solver(Scheme_init_once(.1), System(f))
+		solver.initialize(u0=1., name='first')
+		self.assertIs(solver.current_scheme, None)
+		solver.run(1.)
+		solver.initialize(u0=2.,name='second')
+		with self.assertRaises(InitializedTwiceError):
+			solver.run(1.)
 
-class Test_Access(object):
+	def test_multistep_init_exception(self):
+		multi_scheme = AdamsBashforth2(.1)
+		s = Solver(scheme=multi_scheme, system=System(f))
+		s.initialize(u0=1.)
+		with self.assertRaises(MultistepInitializationError):
+			with s.open_store() as events:
+				s.set_scheme(multi_scheme, events)
+
+class Test_Access(unittest.TestCase):
 	"""
 	Test the Solver.get_events method.
 	"""
@@ -117,13 +119,13 @@ class Test_Access(object):
 		self.s.run()
 		sampling_rate = .5
 		evts = self.s.get_events(t0=0, time=50.05, sampling_rate=sampling_rate)
-		nt.assert_almost_equal(len(evts.T), len(self.s)*sampling_rate/2, -1) # approx 1/4 of total nb of events
-		## nt.assert_equal(len(evts.T), 250)
+		npt.assert_almost_equal(len(evts.T), len(self.s)*sampling_rate/2, -1) # approx 1/4 of total nb of events
+		## self.assertEqual(len(evts.T), 250)
 		npt.assert_array_almost_equal(evts[:,-1], np.array([50.,50.]))
 
-	@nt.raises(Solver.NotRun)
 	def test_notrun(self):
-		self.s.get_events()
+		with self.assertRaises(Solver.NotRun):
+			self.s.get_events()
 
 
 from functools import partial
@@ -145,16 +147,16 @@ class Harness_Solver(Harness):
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0,)
-		nt.assert_equal(self.solver.time, Solver.time)
-		nt.assert_equal(len(self.solver), 1)
+		self.assertEqual(self.solver.time, Solver.time)
+		self.assertEqual(len(self.solver), 1)
 
-	@nt.raises(PyTableStore.AlreadyInitialized)
 	def test_initialize_twice(self):
 		if Store is SimpleStore:
 			raise SkipTest()
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
-		self.solver.initialize(u0=u0)
+		with self.assertRaises(PyTableStore.AlreadyInitialized):
+			self.solver.initialize(u0=u0)
 
 	def test_initialize_scheme(self):
 		raise SkipTest('not relevant anymore, time step is initialized directly at the scheme level')
@@ -164,7 +166,7 @@ class Harness_Solver(Harness):
 		with self.solver.open_store() as events:
 			self.solver.set_scheme(self.solver.scheme, events)
 		self.solver.step(e0[-1], e0[:-1],)
-		nt.assert_equal(self.solver.scheme.h, h)
+		self.assertEqual(self.solver.scheme.h, h)
 
 	def test_quadratic(self):
 		print(type(self).__name__)
@@ -197,37 +199,37 @@ class Harness_Solver(Harness):
 	def test_repr(self):
 		expected = '<Solver: {0}'.format(repr(self.solver.scheme))
 		r = repr(self.solver)
-		nt.assert_true(r.startswith(expected))
+		self.assertTrue(r.startswith(expected))
 		if self.solver.init_scheme is not None:
-			nt.assert_regexp_matches(r, repr(self.solver.init_scheme))
+			self.assertRegex(r, repr(self.solver.init_scheme))
 
 
-class Test_EEuler(Harness_Solver):
+class Test_EEuler(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ExplicitEuler(h=.1), System(f))
 
-class Test_ETrapezoidal(Harness_Solver):
+class Test_ETrapezoidal(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ExplicitTrapezoidal(h=.1), System(f))
 
-class Test_RK4(Harness_Solver):
+class Test_RK4(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(RungeKutta4(h=.1), System(f))
 
-class Test_Midpoint(Harness_Solver):
+class Test_Midpoint(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ImplicitMidPoint(h=.1), System(f))
 
-class Test_RK34(Harness_Solver):
+class Test_RK34(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(RungeKutta34(h=.1), System(f))
 
-class Test_AB(Harness_Solver):
+class Test_AB(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		multi_scheme = AdamsBashforth2(.1)
 		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
-class Test_RK34Vdp(object):
+class Test_RK34Vdp(unittest.TestCase):
 	def setUp(self):
 		time = 7.8
 		self.h_init = time/50
@@ -237,7 +239,7 @@ class Test_RK34Vdp(object):
 
 	def test_run(self):
 		self.s.run()
-		nt.assert_less(self.scheme.h, self.h_init)
+		self.assertLess(self.scheme.h, self.h_init)
 
 class Harness_Solver_NoComplex(Harness_Solver):
 
@@ -245,25 +247,26 @@ class Harness_Solver_NoComplex(Harness_Solver):
 		if isinstance(u0,float) and f is const_c:
 			raise SkipTest('Does not work with real initial conditions and complex vector fields')
 
-class Test_ode15s(Harness_Solver_NoComplex):
+class Test_ode15s(Harness_Solver_NoComplex, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ode15s(h=.1), System(f))
 
-class Test_LawsonEuler(Harness_Solver_NoComplex):
+class Test_LawsonEuler(Harness_Solver_NoComplex, unittest.TestCase):
 	def set_system(self, f):
 		self.solver.system = NoLinear(f,self.dim)
 	def setup_solver(self):
 		self.solver = Solver(LawsonEuler(h=.1), NoLinear(f,self.dim))
 
-class Test_IEuler(Harness_Solver):
+class Test_IEuler(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ImplicitEuler(h=.1), System(f))
 
-@nt.raises(Solver.Unstable)
-def test_unstable():
-	s = Solver(LawsonEuler(h=10.), Linear(np.array([[1.e2]])))
-	s.initialize(u0 = 1., time = 100,)
-	s.run()
+class TestStability(unittest.TestCase):
+	def test_unstable(self):
+		with self.assertRaises(Solver.Unstable):
+			s = Solver(LawsonEuler(h=10.), Linear(np.array([[1.e2]])))
+			s.initialize(u0 = 1., time = 100,)
+			s.run()
 
 def make_lin(A):
 	if np.isscalar(A):
@@ -396,7 +399,7 @@ class TotSys(System):
 def minus_x(t, x):
 	return -x
 
-class Test_Simple(object):
+class Test_Simple(unittest.TestCase):
 	def setUp(self):
 		sys = TotSys(minus_x)
 		self.s = Solver(ExplicitEuler(h=.1), sys)

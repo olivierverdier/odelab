@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import unittest
+
 import odelab
 
 from odelab.scheme.stochastic import *
@@ -10,7 +12,7 @@ from odelab.solver import *
 
 import numpy as np
 
-class Test_OU(object):
+class Test_OU(unittest.TestCase):
 	def test_run(self):
 		sys = OrnsteinUhlenbeck()
 		scheme = EulerMaruyama()
@@ -19,7 +21,7 @@ class Test_OU(object):
 		self.s.initialize(u0=np.array([1.]),  time=1.)
 		self.s.run()
 
-class Test_Differentiator(object):
+class Test_Differentiator(unittest.TestCase):
 	t0 = 5e-9
 	V0 = .01
 	def test_run(self):

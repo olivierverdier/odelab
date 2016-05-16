@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import unittest
+
 from odelab.system import *
 from odelab.system.nonholonomic.contactoscillator import ContactOscillator
 
 import numpy.testing as npt
-import nose.tools as nt
 
-class Test_ContactOscillator(object):
-	def __init__(self, s=3):
-		self.s = 3
+class Test_ContactOscillator(unittest.TestCase):
 	def setUp(self):
+		self.s = 3
 		self.co = ContactOscillator()
 
 	def prepare(self):
@@ -62,22 +62,24 @@ class Harness_Nonholonomic(object):
 		for U,F in zip(u.T,force.T):
 			npt.assert_array_almost_equal(np.dot(self.sys.lag(U), self.sys.codistribution(U),), F)
 
-class Test_ContactOscillator_NH(Harness_Nonholonomic):
+class Test_ContactOscillator_NH(Harness_Nonholonomic, unittest.TestCase):
 	def setUp(self):
 		self.sys = ContactOscillator()
 
-class Test_VerticalRollingDisk_NH(Harness_Nonholonomic):
+class Test_VerticalRollingDisk_NH(Harness_Nonholonomic, unittest.TestCase):
 	def setUp(self):
 		self.sys = VerticalRollingDisk()
 
 
-def test_Jay_exact(t=1.):
-	sys = JayExample()
-	dyn = sys.multi_dynamics(np.hstack([JayExample.exact(t,array([1.,1.])),t]))
-	res = sum(v for v in dyn.values()) - array([np.exp(t), -2*np.exp(-2*t)])
-	npt.assert_array_almost_equal(res,0)
+class TestJay(unittest.TestCase):
+	def test_Jay_exact(self, t=1.):
+		sys = JayExample()
+		dyn = sys.multi_dynamics(np.hstack([JayExample.exact(t,array([1.,1.])),t]))
+		res = sum(v for v in dyn.values()) - array([np.exp(t), -2*np.exp(-2*t)])
+		npt.assert_array_almost_equal(res,0)
 
-@nt.raises(ValueError)
-def test_Jay_exact_wrong_initial_conditions():
-	JayExample.exact(1., array([0.,0,0]))
+# @nt.raises(ValueError)
+	def test_Jay_exact_wrong_initial_conditions(self):
+		with self.assertRaises(ValueError):
+			JayExample.exact(1., array([0.,0,0]))
 

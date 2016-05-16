@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import unittest
+
 import odelab
 
 from odelab.scheme.stochastic import *
@@ -8,7 +10,6 @@ from odelab.system import *
 from odelab.solver import *
 from newton import *
 
-import nose.tools as nt
 
 Solver.catch_runtime = False
 
@@ -54,11 +55,11 @@ class SimpleDiff(System):
 		return np.zeros_like(u)
 
 
-class Test(object):
-	@nt.raises(RootSolver.DidNotConverge)
+class Test(unittest.TestCase):
 	def test_run(self):
-		sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
-		self.s = SingleStepSolver(EulerMaruyama(h=2.5e-11,), sys)
-		self.s.initialize(u0=np.array([0.,0]),time=2.5e-8)
-		self.s.run()
+		with self.assertRaises(RootSolver.DidNotConverge):
+			sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
+			self.s = SingleStepSolver(EulerMaruyama(h=2.5e-11,), sys)
+			self.s.initialize(u0=np.array([0.,0]),time=2.5e-8)
+			self.s.run()
 
