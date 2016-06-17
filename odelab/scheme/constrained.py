@@ -115,12 +115,12 @@ Nonholonomic Symplectic Euler.
 		l0 = self.system.lag(u0)
 		vl0 = np.hstack([v0,l0])
 		codistribution_mid = self.system.codistribution((q0+q1)/2)
+		codistribution = self.system.codistribution(q1)
 		def residual(dvl):
 			u1 = np.hstack([q1, vl0+dvl]) # assuming that the system stores position,velocity
 			v1 = self.system.velocity(u1)
 			p1 = self.system.momentum(u1)
 			l = self.system.lag(u1)
-			codistribution = self.system.codistribution(q1)
 			return np.hstack([p1 - p0 - h*(force + np.dot(codistribution_mid.T, l)), np.dot(codistribution, v1)])
 		return residual
 
