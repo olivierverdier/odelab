@@ -57,9 +57,9 @@ class Harness_Circle(object):
 		self.f = rotational
 		self.set_scheme()
 		self.s = SingleStepSolver(self.scheme, DummySystem(self.f))
-		self.scheme.h = .01
+		self.scheme.h = .05
 		self.s.initialize(u0 = array([1.,0.]))
-		self.s.run(time = 10.)
+		self.s.run(time = 3.)
 
 	def test_plot_2D(self):
 		plt.clf()
@@ -69,7 +69,7 @@ class Harness_Circle(object):
 		for l in a.get_lines():
 			d = l.get_data()
 			radii = np.abs(np.sqrt(d[0]**2+d[1]**2) - 1)
-			assert np.all(radii < .2) # should roughly be a circle
+			assert np.all(radii < .3) # should roughly be a circle
 
 	def test_plot(self):
 		a = self.s.plot(plot_exact=False).axis
