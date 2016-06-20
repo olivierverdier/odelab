@@ -10,6 +10,7 @@ from odelab.scheme.constrained import *
 from odelab.system import *
 from odelab.system.nonholonomic.contactoscillator import *
 from odelab.system.nonholonomic.pendulum import Pendulum, CirclePendulum, SinePendulum
+from odelab.system.nonholonomic.rolling import VerticalRollingDisk, Robot
 from odelab.solver import *
 
 from odelab.scheme.rungekutta import *

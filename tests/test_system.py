@@ -5,6 +5,7 @@ import unittest
 
 from odelab.system import *
 from odelab.system.nonholonomic.contactoscillator import ContactOscillator
+from odelab.system.nonholonomic.rolling import VerticalRollingDisk
 
 import numpy.testing as npt
 
