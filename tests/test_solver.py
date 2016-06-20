@@ -112,16 +112,17 @@ class Test_Access(unittest.TestCase):
 	"""
 	def setUp(self):
 		self.s = Solver(ExplicitEuler(.1), System(partial(const_f, 1.)))
-		self.time = 100
+		self.time = 30
 		self.s.initialize(u0=np.array([0.]),time=self.time)
 
 	def test_access(self):
 		self.s.run()
 		sampling_rate = .5
-		evts = self.s.get_events(t0=0, time=50.05, sampling_rate=sampling_rate)
+		time = 15
+		evts = self.s.get_events(t0=0, time=time, sampling_rate=sampling_rate)
 		npt.assert_almost_equal(len(evts.T), len(self.s)*sampling_rate/2, -1) # approx 1/4 of total nb of events
 		## self.assertEqual(len(evts.T), 250)
-		npt.assert_array_almost_equal(evts[:,-1], np.array([50.,50.]))
+		npt.assert_array_almost_equal(evts[:,-1], np.array([time, time]))
 
 	def test_notrun(self):
 		with self.assertRaises(Solver.NotRun):
