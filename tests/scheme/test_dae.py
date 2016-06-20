@@ -58,8 +58,8 @@ class SimpleDiff(System):
 class Test(unittest.TestCase):
 	def test_run(self):
 		with self.assertRaises(RootSolver.DidNotConverge):
-			sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e12)
-			self.s = SingleStepSolver(EulerMaruyama(h=2.5e-11,), sys)
+			sys = SimpleDiff(V=Vlin(5.e-9,.01),gain=1e8)
+			self.s = SingleStepSolver(EulerMaruyama(h=2.5e-9,), sys)
 			self.s.initialize(u0=np.array([0.,0]),time=2.5e-8)
 			self.s.run()
 
