@@ -27,8 +27,6 @@ import matplotlib.pyplot as plt
 Solver.catch_runtime = False
 
 
-class Harness(object):
-	no_plot = True
 
 def f(t,u):
 	return t*np.ones_like(u)
@@ -133,7 +131,7 @@ from functools import partial
 const_r = partial(const_f, 1.)
 const_c = partial(const_f, 1.j)
 
-class Harness_Solver(Harness):
+class Harness_Solver(object):
 	def setUp(self):
 		self.setup_solver()
 
