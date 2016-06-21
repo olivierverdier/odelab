@@ -59,118 +59,47 @@ def test_linear_exponential(L, scheme):
 
 # Complex convection
 
-class Harness_ComplexConvection(object):
 
-	def check_convection(self, do_plot):
-		scheme = self.scheme
-		h = self.time/self.N
-		scheme.h = h
-		self.s = SingleStepSolver(scheme, system=self.B, init_scheme=HochOst4(h=h))
-		self.s.initialize(u0=self.u0, time=self.time)
-		self.s.run()
-		e1 = self.s.final()
-		u1 = e1[:-1]
-		if do_plot:
-			pl.plot(self.B.points, self.u0)
-			pl.plot(self.B.points, u1)
-		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
+def check_convection(scheme, time, h, B, u0, sol, do_plot):
+	scheme.h = h
+	s = SingleStepSolver(scheme, system=B, init_scheme=HochOst4(h=h))
+	s.initialize(u0=u0, time=time)
+	s.run()
+	e1 = s.final()
+	u1 = e1[:-1]
+	if do_plot:
+		pl.plot(B.points, u0)
+		pl.plot(B.points, u1)
+	npt.assert_array_almost_equal(u1, sol, decimal=2)
 
-	def test_run(self, do_plot=False):
-		self.B = BurgersComplex(viscosity=0., size=16)
-		umax=.5
-		self.u0 = 2*umax*(.5 - np.abs(self.B.points))
-		self.time = .5
-		mid = self.time*umax # the peak at final time
-		self.sol = (self.B.points+.5)*umax/(mid+.5)*(self.B.points < mid) + (self.B.points-.5)*umax/(mid-.5)*(self.B.points > mid)
-		if do_plot:
-			pl.clf()
-			pl.plot(self.B.points, self.sol, lw=2)
-		self.check_convection(do_plot)
+schemes = [ExplicitEuler(), 150], [Kutta4(), 10], [Kutta38(), 10], [Heun(), 10], [ABNorset4(), 50], [ABLawson2(), 50], [ABLawson3(), 50], [ABLawson4(), 50], [Lawson4(), 10], [GenLawson45(), 10], [LawsonEuler(), 150], [RKMK4T(), 10], [ode15s(), 2], [AdamsBashforth1(), 150], [AdamsBashforth2(), 50], [AdamsBashforth2e(), 50], [Butcher1(), 50], [Butcher3(), 120],
 
-	def find_N(self):
-		for N in [10,20,50,75,100,120,150]:
-			self.N = N
-			try:
-				self.notest_run()
-			except AssertionError:
-				continue
-			else:
-				break
+@pytest.mark.parametrize(["scheme", "N"], schemes, ids=repr)
+def test_run(scheme, N, do_plot=False):
+	B = BurgersComplex(viscosity=0., size=16)
+	umax=.5
+	u0 = 2*umax*(.5 - np.abs(B.points))
+	time = .5
+	mid = time*umax # the peak at final time
+	sol = (B.points+.5)*umax/(mid+.5)*(B.points < mid) + (B.points-.5)*umax/(mid-.5)*(B.points > mid)
+	if do_plot:
+		pl.clf()
+		pl.plot(B.points, sol, lw=2)
+	check_convection(scheme, time, time/N, B, u0, sol, do_plot)
+
+def find_N(self):
+	for N in [10,20,50,75,100,120,150]:
+		self.N = N
+		try:
+			self.notest_run()
+		except AssertionError:
+			continue
 		else:
-			raise Exception('No N!')
-		print(type(self.scheme).__name__, N)
+			break
+	else:
+		raise Exception('No N!')
+	print(type(self.scheme).__name__, N)
 
-class Test_CC_EE(Harness_ComplexConvection):
-	scheme = ExplicitEuler()
-	N=150
-
-class Test_CC_RK4(Harness_ComplexConvection):
-	scheme = Kutta4()
-	N = 10
-
-class Test_CC_RK38(Harness_ComplexConvection):
-	scheme = Kutta38()
-	N = 10
-
-class Test_CC_Heun(Harness_ComplexConvection):
-	scheme = Heun()
-	N = 10
-
-class Test_CC_ABN4(Harness_ComplexConvection):
-	scheme = ABNorset4()
-	N = 50
-
-class Test_CC_ABL2(Harness_ComplexConvection):
-	scheme = ABLawson2()
-	N = 50
-
-class Test_CC_ABL3(Harness_ComplexConvection):
-	scheme = ABLawson3()
-	N=50
-
-class Test_CC_ABL4(Harness_ComplexConvection):
-	scheme = ABLawson4()
-	N=50
-
-class Test_CC_L4(Harness_ComplexConvection):
-	scheme = Lawson4()
-	N=10
-
-class Test_CC_GL45(Harness_ComplexConvection):
-	scheme = GenLawson45()
-	N=10
-
-class Test_CC_LE(Harness_ComplexConvection):
-	scheme = LawsonEuler()
-	N=150
-
-class Test_CC_RKMK4T(Harness_ComplexConvection):
-	scheme = RKMK4T()
-	N=10
-
-class Test_CC_ode15s(Harness_ComplexConvection):
-	scheme = ode15s()
-	N=2
-
-class Test_CC_AB1(Harness_ComplexConvection):
-	scheme = AdamsBashforth1()
-	N = 150
-
-class Test_CC_AB2(Harness_ComplexConvection):
-	scheme = AdamsBashforth2()
-	N = 50
-
-class Test_CC_AB2e(Harness_ComplexConvection):
-	scheme = AdamsBashforth2e()
-	N = 50
-
-class Test_CC_B1(Harness_ComplexConvection):
-	scheme = Butcher1()
-	N=50
-
-class Test_CC_B3(Harness_ComplexConvection):
-	scheme = Butcher3()
-	N=120
 
 # Auxiliary test to check that the tableaux are square
 
@@ -193,5 +122,3 @@ def test_exp_square(obj):
 	nb_stages = len(a)
 	tail_length = obj.tail_length
 	check_square(a,b, nb_stages, tail_length)
-
-
