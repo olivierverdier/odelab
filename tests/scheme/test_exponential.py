@@ -174,28 +174,24 @@ class Test_CC_B3(Harness_ComplexConvection):
 
 # Auxiliary test to check that the tableaux are square
 
-class CheckSquare(object):
-	def __init__(self, name):
-		self.description = name
-	def __call__(self,name,a,b,nb_stages, tail_length):
-		npt.assert_equal(len(b), tail_length, 'bv not right # of rows')
-		for i,row in enumerate(a):
-			npt.assert_equal(len(row), nb_stages+tail_length+1, 'au[%d]'%i)
-		for i,row in enumerate(b):
-			npt.assert_equal(len(row), nb_stages+tail_length, 'bv[%d]'%i)
+def check_square(a,b,nb_stages, tail_length):
+	npt.assert_equal(len(b), tail_length, 'bv not right # of rows')
+	for i,row in enumerate(a):
+		npt.assert_equal(len(row), nb_stages+tail_length+1, 'au[%d]'%i)
+	for i,row in enumerate(b):
+		npt.assert_equal(len(row), nb_stages+tail_length, 'bv[%d]'%i)
 
-def test_exp_square():
+import odelab.scheme.exponential as E
+exp_objs = [cls() for cls in [getattr(E, name) for name in dir(E)] if hasattr(cls, 'general_linear_z')]
+
+@pytest.mark.parametrize("obj", exp_objs, ids=repr)
+def test_exp_square(obj):
 	"""
 	Check that the matrices produced by the exponential schemes are square.
 	"""
-	import odelab.scheme.exponential as E
-	for name in dir(E):
-		cls = getattr(E, name)
-		if hasattr(cls, 'general_linear_z'):
-			obj = cls()
-			a,b = obj.general_linear_z(np.eye(2))
-			nb_stages = len(a)
-			tail_length = obj.tail_length
-			yield CheckSquare(name),name, a,b, nb_stages, tail_length
+	a,b = obj.general_linear_z(np.eye(2))
+	nb_stages = len(a)
+	tail_length = obj.tail_length
+	check_square(a,b, nb_stages, tail_length)
 
 
