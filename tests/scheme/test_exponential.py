@@ -13,8 +13,7 @@ from odelab.solver import *
 
 import numpy.testing as npt
 
-from nose.plugins.skip import SkipTest
-
+import pytest
 
 Solver.catch_runtime = False
 
@@ -29,9 +28,8 @@ class CompareLinearExponential(object):
 		npt.assert_array_almost_equal(computed, expected)
 		npt.assert_array_almost_equal(computed, phi)
 
-def test_linear_exponential():
-	for L in [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ]: # np.zeros([2,2])
-		for scheme in [
+@pytest.mark.parametrize("L", [np.array([[1.,2.],[3.,1.]]), -np.identity(2), ])
+@pytest.mark.parametrize("scheme",[
 			LawsonEuler(),
 			RKMK4T(),
 			HochOst4(),
@@ -41,21 +39,23 @@ def test_linear_exponential():
 			Lawson4(),
 			ABNorset4(),
 			GenLawson45(),
-		]:
-			h = .1
-			scheme.h = h
-			sys = Linear(L)
-			s = SingleStepSolver(scheme, system=sys, init_scheme=HochOst4(h=h))
-			u0 = np.array([1.,0.])
-			s.initialize(u0 = u0)
+		]
+)
+def test_linear_exponential(L, scheme):
+	h = .1
+	scheme.h = h
+	sys = Linear(L)
+	s = SingleStepSolver(scheme, system=sys, init_scheme=HochOst4(h=h))
+	u0 = np.array([1.,0.])
+	s.initialize(u0 = u0)
 
-			s.run(time=1.)
-			computed = s.final()[:-1]
-			phi = Phi(0)
-			tf = s.final_time()
-			phi_0 = np.dot(phi(tf*L)[0], u0)
-			expected = np.dot(slin.expm(tf*L), u0)
-			yield CompareLinearExponential(scheme), computed, expected, phi_0
+	s.run(time=1.)
+	computed = s.final()[:-1]
+	phi = Phi(0)
+	tf = s.final_time()
+	phi_0 = np.dot(phi(tf*L)[0], u0)
+	expected = np.dot(slin.expm(tf*L), u0)
+	CompareLinearExponential(scheme), computed, expected, phi_0
 
 # Complex convection
 
@@ -76,7 +76,7 @@ class Harness_ComplexConvection(object):
 		npt.assert_array_almost_equal(u1, self.sol, decimal=2)
 
 	def test_run(self, do_plot=False):
-		self.B = BurgersComplex(viscosity=0., size=32)
+		self.B = BurgersComplex(viscosity=0., size=16)
 		umax=.5
 		self.u0 = 2*umax*(.5 - np.abs(self.B.points))
 		self.time = .5
