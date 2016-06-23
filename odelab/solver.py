@@ -23,7 +23,7 @@ import time
 from odelab.plotter import Plotter
 
 import warnings
-from .store import Store
+from .store import Store, SimpleStore
 
 from contextlib import contextmanager
 
@@ -47,7 +47,10 @@ class Solver (object):
 		self.system = system
 		self.scheme = scheme
 		self.init_scheme = init_scheme
-		self.store = Store(path)
+		if path is None:
+			self.store = SimpleStore()
+		else:
+			self.store = Store(path)
 
 	# default values for the total time
 	time = 1.
