@@ -32,7 +32,7 @@ before_script:
 
 # Run test
 script:
-  - py.test --cov=odelab --cov-report=term-missing --cov-config=.coveragerc
+  - py.test --cov=odelab --cov-report=term-missing --cov-config=.coveragerc tests
 
 # Calculate coverage
 after_success:
