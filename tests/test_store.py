@@ -3,11 +3,11 @@
 from __future__ import division
 
 import unittest
+import pytest
 
 from odelab.store import SimpleStore, PyTableStore, Store
 import numpy as np
 
-from nose.plugins.skip import SkipTest
 
 class Harness_Store(object):
 	def test_open(self):
@@ -38,14 +38,14 @@ class Test_SimpleStore(Harness_Store, unittest.TestCase):
 class Test_PyTableStore(Harness_Store, unittest.TestCase):
 	def setUp(self):
 		if Store is SimpleStore:
-			raise SkipTest()
+			pytest.skip()
 		self.s = PyTableStore()
 		self.s.initialize(np.array([1., 0]), name='foo')
 
 class Test_Exceptions(unittest.TestCase):
 	def setUp(self):
 		if Store is SimpleStore:
-			raise SkipTest()
+			pytest.skip()
 		self.s = PyTableStore()
 
 	def test_raise_not_initialized(self):

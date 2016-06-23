@@ -3,6 +3,7 @@
 from __future__ import division
 
 import unittest
+import pytest
 
 from odelab.solver import Solver, load_solver
 from odelab.system import System
@@ -11,14 +12,11 @@ from odelab.experiment import Experiment
 import numpy as np
 import numpy.testing as npt
 
-from nose.plugins.skip import SkipTest
-
 import tempfile
 import os
 
 from odelab.store import Store, SimpleStore
-if Store is SimpleStore:
-	raise SkipTest('Solver loading makes no sense without PyTables')
+pytestmark = pytest.mark.skipif(Store is SimpleStore, reason="Store tests only make sense with pytables")
 
 def f(t,u):
 	return -u

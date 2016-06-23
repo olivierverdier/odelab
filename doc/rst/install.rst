@@ -34,11 +34,11 @@ Test the installation
 =====================
 
 You may try to run the test suite of |project|.
-(Make sure that you have `nose`_ installed first.)
+(Make sure that you have `pytest`_ installed first.)
 To run the tests, go to the root directory of |project| and run:
 
 .. code-block:: sh
 
-    nosetest tests
+    py.test tests
 
-.. _nose: http://readthedocs.org/docs/nose/en/latest/
+.. _pytest: http://pytest.org/latest/

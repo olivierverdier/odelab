@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
-
 from odelab.scheme.rungekutta import *
 from odelab.scheme.generallinear import *
 from odelab.scheme import *
@@ -19,8 +18,8 @@ import os
 
 import numpy as np
 import numpy.testing as npt
-from nose.plugins.skip import SkipTest
 import unittest
+import pytest
 
 import matplotlib.pyplot as plt
 
@@ -151,14 +150,14 @@ class Harness_Solver(object):
 
 	def test_initialize_twice(self):
 		if isinstance(self.solver.store, SimpleStore):
-			raise SkipTest()
+			pytest.skip()
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
 		with self.assertRaises(PyTableStore.AlreadyInitialized):
 			self.solver.initialize(u0=u0)
 
+	@pytest.mark.skip('Not relevant anymore, time step is initialized directly at the scheme level')
 	def test_initialize_scheme(self):
-		raise SkipTest('not relevant anymore, time step is initialized directly at the scheme level')
 		h = 10.
 		self.solver.initialize(u0=np.random.rand(self.dim),)
 		e0 = self.solver.initial()
@@ -191,8 +190,8 @@ class Harness_Solver(object):
 	def test_real_const(self):
 		self.check_const(const_r, 1., 2.)
 
+	@pytest.mark.skip('Current nonlinear solver does not work with the complex type.')
 	def test_complex_const(self):
-		raise SkipTest('Current nonlinear solver does not work with the complex type.')
 		self.check_const(const_c, 1.+0j, 1.+1.j)
 
 	def test_repr(self):
