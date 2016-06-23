@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/olivierverdier/odelab/master.svg?style=flat-square)](https://travis-ci.org/olivierverdier/odelab)
 [![Coverage Status](https://img.shields.io/coveralls/olivierverdier/odelab/master.svg?style=flat-square)](https://coveralls.io/r/olivierverdier/odelab?branch=master)
-![Python version](https://img.shields.io/badge/python-2.7, 3.4-blue.svg?style=flat-square)
+![Python version](https://img.shields.io/badge/python-2.7, 3.4, 3.5-blue.svg?style=flat-square)
 
 Numerical simulation of ODEs in Python ([full documentation][doc] available).
 
