@@ -150,7 +150,7 @@ class Harness_Solver(object):
 		self.assertEqual(len(self.solver), 1)
 
 	def test_initialize_twice(self):
-		if Store is SimpleStore:
+		if isinstance(self.solver.store, SimpleStore):
 			raise SkipTest()
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0)
