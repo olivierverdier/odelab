@@ -126,13 +126,14 @@ class Test_Access(unittest.TestCase):
 			self.s.get_events()
 
 
-from functools import partial
-const_r = partial(const_f, 1.)
-const_c = partial(const_f, 1.j)
 
-class Harness_Solver(object):
+class TestSolver(unittest.TestCase):
 	def setUp(self):
 		self.setup_solver()
+
+	def setup_solver(self):
+		self.solver = Solver(ExplicitEuler(h=.1), System(f))
+		self.solver.store = Store(None)
 
 	dim = 1
 	def set_system(self, f):
@@ -166,86 +167,72 @@ class Harness_Solver(object):
 		self.solver.step(e0[-1], e0[:-1],)
 		self.assertEqual(self.solver.scheme.h, h)
 
-	def test_quadratic(self):
-		print(type(self).__name__)
-		self.set_system(time_f)
-		self.solver.initialize(u0=1., time=1.,)
-		self.solver.run()
+from functools import partial
+const_r = partial(const_f, 1.)
+const_c = partial(const_f, 1.j)
+
+schemes = [
+		ExplicitEuler(h=.1),
+		ImplicitEuler(h=.1),
+		ExplicitTrapezoidal(h=.1),
+		RungeKutta4(h=.1),
+		ImplicitMidPoint(h=.1),
+		RungeKutta34(h=.1),
+		ode15s(h=.1),
+
+]
+
+@pytest.fixture(params=schemes, ids=repr)
+def scheme(request):
+	return request.param
+
+class TestLinQuad():
+	def test_quadratic(self, scheme):
+		sys = System(time_f)
+		solver = Solver(system=sys, scheme=scheme)
+		solver.initialize(u0=1., time=1.,)
+		solver.run()
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
-		npt.assert_array_almost_equal(self.solver.final(), np.array([3/2,1.]), decimal=1)
+		npt.assert_array_almost_equal(solver.final(), np.array([3/2,1.]), decimal=1)
 
-	def check_const(self, f, u0, expected):
+	def check_const(self, f, u0, expected, scheme):
 		"""should solve the f=c exactly"""
-		print(type(self).__name__)
-		self.check_skip(u0,f)
-		self.set_system(f)
-		self.solver.initialize(u0=u0, time=1.,)
-		self.solver.run()
+		sys = System(f)
+		solver = Solver(system=sys, scheme=scheme)
+		solver.initialize(u0=u0, time=1.,)
+		solver.run()
 		expected_event = np.hstack([expected, 1.])
-		npt.assert_almost_equal(self.solver.final(), expected_event, 1)
+		npt.assert_almost_equal(solver.final(), expected_event, 1)
 
-	def check_skip(self,u0,f):
-		return
-
-	def test_real_const(self):
-		self.check_const(const_r, 1., 2.)
+	def test_real_const(self, scheme):
+		self.check_const(const_r, 1., 2., scheme)
 
 	@pytest.mark.skip('Current nonlinear solver does not work with the complex type.')
-	def test_complex_const(self):
-		self.check_const(const_c, 1.+0j, 1.+1.j)
+	def test_complex_const(self, scheme):
+		self.check_const(const_c, 1.+0j, 1.+1.j, scheme)
 
-	def test_repr(self):
-		expected = '<Solver: {0}'.format(repr(self.solver.scheme))
-		r = repr(self.solver)
-		self.assertTrue(r.startswith(expected))
-		if self.solver.init_scheme is not None:
-			self.assertRegex(r, repr(self.solver.init_scheme))
+	def test_repr(self, scheme):
+		expected = '<Solver: {0}'.format(repr(scheme))
+		solver = Solver(scheme=scheme, system=System(f))
+		r = repr(solver)
+		assert r.startswith(expected)
+		# if solver.init_scheme is not None:
+		# 	self.assertRegex(r, repr(self.solver.init_scheme))
 
 
-class Test_EEuler(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(ExplicitEuler(h=.1), System(f))
+# class Test_AB(Harness_Solver, unittest.TestCase):
+# 	def setup_solver(self):
+# 		multi_scheme = AdamsBashforth2(.1)
+# 		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
-class Test_ETrapezoidal(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(ExplicitTrapezoidal(h=.1), System(f))
 
-class Test_RK4(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(RungeKutta4(h=.1), System(f))
 
-class Test_Midpoint(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(ImplicitMidPoint(h=.1), System(f))
+# class Test_LawsonEuler(Harness_Solver_NoComplex, unittest.TestCase):
+# 	def set_system(self, f):
+# 		self.solver.system = NoLinear(f,self.dim)
+# 	def setup_solver(self):
+# 		self.solver = Solver(LawsonEuler(h=.1), NoLinear(f,self.dim))
 
-class Test_RK34(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(RungeKutta34(h=.1), System(f))
-
-class Test_AB(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		multi_scheme = AdamsBashforth2(.1)
-		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
-
-class Harness_Solver_NoComplex(Harness_Solver):
-
-	def check_skip(self,u0,f):
-		if isinstance(u0,float) and f is const_c:
-			raise SkipTest('Does not work with real initial conditions and complex vector fields')
-
-class Test_ode15s(Harness_Solver_NoComplex, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(ode15s(h=.1), System(f))
-
-class Test_LawsonEuler(Harness_Solver_NoComplex, unittest.TestCase):
-	def set_system(self, f):
-		self.solver.system = NoLinear(f,self.dim)
-	def setup_solver(self):
-		self.solver = Solver(LawsonEuler(h=.1), NoLinear(f,self.dim))
-
-class Test_IEuler(Harness_Solver, unittest.TestCase):
-	def setup_solver(self):
-		self.solver = Solver(ImplicitEuler(h=.1), System(f))
 
 class Test_RK34Vdp(unittest.TestCase):
 	def setUp(self):
