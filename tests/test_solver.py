@@ -227,18 +227,6 @@ class Test_AB(Harness_Solver, unittest.TestCase):
 		multi_scheme = AdamsBashforth2(.1)
 		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
 
-class Test_RK34Vdp(unittest.TestCase):
-	def setUp(self):
-		time = 7.8
-		self.h_init = time/50
-		self.scheme = RungeKutta34(h=self.h_init)
-		self.s = Solver(self.scheme, VanderPol(mu=1.))
-		self.s.initialize(u0 = array([.2,1]), time=time, )
-
-	def test_run(self):
-		self.s.run()
-		self.assertLess(self.scheme.h, self.h_init)
-
 class Harness_Solver_NoComplex(Harness_Solver):
 
 	def check_skip(self,u0,f):
@@ -258,6 +246,18 @@ class Test_LawsonEuler(Harness_Solver_NoComplex, unittest.TestCase):
 class Test_IEuler(Harness_Solver, unittest.TestCase):
 	def setup_solver(self):
 		self.solver = Solver(ImplicitEuler(h=.1), System(f))
+
+class Test_RK34Vdp(unittest.TestCase):
+	def setUp(self):
+		time = 7.8
+		self.h_init = time/50
+		self.scheme = RungeKutta34(h=self.h_init)
+		self.s = Solver(self.scheme, VanderPol(mu=1.))
+		self.s.initialize(u0 = array([.2,1]), time=time, )
+
+	def test_run(self):
+		self.s.run()
+		self.assertLess(self.scheme.h, self.h_init)
 
 class TestStability(unittest.TestCase):
 	def test_unstable(self):
