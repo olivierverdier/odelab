@@ -30,11 +30,6 @@ Solver.catch_runtime = False
 def f(t,u):
 	return t*np.ones_like(u)
 
-def const_f(c,t,u):
-	return c*np.ones_like(u)
-
-def time_f(t,u):
-	return t
 
 class TestMisc(unittest.TestCase):
 	def test_solver_autosave(self):
@@ -108,7 +103,7 @@ class Test_Access(unittest.TestCase):
 	Test the Solver.get_events method.
 	"""
 	def setUp(self):
-		self.s = Solver(ExplicitEuler(.1), System(partial(const_f, 1.)))
+		self.s = Solver(ExplicitEuler(.1), System(f))
 		self.time = 30
 		self.s.initialize(u0=np.array([0.]),time=self.time)
 
@@ -119,7 +114,6 @@ class Test_Access(unittest.TestCase):
 		evts = self.s.get_events(t0=0, time=time, sampling_rate=sampling_rate)
 		npt.assert_almost_equal(len(evts.T), len(self.s)*sampling_rate/2, -1) # approx 1/4 of total nb of events
 		## self.assertEqual(len(evts.T), 250)
-		npt.assert_array_almost_equal(evts[:,-1], np.array([time, time]))
 
 	def test_notrun(self):
 		with self.assertRaises(Solver.NotRun):
@@ -167,71 +161,7 @@ class TestSolver(unittest.TestCase):
 		self.solver.step(e0[-1], e0[:-1],)
 		self.assertEqual(self.solver.scheme.h, h)
 
-from functools import partial
-const_r = partial(const_f, 1.)
-const_c = partial(const_f, 1.j)
 
-schemes = [
-		ExplicitEuler(h=.1),
-		ImplicitEuler(h=.1),
-		ExplicitTrapezoidal(h=.1),
-		RungeKutta4(h=.1),
-		ImplicitMidPoint(h=.1),
-		RungeKutta34(h=.1),
-		ode15s(h=.1),
-
-]
-
-@pytest.fixture(params=schemes, ids=repr)
-def scheme(request):
-	return request.param
-
-class TestLinQuad():
-	def test_quadratic(self, scheme):
-		sys = System(time_f)
-		solver = Solver(system=sys, scheme=scheme)
-		solver.initialize(u0=1., time=1.,)
-		solver.run()
-		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
-		npt.assert_array_almost_equal(solver.final(), np.array([3/2,1.]), decimal=1)
-
-	def check_const(self, f, u0, expected, scheme):
-		"""should solve the f=c exactly"""
-		sys = System(f)
-		solver = Solver(system=sys, scheme=scheme)
-		solver.initialize(u0=u0, time=1.,)
-		solver.run()
-		expected_event = np.hstack([expected, 1.])
-		npt.assert_almost_equal(solver.final(), expected_event, 1)
-
-	def test_real_const(self, scheme):
-		self.check_const(const_r, 1., 2., scheme)
-
-	@pytest.mark.skip('Current nonlinear solver does not work with the complex type.')
-	def test_complex_const(self, scheme):
-		self.check_const(const_c, 1.+0j, 1.+1.j, scheme)
-
-	def test_repr(self, scheme):
-		expected = '<Solver: {0}'.format(repr(scheme))
-		solver = Solver(scheme=scheme, system=System(f))
-		r = repr(solver)
-		assert r.startswith(expected)
-		# if solver.init_scheme is not None:
-		# 	self.assertRegex(r, repr(self.solver.init_scheme))
-
-
-# class Test_AB(Harness_Solver, unittest.TestCase):
-# 	def setup_solver(self):
-# 		multi_scheme = AdamsBashforth2(.1)
-# 		self.solver = Solver(multi_scheme, System(f), init_scheme=ExplicitEuler(h=.1))
-
-
-
-# class Test_LawsonEuler(Harness_Solver_NoComplex, unittest.TestCase):
-# 	def set_system(self, f):
-# 		self.solver.system = NoLinear(f,self.dim)
-# 	def setup_solver(self):
-# 		self.solver = Solver(LawsonEuler(h=.1), NoLinear(f,self.dim))
 
 
 class Test_RK34Vdp(unittest.TestCase):
