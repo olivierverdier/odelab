@@ -2,6 +2,7 @@
 from __future__ import division
 
 import unittest
+import pytest
 
 from odelab.system import *
 from odelab.system.nonholonomic.contactoscillator import ContactOscillator
@@ -50,26 +51,22 @@ class Test_ContactOscillator(unittest.TestCase):
 		for k in d:
 			npt.assert_array_almost_equal(ds[k] - d[k].reshape(-1,1),0)
 
-class Harness_Nonholonomic(object):
-	def test_constraint(self,nb_stages=4):
-		u = np.random.random_sample([self.sys.size,nb_stages])
-		constraints = self.sys.constraint(u)
-		for U,C in zip(u.T,constraints.T):
-			npt.assert_array_almost_equal(np.dot(self.sys.codistribution(U),self.sys.velocity(U)), C)
 
-	def test_reaction_force(self,nb_stages=4):
-		u = np.random.random_sample([self.sys.size,nb_stages])
-		force = self.sys.reaction_force(u)
-		for U,F in zip(u.T,force.T):
-			npt.assert_array_almost_equal(np.dot(self.sys.lag(U), self.sys.codistribution(U),), F)
+@pytest.fixture(params=[ContactOscillator(), VerticalRollingDisk()])
+def sys(request):
+	return request.param
 
-class Test_ContactOscillator_NH(Harness_Nonholonomic, unittest.TestCase):
-	def setUp(self):
-		self.sys = ContactOscillator()
+def test_constraint(sys, nb_stages=4):
+	u = np.random.random_sample([sys.size,nb_stages])
+	constraints = sys.constraint(u)
+	for U,C in zip(u.T,constraints.T):
+		npt.assert_array_almost_equal(np.dot(sys.codistribution(U),sys.velocity(U)), C)
 
-class Test_VerticalRollingDisk_NH(Harness_Nonholonomic, unittest.TestCase):
-	def setUp(self):
-		self.sys = VerticalRollingDisk()
+def test_reaction_force(sys, nb_stages=4):
+	u = np.random.random_sample([sys.size,nb_stages])
+	force = sys.reaction_force(u)
+	for U,F in zip(u.T,force.T):
+		npt.assert_array_almost_equal(np.dot(sys.lag(U), sys.codistribution(U),), F)
 
 
 class TestJay(unittest.TestCase):
