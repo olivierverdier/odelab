@@ -135,8 +135,9 @@ class Test_OscSolver(unittest.TestCase):
 
 
 
-class HarnessRobot(object):
-	def setUp(self):
+class TestRobot(object):
+	def setUp(self, scheme):
+		self.scheme = scheme
 		s = SingleStepSolver(self.scheme, Robot())
 		u0 = np.zeros(10)
 		u0[4] = 1.
@@ -145,22 +146,18 @@ class HarnessRobot(object):
 		s.initialize(time=1, u0 = u0)
 		self.s = s
 
-	def test_run(self):
+	@pytest.mark.parametrize('scheme', [NonHolonomicEnergy(), McLachlan()], ids=repr)
+	def test_run(self, scheme):
+		self.setUp(scheme)
 		self.s.run()
 
-	def test_energy(self):
+	@pytest.mark.parametrize('scheme', [NonHolonomicEnergy(), NonHolonomicEnergy0(), NonHolonomicEnergyEMP()], ids=repr)
+	def test_energy(self, scheme):
+		self.setUp(scheme)
 		s = self.s
 		s.run(time=10)
 		npt.assert_almost_equal(s.system.energy(s.final()), s.system.energy(s.initial()), decimal=4)
 
-class Test_Robot_ML(HarnessRobot, unittest.TestCase):
-	scheme = McLachlan()
-
-	def test_energy(self):
-		pass
-
-class Test_Robot_H(HarnessRobot, unittest.TestCase):
-	scheme = NonHolonomicEnergy()
 
 # Test Spark on simple ODE
 
