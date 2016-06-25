@@ -6,7 +6,7 @@ import unittest
 import pytest
 
 from odelab.system.graph import QuasiGraphSystem, GraphSystem
-from odelab.solver import SingleStepSolver
+from odelab.solver import Solver
 from odelab.scheme.rungekutta import RKDAE
 import odelab.scheme.rungekutta as RK
 
@@ -32,7 +32,7 @@ def test_orders(expected_orders, scheme, plot=False, tol=.2):
 	system = QuasiGraphSystem(fsin)
 	#system = GraphSystem(fsin)
 	u0 = np.array([0.,0.,1])
-	solver = SingleStepSolver(scheme, system)
+	solver = Solver(scheme, system)
 	#compare_exact(sol, u0, 2)
 
 	sol = solver
@@ -88,12 +88,12 @@ def lin(x):
 	return x
 sq.der = lin
 
-def test_rkdae():
+@pytest.mark.parametrize('s', range(2,4))
+def test_rkdae(s):
 	sys = GraphSystem(sq)
 	u0 = np.array([0.,0.,1.])
-	for s in range(2,4):
-		scheme = RKDAE(.1, tableau=RK.RadauIIA.tableaux[s])
-		sol = SingleStepSolver(scheme, sys)
-		sol.initialize(u0=u0, time=1)
-		yield CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2
+	scheme = RKDAE(.1, tableau=RK.RadauIIA.tableaux[s])
+	sol = Solver(scheme, sys)
+	sol.initialize(u0=u0, time=1)
+	CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2
 
