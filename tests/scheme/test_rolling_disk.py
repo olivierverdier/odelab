@@ -10,13 +10,28 @@ from odelab.scheme.constrained import *
 from odelab.scheme.rungekutta import *
 from odelab.system.nonholonomic.rolling import VerticalRollingDisk, Robot
 
-# Vertical Rolling Disk
+schemes = [
+	McLachlan(),
+	NonHolonomicEnergy(),
+	NonHolonomicEnergy0(),
+	NonHolonomicEnergyEMP(),
+	Spark2(),
+	Spark3(),
+	Spark4(),
+	SymplecticEuler(),
+	NonHolonomicLeapFrog(),
+]
 
-class Harness_VerticalRollingDisk(object):
+@pytest.fixture(params=schemes, ids=repr)
+def scheme(request):
+	return request.param
+
+
+class TestVerticalRollingDisk:
 	h = .1
-	def setUp(self):
+	def test_exact(self, scheme):
 		self.sys = VerticalRollingDisk()
-		self.setup_scheme()
+		self.scheme = scheme
 		ohm_phi = 2.
 		ohm_theta = 1.
 		phi_0 = 0
@@ -32,10 +47,8 @@ class Harness_VerticalRollingDisk(object):
 		self.s = Solver(self.scheme, self.sys)
 		self.s.initialize(self.u0,)
 		self.s.time = 1.
-
-	def test_run(self):
 		self.s.run()
-## 		self.s.plot(components=[6,7])
+##		self.s.plot(components=[6,7])
 		self.check_solution()
 
 	def check_solution(self, decimal=1):
@@ -52,39 +65,3 @@ class Harness_VerticalRollingDisk(object):
 		self.s.initialize(h=h,time=time)
 		self.s.run()
 
-
-class Test_VerticalRollingDisk_ML(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = McLachlan()
-
-class Test_VerticalRollingDisk_H(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = NonHolonomicEnergy()
-
-class Test_VerticalRollingDisk_H0(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = NonHolonomicEnergy0()
-
-class Test_VerticalRollingDisk_HM(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = NonHolonomicEnergyEMP()
-
-class Test_VerticalRollingDisk_Spark2(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = Spark2()
-
-class Test_VerticalRollingDisk_Spark3(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = Spark3()
-
-class Test_VerticalRollingDisk_Spark4(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = Spark4()
-
-class Test_VerticalRollingDisk_SE(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = SymplecticEuler()
-
-class Test_VerticalRollingDisk_LF(Harness_VerticalRollingDisk, unittest.TestCase):
-	def setup_scheme(self):
-		self.scheme = NonHolonomicLeapFrog()
