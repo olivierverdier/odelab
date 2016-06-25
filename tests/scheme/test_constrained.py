@@ -2,6 +2,7 @@
 from __future__ import division
 
 import unittest
+import pytest
 
 
 from odelab.scheme import *
@@ -324,31 +325,25 @@ class Test_chaotic_H(Harness_chaoticosc, unittest.TestCase):
 	scheme = NonHolonomicEnergy()
 	energy_tol = 10
 
-class Harness_Chaplygin(object):
-	def setUp(self):
-		self.s = SingleStepSolver(self.scheme, Chaplygin(g=.1))
-		#u0 = np.array([1.,0,.2,0,0,0,0])
-		#u0 = np.array([1.,0,.8*np.pi/2,0,0,0,0])
-		u0_Hilsen = np.array([1.,0,0,0,0,0,0])
-		h_Hilsen = 1./300
-		time_Hilsen = 1.
-		u0_Jay = np.array([0,0,0,0,0,1.,0])
-		h_Jay = .1
-		time_Jay = 100
-		self.scheme.h = h_Jay
-		#self.s.initialize(u0=u0_Jay,time=time_Jay,)
-		self.s.initialize(u0=u0_Jay,time=1)
-		#print self.s.system.energy(s.final())
-		#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
-		#return self.s
+@pytest.mark.parametrize('scheme', [McLachlan(), NonHolonomicEnergy()], ids=repr)
+def test_chaplygin(scheme):
+	solver = SingleStepSolver(scheme, Chaplygin(g=.1))
+	#u0 = np.array([1.,0,.2,0,0,0,0])
+	#u0 = np.array([1.,0,.8*np.pi/2,0,0,0,0])
+	u0_Hilsen = np.array([1.,0,0,0,0,0,0])
+	h_Hilsen = 1./300
+	time_Hilsen = 1.
+	u0_Jay = np.array([0,0,0,0,0,1.,0])
+	h_Jay = .1
+	time_Jay = 100
+	scheme.h = h_Jay
+	#self.s.initialize(u0=u0_Jay,time=time_Jay,)
+	solver.initialize(u0=u0_Jay,time=1)
+	#print self.s.system.energy(s.final())
+	#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
+	#return self.s
 
-	def test_run(self):
-		self.s.run()
-		#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
+	solver.run()
+	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
 
-class Test_Chaplygin_ML(Harness_Chaplygin, unittest.TestCase):
-	scheme = McLachlan()
-
-class Test_Chaplygin_H(Harness_Chaplygin, unittest.TestCase):
-	scheme = NonHolonomicEnergy()
 
