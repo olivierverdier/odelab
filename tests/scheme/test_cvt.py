@@ -121,11 +121,6 @@ class Harness_chaoticosc(object):
 		s.initialize(u0=u0,  time=1)
 		self.s = s
 
-	def test_run(self):
-		s = self.s
-		s.run()
-		print(s.system.energy(s.final()))
-
 	def test_energy(self):
 		self.s.run()
 		H1 = self.s.system.energy(self.s.final())
