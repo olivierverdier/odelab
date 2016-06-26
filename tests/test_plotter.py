@@ -52,7 +52,7 @@ def quick_setup(plotter, **kwargs):
 	for k,v in kwargs.items():
 		setattr(plotter,k,v)
 
-schemes = [ExplicitEuler(), ImplicitEuler(), RungeKutta4()]
+schemes = [ExplicitEuler()]
 
 @pytest.fixture(scope='module', params=schemes, ids=repr)
 def solver(request):
@@ -79,7 +79,6 @@ class TestCircle(object):
 	def test_plot(self, solver):
 		a = solver.plot(plot_exact=False).axis
 		assert a.get_xlabel() == 'time'
-		solver.plot(plot_exact=True)
 		plotter = Plotter(solver)
 		plotter.axis_plot()
 		quick_setup(plotter, components=['output', 0], plot_exact=False)
