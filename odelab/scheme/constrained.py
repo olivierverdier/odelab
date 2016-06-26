@@ -58,7 +58,7 @@ The :class:`odelab.system.System` object must implement:
 			force = (self.system.force(qhp0) + self.system.force(qhp1))/2
 			return np.hstack([
 				q1 - qh - .5*h*v1,
-				p1 - p0 - h * (force + np.dot(codistribution_h.T, l)),
+				p1 - p0 - h * (force + np.dot(l, codistribution_h)),
 				np.dot(codistribution(q1), v1),
 				])
 		return residual
@@ -77,7 +77,7 @@ class NonHolonomicEnergy(Scheme):
 			cod = codistribution(self.codistribution_q(u0,u1,h))
 			return np.hstack([
 				h*self.system.average_velocity(u0,u1),
-				h*(self.system.average_force(u0,u1) + np.dot(cod.T,l1)),
+				h*(self.system.average_force(u0,u1) + np.dot(l1, cod)),
 				l1-l0 + h*np.dot(cod, self.system.average_velocity(u0,u1))])
 		def residual(du):
 			return du - vector(du)
@@ -121,7 +121,7 @@ Nonholonomic Symplectic Euler.
 			v1 = self.system.velocity(u1)
 			p1 = self.system.momentum(u1)
 			l = self.system.lag(u1)
-			return np.hstack([p1 - p0 - h*(force + np.dot(codistribution_mid.T, l)), np.dot(codistribution, v1)])
+			return np.hstack([p1 - p0 - h*(force + np.dot(l, codistribution_mid)), np.dot(codistribution, v1)])
 		return residual
 
 	def get_guess(self,t,u0,h):
@@ -154,7 +154,7 @@ Non-holonomic Leap Frog:
 			u01 = np.hstack([q0,vl1])
 			v1 = self.system.velocity(u01)
 			l1 = self.system.lag(u01)
-			return np.hstack([v1 - v0 - h*(force + np.dot(cod.T, l1)), np.dot(cod, v0+v1)])
+			return np.hstack([v1 - v0 - h*(force + np.dot(l1, cod)), np.dot(cod, v0+v1)])
 		N = self.root_solver(residual)
 		l0 = self.system.lag(u0)
 		vl1 = N.run(np.hstack([v0,l0]))
