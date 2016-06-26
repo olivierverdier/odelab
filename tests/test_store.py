@@ -8,39 +8,36 @@ import pytest
 from odelab.store import SimpleStore, PyTableStore, Store
 import numpy as np
 
+@pytest.fixture(params=[SimpleStore, PyTableStore])
+def store(request):
+	store_class = request.param
+	s = store_class()
+	s.initialize(np.array([1., 0]), name='foo')
+	return s
 
-class Harness_Store(object):
-	def test_open(self):
-		self.s.append(np.array([1.,1]))
-		self.s.append(np.array([1.,2]))
-		self.assertEqual(len(self.s), 2)
-		with self.s.open() as events:
-			self.assertEqual(events.shape, (2,2))
+class TestStore(object):
+	def test_open(self, store):
+		store.append(np.array([1.,1]))
+		store.append(np.array([1.,2]))
+		assert len(store) == 2
+		with store.open() as events:
+			assert events.shape == (2,2)
 
-	def test_append(self):
-		self.s.append(np.array([1.,1]))
-		self.assertEqual(len(self.s),1)
-		with self.s.open() as events:
-			self.assertEqual(events.dtype, float)
+	def test_append(self, store):
+		store.append(np.array([1.,1]))
+		assert len(store) == 1
+		with store.open() as events:
+			assert events.dtype == float
 
-class Test_SimpleStore(Harness_Store, unittest.TestCase):
-	def setUp(self):
-		self.s = SimpleStore()
-		self.s.initialize(np.array([1.,0]), name=None)
-
-	def test_openappend(self):
-		with self.s.open() as events:
-			self.s.append(np.array([1.,1]))
-		self.assertEqual(len(self.s),1)
-		with self.s.open() as events:
-			self.assertEqual(events.dtype, float)
-
-class Test_PyTableStore(Harness_Store, unittest.TestCase):
-	def setUp(self):
-		if Store is SimpleStore:
+	def test_openappend(self, store):
+		if isinstance(store, PyTableStore):
 			pytest.skip()
-		self.s = PyTableStore()
-		self.s.initialize(np.array([1., 0]), name='foo')
+		with store.open() as events:
+			store.append(np.array([1.,1]))
+		assert len(store) == 1
+		with store.open() as events:
+			assert events.dtype == float
+
 
 class Test_Exceptions(unittest.TestCase):
 	def setUp(self):
