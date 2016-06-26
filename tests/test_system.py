@@ -51,6 +51,14 @@ class Test_ContactOscillator(unittest.TestCase):
 		for k in d:
 			npt.assert_array_almost_equal(ds[k] - d[k].reshape(-1,1),0)
 
+	def test_initial(self):
+		z0s = np.linspace(-.9,.9,10)*np.sqrt(2)
+		u0 = self.co.initial_cos(z0s[5])
+		u00 = ContactSystem.initial(self.co, u0)
+		self.assertFalse(u0 is u00)
+		npt.assert_almost_equal(u0,u00)
+
+
 
 @pytest.fixture(params=[ContactOscillator(), VerticalRollingDisk()])
 def sys(request):

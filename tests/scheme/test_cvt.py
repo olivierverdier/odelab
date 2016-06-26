@@ -19,12 +19,13 @@ from odelab.scheme.rungekutta import *
 
 # Contact oscillator
 
-class Harness_Osc(object):
+class TestOsc(object):
 	epsilon = 0.3
-	def setUp(self):
-		self.sys = ContactOscillator(epsilon=self.epsilon)
-		self.set_scheme()
-		self.s = SingleStepSolver(self.scheme, self.sys)
+	def setUp(self, scheme, system):
+		self.scheme = scheme
+		self.system = system
+		# self.sys = ContactOscillator(epsilon=self.epsilon)
+		self.s = Solver(scheme, system)
 		#self.s.initialize(array([1.,1.,1.,0.,0,0,0]))
 		self.s.time = 10.
 
@@ -33,17 +34,27 @@ class Harness_Osc(object):
 	z0s = np.linspace(-.9,.9,10)*np.sqrt(2)
 	N = 15
 
-	decimal = 1
-
-	def test_z0(self, i=5, nb_Poincare_iterations=1):
+	@pytest.mark.parametrize(['scheme', 'system', 'decimal'], [
+		(McLachlan(), ContactOscillator(epsilon=.3), 1),
+		(Spark2(), ContactOscillator(epsilon=.3), 1),
+		(Spark3(), ContactOscillator(epsilon=.3), 1),
+		(NonHolonomicEnergy(), ContactOscillator(epsilon=.3), 6),
+		(McLachlan(), NonReversibleContactOscillator(), 1),
+		(NonHolonomicEnergy(), NonReversibleContactOscillator(), 10),
+		(Spark2(), NonReversibleContactOscillator(), 1),
+		(Spark3(), NonReversibleContactOscillator(), 1),
+	],
+							 ids=repr)
+	def test_z0(self, scheme, system, decimal, i=5, nb_Poincare_iterations=1):
+		self.setUp(scheme, system)
 		z0 = self.z0s[i]
-		h = self.sys.time_step(self.N)
-		self.scheme.h = h
+		h = system.time_step(self.N)
+		scheme.h = h
 		time = nb_Poincare_iterations*self.N*h
-		self.s.initialize(u0=self.sys.initial_sin(z0,), time=time)
+		self.s.initialize(u0=system.initial_sin(z0,), time=time)
 		self.s.run()
 		#self.s.plot(['radius'])
-		npt.assert_almost_equal(self.sys.energy(self.s.final()), self.sys.energy(self.s.initial()), decimal=self.decimal)
+		npt.assert_almost_equal(system.energy(self.s.final()), system.energy(self.s.initial()), decimal=decimal)
 		with self.s.open_store() as events:
 			energy = self.s.system.energy(events)
 
@@ -54,57 +65,6 @@ class Harness_Osc(object):
 		time = nb_Poincare_iterations*self.N*h
 		self.s.initialize(u0=self.sys.initial_cos(z0), h=h, time=time)
 		self.s.run()
-
-class Test_Initial(Harness_Osc, unittest.TestCase):
-	def set_scheme(self):
-		self.scheme = McLachlan()
-
-	def test_initial(self):
-		u0 = self.sys.initial_cos(self.z0s[5])
-		u00 = ContactSystem.initial(self.sys, u0)
-		self.assertFalse(u0 is u00)
-		npt.assert_almost_equal(u0,u00)
-
-
-class Test_McOsc(Harness_Osc, unittest.TestCase):
-	def set_scheme(self):
-		self.scheme = McLachlan()
-
-class Test_JayOsc2(Harness_Osc, unittest.TestCase):
-	def set_scheme(self):
-		self.scheme = Spark2()
-
-class Test_JayOsc3(Harness_Osc, unittest.TestCase):
-	def set_scheme(self):
-		self.scheme = Spark3()
-
-class Test_HOsc(Harness_Osc, unittest.TestCase):
-	decimal = 6
-	def set_scheme(self):
-		self.scheme = NonHolonomicEnergy()
-
-class Test_NROsc(Test_McOsc):
-	epsilon = 0.
-	def setUp(self):
-		self.sys = NonReversibleContactOscillator()
-		self.set_scheme()
-		self.s = SingleStepSolver(self.scheme, self.sys)
-		self.s.time = 10.
-
-class Test_NROsc_H(Test_NROsc):
-	decimal = 10
-	def set_scheme(self):
-		self.scheme = NonHolonomicEnergy()
-
-class Test_NROsc_SP2(Test_NROsc):
-	def set_scheme(self):
-		self.scheme = Spark2()
-
-class Test_NROsc_SP3(Test_NROsc):
-	def set_scheme(self):
-		self.scheme = Spark3()
-
-
 
 
 @pytest.mark.parametrize(['scheme', 'energy_tol'], [(NonHolonomicEnergy(), 2), (McLachlan(), 2)], ids=repr)
