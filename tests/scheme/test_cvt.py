@@ -107,35 +107,23 @@ class Test_NROsc_SP3(Test_NROsc):
 
 
 
+@pytest.mark.parametrize(['scheme', 'energy_tol'], [(NonHolonomicEnergy(), 2), (McLachlan(), 2)], ids=repr)
+def test_energy(scheme, energy_tol):
+	scheme.h = .05
+	s = SingleStepSolver(scheme, ChaoticOscillator(3))
+	u0 = np.zeros(15)
+	N = 10 - 1
+	n = 2 # j in range(N+1)
+	angle = n*np.pi/2/N
+	u0[:7] = np.array([np.cos(angle),.6,.4,.2,1.,1.,1.])
+	u0[7:9] = np.array([0., np.sin(angle)])
+	s.initialize(u0=u0,  time=1)
 
-class Harness_chaoticosc(object):
-	def setUp(self):
-		self.scheme.h = .05
-		s = SingleStepSolver(self.scheme, ChaoticOscillator(3))
-		u0 = np.zeros(15)
-		N = 10 - 1
-		n = 2 # j in range(N+1)
-		angle = n*np.pi/2/N
-		u0[:7] = np.array([np.cos(angle),.6,.4,.2,1.,1.,1.])
-		u0[7:9] = np.array([0., np.sin(angle)])
-		s.initialize(u0=u0,  time=1)
-		self.s = s
+	s.run()
+	H1 = s.system.energy(s.final())
+	H0 = s.system.energy(s.initial())
+	npt.assert_almost_equal(H1, H0, decimal=energy_tol)
 
-	def test_energy(self):
-		self.s.run()
-		H1 = self.s.system.energy(self.s.final())
-		H0 = self.s.system.energy(self.s.initial())
-		print(H0)
-		print(H1)
-		npt.assert_almost_equal(H1, H0, decimal=self.energy_tol)
-
-class Test_chaotic_ML(Harness_chaoticosc, unittest.TestCase):
-	scheme = McLachlan()
-	energy_tol = 2
-
-class Test_chaotic_H(Harness_chaoticosc, unittest.TestCase):
-	scheme = NonHolonomicEnergy()
-	energy_tol = 10
 
 # Old test below
 
