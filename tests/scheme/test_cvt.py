@@ -108,30 +108,6 @@ class Test_NROsc_SP3(Test_NROsc):
 
 
 
-class Test_OscSolver(unittest.TestCase):
-	def get_ht(self, z0,N,P):
-		u"""
-		N: nb iteration per Poincaré iteration
-		P: nb of Poincaré iterations
-		"""
-		h = 2*np.sin(np.pi/N) # is this correct?
-		time = P*N*h
-		return h,time
-
-	def setUp(self, N=40, P=100,):
-		z0 = -.5*np.sqrt(2)
-		print('z0 =',z0)
-		sys = ContactOscillator(epsilon=0)
-		u0 = sys.initial_cos(z0)
-		h,time = self.get_ht(z0, N,P)
-		solver = SingleStepSolver(McLachlan(h), sys,)
-		solver.initialize(time=time, u0=u0, )
-		self.solver = solver
-
-	def notest_run(self):
-		self.solver.run()
-
-
 class Harness_chaoticosc(object):
 	def setUp(self):
 		self.scheme.h = .05
@@ -165,3 +141,29 @@ class Test_chaotic_ML(Harness_chaoticosc, unittest.TestCase):
 class Test_chaotic_H(Harness_chaoticosc, unittest.TestCase):
 	scheme = NonHolonomicEnergy()
 	energy_tol = 10
+
+# Old test below
+
+class Test_OscSolver(unittest.TestCase):
+	def get_ht(self, z0,N,P):
+		u"""
+		N: nb iteration per Poincaré iteration
+		P: nb of Poincaré iterations
+		"""
+		h = 2*np.sin(np.pi/N) # is this correct?
+		time = P*N*h
+		return h,time
+
+	def setUp(self, N=40, P=100,):
+		z0 = -.5*np.sqrt(2)
+		print('z0 =',z0)
+		sys = ContactOscillator(epsilon=0)
+		u0 = sys.initial_cos(z0)
+		h,time = self.get_ht(z0, N,P)
+		solver = SingleStepSolver(McLachlan(h), sys,)
+		solver.initialize(time=time, u0=u0, )
+		self.solver = solver
+
+	def notest_run(self):
+		self.solver.run()
+
