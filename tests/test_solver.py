@@ -35,14 +35,14 @@ class TestMisc(unittest.TestCase):
 	def test_solver_autosave(self):
 		solver = Solver(ExplicitEuler(h=.1), System(f))
 		solver.initialize(u0=1.)
-		solver.run()
-		self.assertEqual(solver.guess_name(), 'System_ExplicitEuler_T1.0')
+		solver.run(1.)
+		self.assertEqual(solver.guess_name(), 'System_ExplicitEuler')
 
 	def test_duration(self):
 		"""Duration are added from run to run"""
 		solver = Solver(ExplicitEuler(h=.1), System(f))
-		solver.initialize(u0=1.,time=1.,)
-		solver.run()
+		solver.initialize(u0=1.,)
+		solver.run(1.)
 		d1 = solver.store['duration']
 		solver.run(time=.1)
 		d2 = solver.store['duration']
@@ -105,10 +105,10 @@ class Test_Access(unittest.TestCase):
 	def setUp(self):
 		self.s = Solver(ExplicitEuler(.1), System(f))
 		self.time = 30
-		self.s.initialize(u0=np.array([0.]),time=self.time)
+		self.s.initialize(u0=np.array([0.]))
 
 	def test_access(self):
-		self.s.run()
+		self.s.run(self.time)
 		sampling_rate = .5
 		time = 15
 		evts = self.s.get_events(t0=0, time=time, sampling_rate=sampling_rate)
@@ -140,7 +140,6 @@ class TestSolver(unittest.TestCase):
 	def test_initialize(self):
 		u0 = np.random.rand(self.dim)
 		self.solver.initialize(u0=u0,)
-		self.assertEqual(self.solver.time, Solver.time)
 		self.assertEqual(len(self.solver), 1)
 
 	def test_initialize_twice(self):
@@ -166,22 +165,22 @@ class TestSolver(unittest.TestCase):
 
 class Test_RK34Vdp(unittest.TestCase):
 	def setUp(self):
-		time = 7.8
-		self.h_init = time/50
+		self.time = 7.8
+		self.h_init = self.time/50
 		self.scheme = RungeKutta34(h=self.h_init)
 		self.s = Solver(self.scheme, VanderPol(mu=1.))
-		self.s.initialize(u0 = array([.2,1]), time=time, )
+		self.s.initialize(u0 = array([.2,1]))
 
 	def test_run(self):
-		self.s.run()
+		self.s.run(self.time)
 		self.assertLess(self.scheme.h, self.h_init)
 
 class TestStability(unittest.TestCase):
 	def test_unstable(self):
 		with self.assertRaises(Solver.Unstable):
 			s = Solver(LawsonEuler(h=10.), Linear(np.array([[1.e2]])))
-			s.initialize(u0 = 1., time = 100,)
-			s.run()
+			s.initialize(u0 = 1.)
+			s.run(100)
 
 
 class DummyException(Exception):
@@ -205,18 +204,19 @@ class Test_FinalTimeExceptions(unittest.TestCase):
 		self.scheme = ExplicitEuler(h=.1)
 		self.s = Solver(self.scheme, self.sys)
 		self.s.catch_runtime = True
-		self.s.initialize(u0=0, time=10, )
+		self.time = 10
+		self.s.initialize(u0=0)
 
 	def test_final_time_not_reached(self):
 		with self.assertRaises(Solver.FinalTimeNotReached):
-			self.s.run(max_iter = 1)
+			self.s.run(self.time, max_iter = 1)
 
 	def test_max_iter(self):
 		try:
-			self.s.run()
+			self.s.run(self.time)
 		except self.s.RuntimeError:
 			pass
-		self.assertGreaterEqual(self.s._max_iter, self.s.max_iter_factor*self.s.time/self.scheme.h)
+		self.assertGreaterEqual(self.s._max_iter, self.s.max_iter_factor*self.time/self.scheme.h)
 		time = 50
 		try:
 			self.s.run(50)
@@ -226,12 +226,12 @@ class Test_FinalTimeExceptions(unittest.TestCase):
 
 	def test_sys_exception(self):
 		with self.assertRaises(Solver.RuntimeError):
-			self.s.run()
+			self.s.run(self.time)
 
 	def test_sys_no_runtime_exception(self):
 		self.s.catch_runtime = False
 		with self.assertRaises(DummyException):
-			self.s.run()
+			self.s.run(self.time)
 
 def faulty_function(t,u):
 	raise Exception('message')
@@ -244,18 +244,18 @@ class Test_Exceptions(unittest.TestCase):
 			self.s.initialize()
 	def test_no_initialize(self):
 		with self.assertRaises(Solver.NotInitialized):
-			self.s.run()
+			self.s.run(1.)
 	def test_unstable(self):
 		self.s = Solver(ExplicitEuler(h=.1), Linear(np.array([[float('inf')]])))
 		self.s.initialize(u0=np.array([0]))
 		with self.assertRaises(Solver.Unstable):
-			self.s.run()
+			self.s.run(1.)
 	def test_runtime_exception(self):
 		self.s = Solver(ExplicitEuler(h=.1), System(faulty_function))
 		self.s.catch_runtime = True
 		self.s.initialize(u0=0)
 		with self.assertRaises(Solver.RuntimeError):
-			self.s.run()
+			self.s.run(1.)
 
 class TotSys(System):
 	def total(self, xt):
@@ -271,23 +271,25 @@ class Test_Simple(unittest.TestCase):
 
 	def test_time(self):
 		sol = self.s
-		sol.h = Solver.time/10
+		time = 1.
+		sol.h = time/10
 		sol.initialize(u0=0.)
 		sol.run(sol.h)
-		npt.assert_(sol.final_time() < Solver.time)
+		npt.assert_(sol.final_time() < time)
 
 	def test_extra_run(self):
 		"""test that an extra run continues from last time"""
 		sol = self.s
 		sol.initialize(u0=1.)
-		sol.run()
-		npt.assert_almost_equal(sol.final_time(),Solver.time)
-		sol.run()
-		npt.assert_almost_equal(sol.final_time(),2*Solver.time)
+		time = 1.
+		sol.run(1.)
+		npt.assert_almost_equal(sol.final_time(), time)
+		sol.run(time)
+		npt.assert_almost_equal(sol.final_time(),2*time)
 
 	def test_plot_args(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
-		self.s.run()
+		self.s.run(1.)
 		plt.clf()
 		lines = self.s.plot(0,lw=5).axis.lines
 		npt.assert_equal(len(lines),1)
@@ -298,7 +300,7 @@ class Test_Simple(unittest.TestCase):
 
 	def test_plot_function(self):
 		self.s.initialize(u0=np.array([1.,1.,1.]))
-		self.s.run()
+		self.s.run(1.)
 		lines = self.s.plot_function('total', lw=4).axis.lines
 		npt.assert_equal(lines[-1].get_linewidth(), 4)
 

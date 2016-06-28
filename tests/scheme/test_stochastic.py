@@ -18,8 +18,8 @@ class Test_OU(unittest.TestCase):
 		scheme = EulerMaruyama()
 		scheme.h = .01
 		self.s = SingleStepSolver(scheme, sys)
-		self.s.initialize(u0=np.array([1.]),  time=1.)
-		self.s.run()
+		self.s.initialize(u0=np.array([1.]))
+		self.s.run(time=1.)
 
 class Test_Differentiator(unittest.TestCase):
 	t0 = 5e-9
@@ -31,7 +31,7 @@ class Test_Differentiator(unittest.TestCase):
 		## scheme.h = 2.5e-11
 		scheme.h = self.t0
 		self.s = SingleStepSolver(scheme, sys)
-		self.s.initialize(u0 = np.array([0,0,0,0,0.]),  time=5*self.t0)
-		self.s.run()
+		self.s.initialize(u0 = np.array([0,0,0,0,0.]))
+		self.s.run(time=5*self.t0)
 
 

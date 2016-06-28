@@ -76,7 +76,7 @@ class CompareExact(object):
 	def __init__(self, name):
 		self.description = name
 	def __call__(self, solver, u0, components, decimal=2):
-		solver.run()
+		solver.run(time=1)
 		print(solver.final_time())
 		print(solver.final())
 		exact = solver.system.exact(solver.final_time(), u0)
@@ -94,6 +94,6 @@ def test_rkdae(s):
 	u0 = np.array([0.,0.,1.])
 	scheme = RKDAE(.1, tableau=RK.RadauIIA.tableaux[s])
 	sol = Solver(scheme, sys)
-	sol.initialize(u0=u0, time=1)
+	sol.initialize(u0=u0)
 	CompareExact('RadauIIA-{0}'.format(s)), sol, u0, 2
 

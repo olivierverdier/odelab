@@ -52,13 +52,10 @@ class Solver (object):
 		else:
 			self.store = Store(path)
 
-	# default values for the total time
-	time = 1.
-
 	# max_iter = max_iter_factor * (time/h)
 	max_iter_factor = 100
 
-	def initialize(self, u0=None, t0=0, time=None, name=None):
+	def initialize(self, u0=None, t0=0, name=None):
 		"""
 Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
@@ -76,15 +73,11 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		raw_event0 = np.hstack([u0, t0])
 		event0 = self.system.preprocess(raw_event0)
 
-		if time is not None:
-			self.time = time
-
 		self.set_name(name=name)
 
 		info = {
 				'u0':u0,
 				't0':t0,
-				'time':time,
 				}
 		# save system and scheme information in order to recover if unpickling fails
 		solver_info = {
@@ -182,18 +175,15 @@ Method to open the data store. Any access to the events must make use of this me
 
 	t_tol = 1e-12 # tolerance to tell whether the final time is reached
 
-	def run(self, time=None, max_iter=None):
+	def run(self, time, max_iter=None):
 		"""
 		Run the simulation for a given time.
 
-:param scalar time: the time span for which to run; if none is given, the default ``self.time`` is used
+:param scalar time: the time span for which to run;
 :param max_iter: the maximum number of iterations; if ``None``, an estimate is computed base on the time step and time span
 		"""
 		if not hasattr(self,'name'):
 			raise self.NotInitialized("You must call the `initialize` method before you can run the solver.")
-
-		if time is None:
-			time = self.time
 
 		self._max_iter = max_iter
 		if self._max_iter is None:
@@ -245,7 +235,7 @@ Method to open the data store. Any access to the events must make use of this me
 			self.name = guess
 
 	def guess_name(self):
-		return "{system}_{scheme}_T{time}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, time=self.time,)
+		return "{system}_{scheme}".format(system=type(self.system).__name__, scheme=type(self.scheme).__name__, )
 
 	def get_u(self, index, process=True):
 		"""

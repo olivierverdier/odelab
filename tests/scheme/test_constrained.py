@@ -29,13 +29,13 @@ class TestRobot(object):
 		u0[4] = 1.
 		u0[7] = 1.
 		self.scheme.h = .2
-		s.initialize(time=1, u0 = u0)
+		s.initialize(u0 = u0)
 		self.s = s
 
 	@pytest.mark.parametrize('scheme', [NonHolonomicEnergy(), McLachlan()], ids=repr)
 	def test_run(self, scheme):
 		self.setUp(scheme)
-		self.s.run()
+		self.s.run(1.)
 
 	@pytest.mark.parametrize('scheme', [NonHolonomicEnergy(), NonHolonomicEnergy0(), NonHolonomicEnergyEMP()], ids=repr)
 	def test_energy(self, scheme):
@@ -59,7 +59,7 @@ class Test_SparkODE(unittest.TestCase):
 		self.s.initialize(array([1.]))
 
 	def test_run(self):
-		self.s.run()
+		self.s.run(1.)
 		exact = np.exp(-self.s.get_times())
 		print(exact[-1])
 		print(self.s.final())
@@ -78,8 +78,8 @@ class Test_JayExample(unittest.TestCase):
 		scheme = Spark2()
 		scheme.h = .05
 		self.s = SingleStepSolver(scheme, self.sys)
-		self.s.initialize(u0=array([1.,1.,1.]), time=1,)
-		self.s.run()
+		self.s.initialize(u0=array([1.,1.,1.]), )
+		self.s.run(1.)
 		print(self.s.final_time())
 		print(self.s.final())
 		exact = self.sys.exact(self.s.final_time(),array([1.,1.,1.]))
@@ -89,12 +89,12 @@ class Test_JayExample(unittest.TestCase):
 def test_pendulum_ML():
 	s = SingleStepSolver(McLachlan(h=.1), CirclePendulum())
 	s.initialize(np.array([1.,0,0,0,0]))
-	s.run()
+	s.run(1.)
 
 def test_pendulum_NHE():
 	s = SingleStepSolver(NonHolonomicEnergy(h=.1), SinePendulum())
 	s.initialize(np.array([1.,0,0,0,0]))
-	s.run()
+	s.run(1.)
 
 
 @pytest.mark.parametrize('scheme', [McLachlan(), NonHolonomicEnergy()], ids=repr)
@@ -110,12 +110,12 @@ def test_chaplygin(scheme):
 	time_Jay = 100
 	scheme.h = h_Jay
 	#self.s.initialize(u0=u0_Jay,time=time_Jay,)
-	solver.initialize(u0=u0_Jay,time=1)
+	solver.initialize(u0=u0_Jay)
 	#print self.s.system.energy(s.final())
 	#nt.assert_equal(s.system.energy(self.s.events_array).shape, (len(self.s),))
 	#return self.s
 
-	solver.run()
+	solver.run(1.)
 	#nt.assert_almost_equal(s.system.energy(s.initial()), s.system.energy(s.final()))
 
 

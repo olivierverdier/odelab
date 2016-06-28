@@ -51,8 +51,8 @@ class TestOsc(object):
 		h = system.time_step(self.N)
 		scheme.h = h
 		time = nb_Poincare_iterations*self.N*h
-		self.s.initialize(u0=system.initial_sin(z0,), time=time)
-		self.s.run()
+		self.s.initialize(u0=system.initial_sin(z0,))
+		self.s.run(time)
 		#self.s.plot(['radius'])
 		npt.assert_almost_equal(system.energy(self.s.final()), system.energy(self.s.initial()), decimal=decimal)
 		with self.s.open_store() as events:
@@ -77,9 +77,9 @@ def test_energy(scheme, energy_tol):
 	angle = n*np.pi/2/N
 	u0[:7] = np.array([np.cos(angle),.6,.4,.2,1.,1.,1.])
 	u0[7:9] = np.array([0., np.sin(angle)])
-	s.initialize(u0=u0,  time=1)
+	s.initialize(u0=u0)
 
-	s.run()
+	s.run(1.)
 	H1 = s.system.energy(s.final())
 	H0 = s.system.energy(s.initial())
 	npt.assert_almost_equal(H1, H0, decimal=energy_tol)

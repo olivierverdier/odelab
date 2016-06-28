@@ -63,8 +63,8 @@ def test_linear_exponential(L, scheme):
 def check_convection(scheme, time, h, B, u0, sol, do_plot):
 	scheme.h = h
 	s = SingleStepSolver(scheme, system=B, init_scheme=HochOst4(h=h))
-	s.initialize(u0=u0, time=time)
-	s.run()
+	s.initialize(u0=u0)
+	s.run(time=time)
 	e1 = s.final()
 	u1 = e1[:-1]
 	if do_plot:

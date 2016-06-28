@@ -47,7 +47,6 @@ class Test_Experiment(unittest.TestCase):
 				},
 			'initialize': {
 				'u0' : np.array([1.]),
-				'time': 1.,
 				'name': self.name,
 				},
 			}
@@ -55,7 +54,7 @@ class Test_Experiment(unittest.TestCase):
 		s = Solver(system=System(f), scheme=scheme, path=self.path)
 		s.catch_runtime = False
 		s.initialize(**params['initialize'])
-		s.run()
+		s.run(1.)
 		#exp = Experiment(params, store_prefix=self.prefix)
 		#exp.run()
 		#exp.solver.file.close()
@@ -75,7 +74,7 @@ class Test_Experiment(unittest.TestCase):
 
 	def test_load_run(self):
 		s = load_solver(self.path, self.name)
-		s.run()
+		s.run(1.)
 	
 	def test_not_loadable(self):
 		base = os.path.dirname(__file__)

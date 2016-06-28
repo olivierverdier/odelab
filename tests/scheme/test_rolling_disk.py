@@ -46,8 +46,7 @@ class TestVerticalRollingDisk:
 		self.scheme.h = self.h
 		self.s = Solver(self.scheme, self.sys)
 		self.s.initialize(self.u0,)
-		self.s.time = 1.
-		self.s.run()
+		self.s.run(1.)
 ##		self.s.plot(components=[6,7])
 		self.check_solution()
 

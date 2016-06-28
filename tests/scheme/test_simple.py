@@ -37,8 +37,8 @@ class TestLinQuad():
 	def test_quadratic(self, scheme):
 		sys = System(time_f)
 		solver = Solver(system=sys, scheme=scheme)
-		solver.initialize(u0=1., time=1.,)
-		solver.run()
+		solver.initialize(u0=1., )
+		solver.run(time=1.,)
 		# u'(t) = t; u(0) = u0; => u(t) == u0 + t**2/2
 		npt.assert_array_almost_equal(solver.final(), np.array([3/2,1.]), decimal=1)
 
@@ -46,8 +46,8 @@ class TestLinQuad():
 		"""should solve the f=c exactly"""
 		sys = System(f)
 		solver = Solver(system=sys, scheme=scheme)
-		solver.initialize(u0=u0, time=1.,)
-		solver.run()
+		solver.initialize(u0=u0, )
+		solver.run(time=1.,)
 		expected_event = np.hstack([expected, 1.])
 		npt.assert_almost_equal(solver.final(), expected_event, 1)
 
