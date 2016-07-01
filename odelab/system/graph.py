@@ -41,7 +41,8 @@ class GraphSystem(System):
 
 	def constraint(self, ut):
 		x,y = self.state(ut)
-		return array([y - self.f(x)])
+		t = ut[-1]
+		return array([y - self.f(t, x)])
 
 	def hidden_error(self, t, u):
 		return self.lag(u)[0] - self.f.der(t,self.state(u)[0])
@@ -92,8 +93,8 @@ class QuasiGraphSystem(GraphSystem):
 	def exact(self,t,u0):
 		x0 = u0[0]
 		x = x0 + t
-		y = self.f(x)
+		y = self.f(t, x)
 		z = x*(1+y)
-		return array([z, y, self.f.der(x)])
+		return array([z, y, self.f.der(t, x)])
 
 

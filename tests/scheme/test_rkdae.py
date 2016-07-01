@@ -7,6 +7,7 @@ import pytest
 
 from odelab.system.graph import QuasiGraphSystem, GraphSystem
 from odelab.solver import Solver
+Solver.catch_runtime = False
 from odelab.scheme.rungekutta import RKDAE
 import odelab.scheme.rungekutta as RK
 
@@ -16,9 +17,11 @@ import matplotlib.pyplot as plt
 import odelab.order as order
 
 
-def fsin(x):
+def fsin(t, x):
 	return np.sin(x)
-fsin.der = np.cos
+def cos(t, x):
+	return np.cos(x)
+fsin.der = cos
 
 @pytest.mark.parametrize(["expected_orders", "scheme"], 
 [
@@ -82,9 +85,9 @@ class CompareExact(object):
 		exact = solver.system.exact(solver.final_time(), u0)
 		#npt.assert_array_almost_equal(solver.final()[:components], exact[:components], decimal=decimal)
 
-def sq(x):
+def sq(t, x):
 	return .5*x*x
-def lin(x):
+def lin(t, x):
 	return x
 sq.der = lin
 
