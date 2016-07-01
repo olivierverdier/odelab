@@ -55,9 +55,9 @@ class Solver (object):
 	# max_iter = max_iter_factor * (time/h)
 	max_iter_factor = 100
 
-	def initialize(self, u0=None, t0=0, name=None):
+	def initialize(self, u0=None, name=None):
 		"""
-Initialize the solver to the initial condition :math:`u(t0) = u0`.
+Initialize the solver to the initial condition :math:`u(0) = u0`.
 
 :param array u0: initial condition; if it is not provided, it is set to the previous initial condition.
 :param scalar time: span of the simulation
@@ -69,14 +69,13 @@ Initialize the solver to the initial condition :math:`u(t0) = u0`.
 		if np.isscalar(u0):
 			u0 = [u0] # todo: test if this is necessary
 		u0 = np.array(u0)
-		raw_event0 = np.hstack([u0, t0])
+		raw_event0 = np.hstack([u0, 0])
 		event0 = self.system.preprocess(raw_event0)
 
 		self.set_name(name=name)
 
 		info = {
 				'u0':u0,
-				't0':t0,
 				}
 		# save system and scheme information in order to recover if unpickling fails
 		solver_info = {
