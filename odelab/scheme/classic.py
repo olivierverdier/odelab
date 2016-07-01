@@ -11,7 +11,7 @@ class ExplicitEuler (Scheme):
 Explicit version of the Euler method, defined by:
 
 .. math::
-	u_1 = u_1 + hf(t_0, u_0)
+	u_1 = u_0 + hf(t_0, u_0)
 	"""
 	def delta(self, t, u0, h):
 		return h, self.h*self.system.f(t, u0)
