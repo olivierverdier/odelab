@@ -9,6 +9,7 @@ from odelab.scheme.generallinear import *
 from odelab.scheme.classic import *
 
 from odelab.system import *
+from odelab.system.exponential.burgers import BurgersComplex
 from odelab.solver import *
 
 import numpy.testing as npt
