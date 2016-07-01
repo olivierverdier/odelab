@@ -60,7 +60,6 @@ class Solver (object):
 Initialize the solver to the initial condition :math:`u(t0) = u0`.
 
 :param array u0: initial condition; if it is not provided, it is set to the previous initial condition.
-:param scalar t0: initial time
 :param scalar time: span of the simulation
 :param string name: name of this simulation
 		"""
