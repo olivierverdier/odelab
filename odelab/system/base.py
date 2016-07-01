@@ -13,7 +13,7 @@ class System(object):
 	"""
 	def __init__(self, f=None):
 		if f is not None:
-			self.f = f
+			self._f = f
 
 	def label(self, component):
 		return '%s' % component
@@ -23,6 +23,10 @@ class System(object):
 
 	def postprocess(self, u1):
 		return u1
+
+	def __call__(self, t, x):
+		return self._f(t, x)
+
 
 class ODESystem(System):
 	"""

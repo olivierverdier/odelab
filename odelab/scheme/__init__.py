@@ -125,7 +125,7 @@ class ode15s(Scheme):
 	def initialize(self, events): # the system must be defined before this is called!
 		super(ode15s,self).initialize(events)
 		import scipy.integrate
-		self.integ = scipy.integrate.ode(self.system.f)
+		self.integ = scipy.integrate.ode(self.system)
 		e0 = events[:,-1] # duplicate code with Solver.final
 		vodevariant = ['vode', 'zvode'][np.iscomplexobj(e0)]
 		self.integ.set_integrator(vodevariant, method='bdf', order=5, nsteps=3000, **self.integrator_kwargs)

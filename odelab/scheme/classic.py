@@ -14,7 +14,7 @@ Explicit version of the Euler method, defined by:
 	u_1 = u_0 + hf(t_0, u_0)
 	"""
 	def delta(self, t, u0, h):
-		return h, self.h*self.system.f(t, u0)
+		return h, self.h*self.system(t, u0)
 
 class ImplicitEuler (Scheme):
 	"""
@@ -25,7 +25,7 @@ The standard implicit Euler scheme, defined by:
 	"""
 	def get_residual(self, t, u0, h):
 		def residual(du):
-			return du - h*self.system.f(t+h,u0+du)
+			return du - h*self.system(t+h,u0+du)
 		return residual
 
 class ImplicitMidPoint(Scheme):
@@ -38,7 +38,7 @@ The implicit mid point rule
 	def get_residual(self, t, u0, h):
 		def residual(du):
 			mid = u0 + du/2
-			return du - h*self.system.f(t+h/2, mid)
+			return du - h*self.system(t+h/2, mid)
 		return residual
 
 class RungeKutta4(Scheme):
@@ -46,7 +46,7 @@ class RungeKutta4(Scheme):
 Standard Runge-Kutta of order 4.
 	"""
 	def delta(self, t, u0, h):
-		f = self.system.f
+		f = self.system
 		Y1 = f(t, u0)
 		Y2 = f(t + h/2., u0 + h*Y1/2.)
 		Y3 = f(t + h/2., u0 + h*Y2/2.)
@@ -55,7 +55,7 @@ Standard Runge-Kutta of order 4.
 
 class ExplicitTrapezoidal(Scheme):
 	def delta(self,t,u0,h):
-		f = self.system.f
+		f = self.system
 		u1 = u0 + h*f(t,u0)
 		res = h*.5*(f(t,u0) + f(t+h,u1))
 		return h, res
@@ -75,7 +75,7 @@ Adaptive Runge-Kutta of order four.
 			self.h = 1.
 
 	def delta(self, t, u0, h):
-		f = self.system.f
+		f = self.system
 		Y1 = f(t, u0)
 		Y2 = f(t + h/2., u0 + h*Y1/2.)
 		Y3 = f(t + h/2, u0 + h*Y2/2)

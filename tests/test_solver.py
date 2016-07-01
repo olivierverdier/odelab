@@ -190,7 +190,7 @@ class LimitedSys(System):
 	def __init__(self, limit):
 		self.limit = limit
 		self.i = 0
-	def f(self, t, x):
+	def __call__(self, t, x):
 		if self.i < self.limit:
 			self.i += 1
 			return 0

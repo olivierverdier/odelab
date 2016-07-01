@@ -89,3 +89,8 @@ class TestJay(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			JayExample.exact(1., array([0.,0,0]))
 
+def test_sys_call():
+	def const(t, x):
+		return 1.
+	sys = System(const)
+	assert sys(0, 0) == 1.

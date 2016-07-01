@@ -19,6 +19,6 @@ The van der Pol oscillator, defined by:
 	def __init__(self, mu=1.):
 		self.mu = mu
 
-	def f(self,t,y):
+	def __call__(self,t,y):
 		return np.array([y[1], self.mu*(1-y[0]**2)*y[1] - y[0]])
 

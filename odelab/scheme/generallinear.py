@@ -38,7 +38,7 @@ class ExplicitGeneralLinear(GeneralLinear):
 
 
 	def step(self, t, u, h):
-		f = self.system.f
+		f = self.system
 		ua, vb = self.tableau
 		nb_stages = len(ua)
 		nb_steps = len(vb)

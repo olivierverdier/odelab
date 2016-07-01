@@ -13,7 +13,7 @@ class Exponential(System):
 	def linear(self):
 		return self.L
 
-	def f(self, t, u):
+	def __call__(self, t, u):
 		return np.dot(self.linear(), u) + self.nonlin(t,u)
 
 def zero_dynamics(t,u):
