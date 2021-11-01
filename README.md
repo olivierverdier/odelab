@@ -18,7 +18,7 @@ Numerical simulation of ODEs in Python ([full documentation][doc] available).
 
 ## Example
 
-![van der Pol example](http://olivierverdier.github.com/odelab/_images/vanderpol.png)
+![van der Pol example](http://olivierverdier.github.io/odelab/_images/vanderpol.png)
 
 That example can be reproduced with:
 
@@ -35,5 +35,5 @@ s.plot2D()
 
 Read the full [full documentation][doc].
 
-[doc]: http://olivierverdier.github.com/odelab/
+[doc]: http://olivierverdier.github.io/odelab/
 
